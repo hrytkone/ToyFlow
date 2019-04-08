@@ -6,9 +6,14 @@
 #include <boost/math/special_functions/bessel.hpp>
 
 double Rk(double khi, int n) {
-    double k = n;
-    double bessel = boost::math::cyl_bessel_i((k-1)/2, khi*khi/2) + boost::math::cyl_bessel_i((k+1)/2, khi*khi/2);
-    return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*bessel;
+    try {
+        double k = n;
+        double bessel = boost::math::cyl_bessel_i((k-1)/2, khi*khi/2) + boost::math::cyl_bessel_i((k+1)/2, khi*khi/2);
+        return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*bessel;
+    } catch (const std::overflow_error& e) {
+        cout << "overflow_error: set Rk=0 in case n=" << n << "\n";
+        return 0;
+    }
 }
 
 double func(double *x, double *p) {
