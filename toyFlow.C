@@ -29,15 +29,12 @@ double AcceptanceFuncTimesCos(double *x, double *p);
 double *GetCorrectionParam(double phiMin, double phiMax, double percentage, double n, TF1 *fA, TF1 *fTimesSin, TF1 *fTimesCos, TF1 *fTimesSin2, TF1 *fTimesCos2);
 
 double ShiftCorrection(double x, double correction);
-double TwistCorrectionX(double x, double y, double lambdaMinus, double lambdaPlus);
-double TwistCorrectionY(double y, double x, double lambdaMinus, double lambdaPlus);
-double RescalingCorrectionX(double x, double aPlus);
-double RescalingCorrectionY(double y, double aMinus);
-void DoCorrections(double &Qx, double &Qy, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus);
+double TwistCorrection(double x, double y, double lambda1, double lambda2);
+double RescalingCorrection(double x, double a);
+void DoCorrections(TComplex &Q, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus);
 
-double GetEventPlane(double Qx, double Qy, int n);
-double GetVnObs(double phi, double Qx, double Qy, int n);
-double GetDotProduct(double Ax, double Ay, double Bx, double By);
+double GetEventPlane(TComplex Q, int n);
+double GetVnObs(TComplex Q, double phi, int n);
 
 int main(int argc, char **argv) {
 
@@ -214,7 +211,7 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
         eta = rand->Uniform(-0.8, 0.8);
 
         histos->hPt->Fill(pT);
-        histos->hPhiEta->Fill(phi, eta);
+        histos->hPhi->Fill(phi);
 
         px = pT*TMath::Cos(phi);
         py = pT*TMath::Sin(phi);
@@ -234,6 +231,8 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
         }
 
         if (phi < phiMin || phi > phiMax) {
+
+            histos->hPhiNonuni->Fill(phi);
 
             new((*listNonuni)[nNonuniFull]) JToyMCTrack(track);
             nNonuniFull++;
@@ -256,6 +255,8 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
         } else {
             randNum = rand->Rndm();
             if ( randNum > percentage ) {
+
+                histos->hPhiNonuni->Fill(phi);
 
                 new((*listNonuni)[nNonuniFull]) JToyMCTrack(track);
                 nNonuniFull++;
@@ -289,22 +290,36 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
     int nMultA = listSubA->GetEntriesFast();
     int nMultB = listSubB->GetEntriesFast();
 
-    int i, j, n;
+    int i, j, k, n;
     int w = 1.0;
-    double Qx, Qy, QxA, QyA, QxB, QyB;
     double phi, pt;
     double Rtrue;
+
+    TComplex Q = TComplex(0, 0);
+    TComplex QsubA = TComplex(0, 0);
+    TComplex QsubB = TComplex(0, 0);
+    TComplex autocorr = TComplex(0, 0);
 
     double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
     double EventPlaneA, EventPlaneB, Rsub, vobs;
 
     vector<double> VnObs;
+
+    int nPtBins = 9;
+    double width = 0.0;
+    double binWidths[nPtBins];
+    for (i=0; i<nPtBins; i++) {
+        width += 0.2;
+        binWidths[i] = width;
+    }
     vector<vector<double>> VnObsPtBins;
-    VnObsPtBins.resize(6);
+    VnObsPtBins.resize(nPtBins);
 
     JToyMCTrack *track;
 
     for (i = 0; i < 5; i++) {
+
+        n = i+1;
 
         cm = corrections[i][0];
         sm = corrections[i][1];
@@ -313,10 +328,9 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
         lambdaMinus = corrections[i][6];
         lambdaPlus = corrections[i][7];
 
-        n = i+1;
-        Qx = 0; Qy = 0;
-        QxA = 0; QyA = 0;
-        QxB = 0; QyB = 0;
+        Q = TComplex(0, 0);
+        QsubA = TComplex(0, 0);
+        QsubB = TComplex(0, 0);
 
         // Construct Q-vectors for full event and subevents
         for (j=0; j<nMult; j++) {
@@ -326,8 +340,7 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
             if (bUseWeight) w = track->GetPt();
 
-            Qx += w*TMath::Cos(n*phi);
-            Qy += w*TMath::Sin(n*phi);
+            Q += TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
 
             if ( j<nMultA ) {
                 track = (JToyMCTrack*)listSubA->At(j);
@@ -335,8 +348,7 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
                 if (bUseWeight) w = track->GetPt();
 
-                QxA += w*TMath::Cos(n*phi);
-                QyA += w*TMath::Sin(n*phi);
+                QsubA += TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
             }
 
             if ( j<nMultB ) {
@@ -345,24 +357,27 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
                 if (bUseWeight) w = track->GetPt();
 
-                QxB += w*TMath::Cos(n*phi);
-                QyB += w*TMath::Sin(n*phi);
+                QsubB += TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
             }
         }
 
+        /**Q /= TComplex::Abs(Q);
+        QsubA /= TComplex::Abs(QsubA);
+        QsubB /= TComplex::Abs(QsubB);**/
+
         // Get true resolution
         if (bGetTrueRes) {
-            Rtrue = TMath::Cos(n*(GetEventPlane(Qx, Qy, n) - Psi[i]));
+            Rtrue = TMath::Cos(n*(GetEventPlane(Q, n) - Psi[i]));
             histos->hRtrue[i]->Fill(Rtrue);
         }
 
         if (bDoCorrections) {
-            DoCorrections(Qx, Qy, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-            DoCorrections(QxA, QyA, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-            DoCorrections(QxB, QyB, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            DoCorrections(Q, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            DoCorrections(QsubA, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            DoCorrections(QsubB, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
 
-            EventPlaneA = GetEventPlane(QxA, QyA, n);
-            EventPlaneB = GetEventPlane(QxB, QyB, n);
+            EventPlaneA = GetEventPlane(QsubA, n);
+            EventPlaneB = GetEventPlane(QsubB, n);
             Rsub = TMath::Cos(n*(TMath::Abs(EventPlaneA - EventPlaneB)));
             histos->hRsubCorrected[i]->Fill(Rsub);
 
@@ -371,14 +386,15 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
                 track = (JToyMCTrack*)listFull->At(j);
                 phi = track->GetPhi();
 
-                Qx -= TMath::Cos(n*phi);
-                Qy -= TMath::Sin(n*phi);
+                autocorr = TComplex(TMath::Cos(n*phi), TMath::Sin(n*phi));
+                //autocorr /= TComplex::Abs(autocorr);
 
-                vobs = GetVnObs(phi, Qx, Qy, n);
+                Q -= autocorr;
+
+                vobs = GetVnObs(Q, phi, n);
                 VnObs.push_back(vobs);
 
-                Qx += TMath::Cos(n*phi);
-                Qy += TMath::Sin(n*phi);
+                Q += autocorr;
             }
 
             vobs = accumulate(VnObs.begin(), VnObs.end(), 0.0)/VnObs.size();
@@ -386,8 +402,8 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
         } else {
 
-            EventPlaneA = GetEventPlane(QxA, QyA, n);
-            EventPlaneB = GetEventPlane(QxB, QyB, n);
+            EventPlaneA = GetEventPlane(QsubA, n);
+            EventPlaneB = GetEventPlane(QsubB, n);
             Rsub = TMath::Cos(n*(TMath::Abs(EventPlaneA - EventPlaneB)));
             histos->hRsub[i]->Fill(Rsub);
 
@@ -396,14 +412,16 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
                 track = (JToyMCTrack*)listFull->At(j);
                 phi = track->GetPhi();
 
-                Qx -= TMath::Cos(n*phi);
-                Qy -= TMath::Sin(n*phi);
+                autocorr = TComplex(TMath::Cos(n*phi), TMath::Sin(n*phi));
+                //autocorr /= TComplex::Abs(autocorr);
 
-                vobs = GetVnObs(phi, Qx, Qy, n);
+                Q -= autocorr;
+
+                vobs = GetVnObs(Q, phi, n);
                 VnObs.push_back(vobs);
 
-                Qx += TMath::Cos(n*phi);
-                Qy += TMath::Sin(n*phi);
+                Q += autocorr;
+
             }
 
             vobs = accumulate(VnObs.begin(), VnObs.end(), 0.0)/VnObs.size();
@@ -412,36 +430,33 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
             // Divide into pT-bins
             if (n==2) {
-                for (j = 0; j < nMult; j++) {
+                for (j=0; j < nMult; j++) {
 
                     track = (JToyMCTrack*)listFull->At(j);
                     phi = track->GetPhi();
                     pt = track->GetPt();
 
-                    Qx -= TMath::Cos(n*phi);
-                    Qy -= TMath::Sin(n*phi);
+                    autocorr = TComplex(TMath::Cos(n*phi), TMath::Sin(n*phi));
+                    //autocorr /= TComplex::Abs(autocorr);
 
-                    vobs = GetVnObs(phi, Qx, Qy, n);
-                    if (pt < 1.0)
-                        VnObsPtBins[0].push_back(vobs);
-                    else if (pt >= 1.0 && pt < 2.0)
-                        VnObsPtBins[1].push_back(vobs);
-                    else if (pt >= 2.0 && pt < 3.0)
-                        VnObsPtBins[2].push_back(vobs);
-                    else if (pt >= 3.0 && pt < 4.0)
-                        VnObsPtBins[3].push_back(vobs);
-                    else if (pt >= 4.0 && pt < 5.0)
-                        VnObsPtBins[4].push_back(vobs);
-                    else if (pt >= 5.0 && pt < 6.0)
-                        VnObsPtBins[5].push_back(vobs);
+                    Q -= autocorr;
 
-                    Qx += TMath::Cos(n*phi);
-                    Qy += TMath::Sin(n*phi);
+                    vobs = GetVnObs(Q, phi, n);
+
+                    for (k=0; k<nPtBins; k++) {
+                        if (pt < binWidths[k]) {
+                            VnObsPtBins[k].push_back(vobs);
+                            break;
+                        }
+                    }
+
+                    Q += autocorr;
+
                 }
 
                 for (j=0; j<6; j++) {
                     vobs = accumulate(VnObsPtBins[j].begin(), VnObsPtBins[j].end(), 0.0)/VnObsPtBins[j].size();
-                    histos->hPtBin[j]->Fill(vobs/Rtrue);
+                    histos->hPtBin[j]->Fill(vobs);
                     VnObsPtBins[j].clear();
                 }
 
@@ -529,40 +544,25 @@ double ShiftCorrection(double x, double correction) {
     return x - correction;
 }
 
-double TwistCorrectionX(double x, double y, double lambdaMinus, double lambdaPlus) {
-    return (x - lambdaMinus*y)/(1-lambdaMinus*lambdaPlus);
+double TwistCorrection(double x, double y, double lambda1, double lambda2) {
+    return (x - lambda1*y)/(1-lambda1*lambda2);
 }
 
-double TwistCorrectionY(double y, double x, double lambdaMinus, double lambdaPlus) {
-    return (y - lambdaPlus*x)/(1-lambdaMinus*lambdaPlus);
+double RescalingCorrection(double x, double a) {
+    return x/a;
 }
 
-double RescalingCorrectionX(double x, double aPlus) {
-    return x/aPlus;
+void DoCorrections(TComplex &Q, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
+    Q = TComplex(ShiftCorrection(Q.Re(), cm), ShiftCorrection(Q.Im(), sm));
+    Q = TComplex(TwistCorrection(Q.Re(), Q.Im(), lambdaMinus, lambdaPlus), TwistCorrection(Q.Im(), Q.Re(), lambdaPlus, lambdaMinus));
+    Q = TComplex(RescalingCorrection(Q.Re(), aPlus), RescalingCorrection(Q.Im(), aMinus));
 }
 
-double RescalingCorrectionY(double y, double aMinus) {
-    return y/aMinus;
+double GetEventPlane(TComplex Q, int n) {
+    return TMath::ATan2(Q.Im(), Q.Re())/n;
 }
 
-void DoCorrections(double &Qx, double &Qy, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
-    Qx = ShiftCorrection(Qx, cm);
-    Qy = ShiftCorrection(Qy, sm);
-    Qx = TwistCorrectionX(Qx, Qy, lambdaMinus, lambdaPlus);
-    Qy = TwistCorrectionY(Qy, Qx, lambdaMinus, lambdaPlus);
-    Qx = RescalingCorrectionX(Qx, aPlus);
-    Qy = RescalingCorrectionX(Qy, aMinus);
-}
-
-double GetEventPlane(double Qx, double Qy, int n) {
-    return TMath::ATan2(Qy, Qx)/n;
-}
-
-double GetVnObs(double phi, double Qx, double Qy, int n) {
-    double EP = GetEventPlane(Qx, Qy, n);
+double GetVnObs(TComplex Q, double phi, int n) {
+    double EP = GetEventPlane(Q, n);
     return TMath::Cos(n*(phi - EP));
-}
-
-double GetDotProduct(double Ax, double Ay, double Bx, double By) {
-    return Ax*Bx + Ay*By;
 }

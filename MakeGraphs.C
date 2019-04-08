@@ -126,9 +126,14 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         gRcorrected->SetPointError(i, 0.0, errorRCorrected[i]);
     }
 
-    for (i=0; i<6; i++) {
-        gPtBin->SetPoint(i, double(i)+0.5, ptBin[i]);
-        gPtBin->SetPointError(i, 0.0, ptBinError[i]);
+    int nPtBins = 9;
+    double point = 0.0;
+    double step = 0.0;
+    for (i=0; i<nPtBins; i++) {
+        step += 0.2;
+        point += step;
+        gPtBin->SetPoint(i, point-step/2.0, ptBin[i]);
+        gPtBin->SetPointError(i, step/2.0, ptBinError[i]);
     }
 
     fOut->cd();

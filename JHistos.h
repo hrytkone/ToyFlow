@@ -14,11 +14,11 @@ public:
 
 	TH1D *hPt;
     TH1D *hMultiplicity;
-    TH2D *hPhiEta;
+    TH1D *hPhi;
 
     TH1D *hPtNonuni;
     TH1D *hMultiplicityNonuni;
-    TH2D *hPhiEtaNonuni;
+    TH1D *hPhiNonuni;
 
     TH1D *hCosPhi[5];
     TH1D *hSinPhi[5];
@@ -31,15 +31,11 @@ public:
 
     TH1D *hRsub[5];
     TH1D *hVnObs[5];
-    TH1D *hSPnom[5];
-    TH1D *hSPdenom[5];
 
     TH1D *hRsubCorrected[5];
     TH1D *hVnObsCorrected[5];
-    TH1D *hSPnomCorrected[5];
-    TH1D *hSPdenomCorrected[5];
 
     // pT bins for v2
-    TH1D *hPtBin[6];
+    TH1D *hPtBin[9];
 
 };
