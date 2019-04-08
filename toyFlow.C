@@ -1,0 +1,568 @@
+#include <iostream>
+#include <stdlib.h>
+
+#include "JHistos.h"
+#include "JToyMCTrack.h"
+
+#include "TFile.h"
+#include "TLorentzVector.h"
+#include "TH1D.h"
+#include "TF1.h"
+#include "TRandom3.h"
+#include "TClonesArray.h"
+#include "TComplex.h"
+
+#include "TStopwatch.h"
+
+using namespace std;
+
+double PtDist(double *x, double *p);
+double PhiDist(double *x, double *p);
+double VnDist(double *x, double *p);
+
+void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double alpha, double beta, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence);
+void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *listSubB, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, bool bGetTrueRes, double **corrections);
+
+double AcceptanceFunc(double *x, double *p);
+double AcceptanceFuncTimesSin(double *x, double *p);
+double AcceptanceFuncTimesCos(double *x, double *p);
+double *GetCorrectionParam(double phiMin, double phiMax, double percentage, double n, TF1 *fA, TF1 *fTimesSin, TF1 *fTimesCos, TF1 *fTimesSin2, TF1 *fTimesCos2);
+
+double ShiftCorrection(double x, double correction);
+double TwistCorrectionX(double x, double y, double lambdaMinus, double lambdaPlus);
+double TwistCorrectionY(double y, double x, double lambdaMinus, double lambdaPlus);
+double RescalingCorrectionX(double x, double aPlus);
+double RescalingCorrectionY(double y, double aMinus);
+void DoCorrections(double &Qx, double &Qy, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus);
+
+double GetEventPlane(double Qx, double Qy, int n);
+double GetVnObs(double phi, double Qx, double Qy, int n);
+double GetDotProduct(double Ax, double Ay, double Bx, double By);
+
+int main(int argc, char **argv) {
+
+    TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
+    int nEvents = argc > 2 ? atol(argv[2]):1000;
+    const double dNdeta = argc > 3 ? atof(argv[3]):1500.0;
+    const double etaRange = 0.8;
+    const int nMult = int(2. * etaRange * dNdeta);
+    cout << "dNdeta=" << dNdeta << "     total multiplicity=" << nMult << endl;
+
+    const int nCoef = 5;
+
+    double alpha = 2.0;
+    double beta = 1.0;
+
+    const double scale = 1.0;
+    double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
+
+    bool bRandomPsi = true;
+    bool bUsePtDependence = false;
+    bool bUseWeight = false;
+
+    int i, j; // indices for loops
+    double pi = TMath::Pi();
+
+    TStopwatch timer;
+    timer.Start();
+
+    TFile *fOut = TFile::Open(outFileName, "RECREATE");
+
+    TRandom3 *rand = new TRandom3();
+    rand->SetSeed(0);
+
+    JHistos *histos = new JHistos();
+
+    double Psi[nCoef] = {0};
+
+    double Tdec = 0.12;
+    double vr = 0.6;
+    double Teff = Tdec * TMath::Sqrt((1.+vr)/(1.-vr));
+    TF1 *fPtDist = new TF1("fPtDist", PtDist, 0.0, 10.0, 1);
+    fPtDist->SetParameter(0, 1./Teff);
+
+    TF1 *fPhiDist = new TF1("fPhiDist", PhiDist, -pi, pi, 10);
+    fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4], Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
+
+    TF1 *fVnDist = new TF1("fVnDist", VnDist, 0.0, 10.0, 3);
+
+    TClonesArray *listUniFull = new TClonesArray("JToyMCTrack", nMult+1);
+    TClonesArray *listUniA = new TClonesArray("JToyMCTrack", nMult+1);
+    TClonesArray *listUniB = new TClonesArray("JToyMCTrack", nMult+1);
+    TClonesArray *listNonuniFull = new TClonesArray("JToyMCTrack", nMult+1);
+    TClonesArray *listNonuniA = new TClonesArray("JToyMCTrack", nMult+1);
+    TClonesArray *listNonuniB = new TClonesArray("JToyMCTrack", nMult+1);
+
+    // CORRECTIONS
+    double phiMin = 1.0;
+    double phiMax = 1.5;
+    double percentage = 50.0;
+
+    TF1 *fA = new TF1("fA", AcceptanceFunc, -pi, pi, 4);
+    TF1 *fTimesSin = new TF1("fTimesSin", AcceptanceFuncTimesSin, -pi, pi, 5);
+    TF1 *fTimesCos = new TF1("fTimesCos", AcceptanceFuncTimesCos, -pi, pi, 5);
+    TF1 *fTimesSin2 = new TF1("fTimesSin2", AcceptanceFuncTimesSin, -pi, pi, 5);
+    TF1 *fTimesCos2 = new TF1("fTimesCos2", AcceptanceFuncTimesCos, -pi, pi, 5);
+
+    double *corrections[5];
+    for (i=0; i<5; i++) {
+        corrections[i] = GetCorrectionParam(phiMin, phiMax, percentage, i+1, fA, fTimesSin, fTimesCos, fTimesSin2, fTimesCos2);
+    }
+
+    // Save correction parameters
+    TH2D *hCorrectionParameters = new TH2D("hCorrectionParameters", "hCorrectionParameters", 5, 0.5, 5.5, 8, 0.5, 8.5);
+    for (i=0; i<5; i++) {
+        for (j=0; j<8; j++)
+            hCorrectionParameters->Fill(i, j, corrections[i][j]);
+    }
+
+
+    // Save input numbers
+    TH1D *hInputNumbers = new TH1D("hInputNumbers","hInputNumbers",16, 0.5, 16.5);
+    hInputNumbers->Fill(1, double(nEvents));
+    hInputNumbers->Fill(2, double(dNdeta));
+    hInputNumbers->Fill(3, etaRange);
+    hInputNumbers->Fill(4, double(nMult));
+    hInputNumbers->Fill(5, vn[0]);
+    hInputNumbers->Fill(6, vn[1]);
+    hInputNumbers->Fill(7, vn[2]);
+    hInputNumbers->Fill(8, vn[3]);
+    hInputNumbers->Fill(9, vn[4]);
+    hInputNumbers->Fill(10, Tdec);
+    hInputNumbers->Fill(11, vr);
+    hInputNumbers->Fill(12, Teff);
+    hInputNumbers->Fill(13, 1./Teff);
+    hInputNumbers->Fill(14, phiMin);
+    hInputNumbers->Fill(15, phiMax);
+    hInputNumbers->Fill(16, percentage);
+
+    int nOutput = nEvents/20;
+    for (i=0; i<nEvents; i++) {
+        if (i % nOutput == 0)
+            cout << 100*i/nEvents << " % finished" << endl;
+
+        // Good to use argument "C" in case of pointers
+        listUniFull->Clear("C");
+        listUniA->Clear("C");
+        listUniB->Clear("C");
+        listNonuniFull->Clear("C");
+        listNonuniA->Clear("C");
+        listNonuniB->Clear("C");
+
+        if (bRandomPsi) {
+            for (j=0; j<5; j++) {
+                Psi[j] = rand->Uniform(0, 2*pi);
+            }
+        } else {
+            double psiTemp = rand->Uniform(0, 2*pi);
+            for (j=0; j<5;j++) {
+                Psi[j] = psiTemp;
+            }
+        }
+
+        fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
+            Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
+
+        GetEvent(listUniFull, listUniA, listUniB, listNonuniFull, listNonuniA, listNonuniB, histos, rand, fPtDist, fPhiDist, fVnDist, vn, alpha, beta, nMult, percentage, phiMin, phiMax, bUsePtDependence);
+
+        AnalyzeEvent(listUniFull, listUniA, listUniB, histos, Psi, bUseWeight, false, true, corrections);
+
+        AnalyzeEvent(listNonuniFull, listNonuniA, listNonuniB, histos, Psi, bUseWeight, true, false, corrections);
+
+    }
+
+    fOut->Write();
+    timer.Print();
+    return 0;
+}
+
+//======END OF MAIN PROGRAM======
+void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double alpha, double beta, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence) {
+
+    double pT, phi, eta, E;
+    double px, py, pz;
+    int nNonuniFull = 0;
+    int nUniA = 0;
+    int nUniB = 0;
+    int nNonuniA = 0;
+    int nNonuniB = 0;
+
+    JToyMCTrack track;
+    TLorentzVector lVec;
+
+    double randNum;
+    double vnTemp[5];
+    int i, j, m;
+    for (i = 0; i < nMult; i++) {
+
+        if (bUsePtDependence) {
+            for (j=0; j<5; j++) {
+                fVnDist->SetParameters(alpha, beta, vn[j]);
+            }
+
+            for (j=0; j<5; j++) {
+                pT = fPt->GetRandom();
+                vnTemp[j] = fVnDist->Eval(pT);
+            }
+            fPhi->SetParameters(vnTemp);
+
+        } else {
+            pT = fPt->GetRandom();
+        }
+
+        phi = fPhi->GetRandom();
+        eta = rand->Uniform(-0.8, 0.8);
+
+        histos->hPt->Fill(pT);
+        histos->hPhiEta->Fill(phi, eta);
+
+        px = pT*TMath::Cos(phi);
+        py = pT*TMath::Sin(phi);
+        pz = pT*TMath::SinH(eta);
+        E = TMath::Sqrt(pT*pT + pz*pz);
+        lVec.SetPxPyPzE(px, py, pz, E);
+        track.SetTrack(lVec);
+
+        new((*listUni)[i]) JToyMCTrack(track);
+        if (i%2 == 0) {
+            new((*listUniA)[nUniA]) JToyMCTrack(track);
+            nUniA++;
+        }
+        else {
+            new((*listUniB)[nUniB]) JToyMCTrack(track);
+            nUniB++;
+        }
+
+        if (phi < phiMin || phi > phiMax) {
+
+            new((*listNonuni)[nNonuniFull]) JToyMCTrack(track);
+            nNonuniFull++;
+            if (i%2 == 0) {
+                new((*listNonuniA)[nNonuniA]) JToyMCTrack(track);
+                nNonuniA++;
+            }
+            else {
+                new((*listNonuniB)[nNonuniB]) JToyMCTrack(track);
+                nNonuniB++;
+            }
+
+            for (j=0; j<5; j++) {
+                m = j+1;
+                histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
+                histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
+                histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
+                histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
+            }
+        } else {
+            randNum = rand->Rndm();
+            if ( randNum > percentage ) {
+
+                new((*listNonuni)[nNonuniFull]) JToyMCTrack(track);
+                nNonuniFull++;
+                if ( nNonuniA<nNonuniB ) {
+                    new((*listNonuniA)[nNonuniA]) JToyMCTrack(track);
+                    nNonuniA++;
+                }
+                else {
+                    new((*listNonuniB)[nNonuniB]) JToyMCTrack(track);
+                    nNonuniB++;
+                }
+
+                for (j=0; j<5; j++) {
+                    m = j+1;
+                    histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
+                    histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
+                    histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
+                    histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
+                }
+            }
+        }
+
+        histos->hMultiplicity->Fill(nMult);
+        histos->hMultiplicityNonuni->Fill(nNonuniFull);
+    }
+}
+
+void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *listSubB, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, bool bGetTrueRes, double **corrections) {
+
+    int nMult = listFull->GetEntriesFast();
+    int nMultA = listSubA->GetEntriesFast();
+    int nMultB = listSubB->GetEntriesFast();
+
+    int i, j, n;
+    int w = 1.0;
+    double Qx, Qy, QxA, QyA, QxB, QyB;
+    double phi, pt;
+    double Rtrue;
+
+    double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
+    double EventPlaneA, EventPlaneB, Rsub, vobs;
+
+    vector<double> VnObs;
+    vector<vector<double>> VnObsPtBins;
+    VnObsPtBins.resize(6);
+
+    JToyMCTrack *track;
+
+    for (i = 0; i < 5; i++) {
+
+        cm = corrections[i][0];
+        sm = corrections[i][1];
+        aMinus = corrections[i][4];
+        aPlus = corrections[i][5];
+        lambdaMinus = corrections[i][6];
+        lambdaPlus = corrections[i][7];
+
+        n = i+1;
+        Qx = 0; Qy = 0;
+        QxA = 0; QyA = 0;
+        QxB = 0; QyB = 0;
+
+        // Construct Q-vectors for full event and subevents
+        for (j=0; j<nMult; j++) {
+
+            track = (JToyMCTrack*)listFull->At(j);
+            phi = track->GetPhi();
+
+            if (bUseWeight) w = track->GetPt();
+
+            Qx += w*TMath::Cos(n*phi);
+            Qy += w*TMath::Sin(n*phi);
+
+            if ( j<nMultA ) {
+                track = (JToyMCTrack*)listSubA->At(j);
+                phi = track->GetPhi();
+
+                if (bUseWeight) w = track->GetPt();
+
+                QxA += w*TMath::Cos(n*phi);
+                QyA += w*TMath::Sin(n*phi);
+            }
+
+            if ( j<nMultB ) {
+                track = (JToyMCTrack*)listSubB->At(j);
+                phi = track->GetPhi();
+
+                if (bUseWeight) w = track->GetPt();
+
+                QxB += w*TMath::Cos(n*phi);
+                QyB += w*TMath::Sin(n*phi);
+            }
+        }
+
+        // Get true resolution
+        if (bGetTrueRes) {
+            Rtrue = TMath::Cos(n*(GetEventPlane(Qx, Qy, n) - Psi[i]));
+            histos->hRtrue[i]->Fill(Rtrue);
+        }
+
+        if (bDoCorrections) {
+            DoCorrections(Qx, Qy, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            DoCorrections(QxA, QyA, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            DoCorrections(QxB, QyB, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+
+            EventPlaneA = GetEventPlane(QxA, QyA, n);
+            EventPlaneB = GetEventPlane(QxB, QyB, n);
+            Rsub = TMath::Cos(n*(TMath::Abs(EventPlaneA - EventPlaneB)));
+            histos->hRsubCorrected[i]->Fill(Rsub);
+
+            for (j = 0; j < nMult; j++) {
+
+                track = (JToyMCTrack*)listFull->At(j);
+                phi = track->GetPhi();
+
+                Qx -= TMath::Cos(n*phi);
+                Qy -= TMath::Sin(n*phi);
+
+                vobs = GetVnObs(phi, Qx, Qy, n);
+                VnObs.push_back(vobs);
+
+                Qx += TMath::Cos(n*phi);
+                Qy += TMath::Sin(n*phi);
+            }
+
+            vobs = accumulate(VnObs.begin(), VnObs.end(), 0.0)/VnObs.size();
+            histos->hVnObsCorrected[i]->Fill(vobs);
+
+        } else {
+
+            EventPlaneA = GetEventPlane(QxA, QyA, n);
+            EventPlaneB = GetEventPlane(QxB, QyB, n);
+            Rsub = TMath::Cos(n*(TMath::Abs(EventPlaneA - EventPlaneB)));
+            histos->hRsub[i]->Fill(Rsub);
+
+            for (j = 0; j < nMult; j++) {
+
+                track = (JToyMCTrack*)listFull->At(j);
+                phi = track->GetPhi();
+
+                Qx -= TMath::Cos(n*phi);
+                Qy -= TMath::Sin(n*phi);
+
+                vobs = GetVnObs(phi, Qx, Qy, n);
+                VnObs.push_back(vobs);
+
+                Qx += TMath::Cos(n*phi);
+                Qy += TMath::Sin(n*phi);
+            }
+
+            vobs = accumulate(VnObs.begin(), VnObs.end(), 0.0)/VnObs.size();
+            histos->hVnObs[i]->Fill(vobs);
+            VnObs.clear();
+
+            // Divide into pT-bins
+            if (n==2) {
+                for (j = 0; j < nMult; j++) {
+
+                    track = (JToyMCTrack*)listFull->At(j);
+                    phi = track->GetPhi();
+                    pt = track->GetPt();
+
+                    Qx -= TMath::Cos(n*phi);
+                    Qy -= TMath::Sin(n*phi);
+
+                    vobs = GetVnObs(phi, Qx, Qy, n);
+                    if (pt < 1.0)
+                        VnObsPtBins[0].push_back(vobs);
+                    else if (pt >= 1.0 && pt < 2.0)
+                        VnObsPtBins[1].push_back(vobs);
+                    else if (pt >= 2.0 && pt < 3.0)
+                        VnObsPtBins[2].push_back(vobs);
+                    else if (pt >= 3.0 && pt < 4.0)
+                        VnObsPtBins[3].push_back(vobs);
+                    else if (pt >= 4.0 && pt < 5.0)
+                        VnObsPtBins[4].push_back(vobs);
+                    else if (pt >= 5.0 && pt < 6.0)
+                        VnObsPtBins[5].push_back(vobs);
+
+                    Qx += TMath::Cos(n*phi);
+                    Qy += TMath::Sin(n*phi);
+                }
+
+                for (j=0; j<6; j++) {
+                    vobs = accumulate(VnObsPtBins[j].begin(), VnObsPtBins[j].end(), 0.0)/VnObsPtBins[j].size();
+                    histos->hPtBin[j]->Fill(vobs/Rtrue);
+                    VnObsPtBins[j].clear();
+                }
+
+            }
+        }
+    }
+}
+
+double PtDist(double *x, double *p) {
+    return TMath::Exp(-p[0]*x[0]);
+}
+
+double PhiDist(double *x, double *p) {
+    double phi = x[0];
+    double vn[5] = {p[0], p[1], p[2], p[3], p[4]};
+    double psi[5] = {p[5], p[6], p[7], p[8], p[9]};
+    return 1.0 + 2.0*vn[0]*TMath::Cos(phi - psi[0]) + 2.0*vn[1]*TMath::Cos(2.*(phi - psi[1]))
+        + 2.0*vn[2]*TMath::Cos(3.*(phi - psi[2])) + 2.0*vn[3]*TMath::Cos(4.*(phi - psi[3]))
+        + 2.0*vn[4]*TMath::Cos(5.*(phi - psi[4]));
+}
+
+double VnDist(double *x, double *p) {
+    double pt = x[0];
+    double alpha = p[0];
+    double beta = p[1];
+    double vnMax = p[2];
+
+    double C = vnMax/(TMath::Power(alpha/beta, alpha)*TMath::Exp(-alpha));
+
+    return C*TMath::Power(pt, alpha)*TMath::Exp(-beta*pt);
+}
+
+double AcceptanceFunc(double *x, double *p) {
+    double phi = x[0];
+    double phiMin = p[0];
+    double phiMax = p[1];
+    double missedParticles = p[2];
+    double norm = p[3];
+    return ((phi < phiMin) || (phi > phiMax)) ? norm : norm*(1-missedParticles);
+}
+
+double AcceptanceFuncTimesSin(double *x, double *p) {
+    double phi = x[0];
+    double phiMin = p[0];
+    double phiMax = p[1];
+    double missedParticles = p[2];
+    double n = p[3];
+    double norm = p[4];
+    return ((phi < phiMin) || (phi > phiMax)) ? norm*TMath::Sin(n*phi) : norm*(1-missedParticles)*TMath::Sin(n*phi);
+}
+
+double AcceptanceFuncTimesCos(double *x, double *p) {
+    double phi = x[0];
+    double phiMin = p[0];
+    double phiMax = p[1];
+    double missedParticles = p[2];
+    double n = p[3];
+    double norm = p[4];
+    return ((phi < phiMin) || (phi > phiMax)) ? norm*TMath::Cos(n*phi) : norm*(1-missedParticles)*TMath::Cos(n*phi);
+}
+
+double *GetCorrectionParam(double phiMin, double phiMax, double percentage, double n, TF1 *fA, TF1 *fTimesSin, TF1 *fTimesCos, TF1 *fTimesSin2, TF1 *fTimesCos2) {
+    double pi = TMath::Pi();
+    fA->SetParameters(phiMin, phiMax, percentage, 1);
+    double area = fA->Integral(-pi, pi);
+
+    fTimesSin->SetParameters(phiMin, phiMax, percentage, n, (2*pi)/area);
+    fTimesCos->SetParameters(phiMin, phiMax, percentage, n, (2*pi)/area);
+    fTimesSin2->SetParameters(phiMin, phiMax, percentage, 2*n, (2*pi)/area);
+    fTimesCos2->SetParameters(phiMin, phiMax, percentage, 2*n, (2*pi)/area);
+
+    double *corrections = new double[8];
+    corrections[0] = fTimesCos->Integral(-pi, pi)/(2.0*pi); //cm
+    corrections[1] = fTimesSin->Integral(-pi, pi)/(2.0*pi); //sm
+    corrections[2] = fTimesCos2->Integral(-pi, pi)/(2.0*pi); //cm2
+    corrections[3] = fTimesSin2->Integral(-pi, pi)/(2.0*pi); //sm2
+    corrections[4] = 1.0 - corrections[2]; //a-
+    corrections[5] = 1.0 + corrections[2]; //a+
+    corrections[6] = corrections[3]/corrections[4]; //lambda-
+    corrections[7] = corrections[3]/corrections[5]; //lambda+
+    return corrections;
+}
+
+double ShiftCorrection(double x, double correction) {
+    return x - correction;
+}
+
+double TwistCorrectionX(double x, double y, double lambdaMinus, double lambdaPlus) {
+    return (x - lambdaMinus*y)/(1-lambdaMinus*lambdaPlus);
+}
+
+double TwistCorrectionY(double y, double x, double lambdaMinus, double lambdaPlus) {
+    return (y - lambdaPlus*x)/(1-lambdaMinus*lambdaPlus);
+}
+
+double RescalingCorrectionX(double x, double aPlus) {
+    return x/aPlus;
+}
+
+double RescalingCorrectionY(double y, double aMinus) {
+    return y/aMinus;
+}
+
+void DoCorrections(double &Qx, double &Qy, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
+    Qx = ShiftCorrection(Qx, cm);
+    Qy = ShiftCorrection(Qy, sm);
+    Qx = TwistCorrectionX(Qx, Qy, lambdaMinus, lambdaPlus);
+    Qy = TwistCorrectionY(Qy, Qx, lambdaMinus, lambdaPlus);
+    Qx = RescalingCorrectionX(Qx, aPlus);
+    Qy = RescalingCorrectionX(Qy, aMinus);
+}
+
+double GetEventPlane(double Qx, double Qy, int n) {
+    return TMath::ATan2(Qy, Qx)/n;
+}
+
+double GetVnObs(double phi, double Qx, double Qy, int n) {
+    double EP = GetEventPlane(Qx, Qy, n);
+    return TMath::Cos(n*(phi - EP));
+}
+
+double GetDotProduct(double Ax, double Ay, double Bx, double By) {
+    return Ax*Bx + Ay*By;
+}

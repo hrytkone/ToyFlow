@@ -1,0 +1,9 @@
+void FinalMacro() {
+    gROOT->ProcessLine(".I /home/heimarry/alice/sw/slc7_x86-64/boost/v1.59.0-1/include/");
+    gROOT->ProcessLine(".I ResIter.h");
+
+    cout << "Run MakeGraphs.C" << endl;
+    gROOT->ProcessLine(".x MakeGraphs.C");
+    cout << "Run PlotVn.C" << endl;
+    gROOT->ProcessLine(".x PlotVn.C");
+}
