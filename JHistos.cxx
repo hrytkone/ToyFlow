@@ -32,9 +32,21 @@ JHistos::JHistos(){
     hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, -3.2, 3.2);
     hPhiNonuni->Sumw2();
 
+    hSqrtSumWeights = new TH1D("hSqrtSumWeights","sqrt of sum of weights squares", 240, 0.0, 60.);
+    hSqrtSumWeights->Sumw2();
+    hSqrtSumWeightsA = new TH1D("hSqrtSumWeightsA","sqrt of sum of weights squares in subevent A", 240, 0.0, 60.);
+    hSqrtSumWeightsA->Sumw2();
+    hSqrtSumWeightsB = new TH1D("hSqrtSumWeightsB","sqrt of sum of weights squares in subevent B", 240, 0.0, 60.);
+    hSqrtSumWeightsB->Sumw2();
+
+    hSqrtSumWeightsNonuni = new TH1D("hSqrtSumWeightsNonuni","sqrt of sum of weights squares", 240, 0.0, 60.);
+    hSqrtSumWeightsNonuni->Sumw2();
+    hSqrtSumWeightsANonuni = new TH1D("hSqrtSumWeightsANonuni","sqrt of sum of weights squares in subevent A", 240, 0.0, 60.);
+    hSqrtSumWeightsANonuni->Sumw2();
+    hSqrtSumWeightsBNonuni = new TH1D("hSqrtSumWeightsBNonuni","sqrt of sum of weights squares in subevent B", 240, 0.0, 60.);
+    hSqrtSumWeightsBNonuni->Sumw2();
+
     for (i=0; i<5; i++){
-        hRtrue[i] = new TH1D(Form("hRtrue%02i",i+1),Form("hRtrue%02i",i+1),401,-1,1);
-        hRtrue[i]->Sumw2();
 
         hCosPhi[i] = new TH1D(Form("hCosPhi%02i",i+1),Form("hCosPhi%02i",i+1),401,-1.0,1.0);
         hCosPhi[i]->Sumw2();
@@ -46,19 +58,36 @@ JHistos::JHistos(){
         hSinPhi2[i] = new TH1D(Form("hSinPhi2%02i",i+1),Form("hSinPhi2%02i",i+1),401,-1.0,1.0);
         hSinPhi2[i]->Sumw2();
 
-        hVnObs[i] = new TH1D(Form("hVnObs%02i",i+1),Form("hVnObs%02i",i+1),401,-1.5,1.5);
-        hVnObs[i]->Sumw2();
+        hRtrue[i] = new TH1D(Form("hRtrue%02i",i+1),Form("hRtrue%02i",i+1),401,-1,1);
+        hRtrue[i]->Sumw2();
         hRsub[i] = new TH1D(Form("hRsub%02i",i+1),Form("hRsub%02i",i+1),401,-1.0,1.0);
         hRsub[i]->Sumw2();
+        hVnObs[i] = new TH1D(Form("hVnObs%02i",i+1),Form("hVnObs%02i",i+1),401,-1.5,1.5);
+        hVnObs[i]->Sumw2();
 
-        hVnObsCorrected[i] = new TH1D(Form("hVnObsCorrected%02i",i+1),Form("hVnObsCorrected%02i",i+1),401,-1.5,1.5);
-        hVnObsCorrected[i]->Sumw2();
+        hRtrueCorrected[i] = new TH1D(Form("hRtrueCorrected%02i",i+1),Form("hRtrueCorrected%02i",i+1),401,-1,1);
+        hRtrueCorrected[i]->Sumw2();
         hRsubCorrected[i] = new TH1D(Form("hRsubCorrected%02i",i+1),Form("hRsubCorrected%02i",i+1),401,-1,1);
         hRsubCorrected[i]->Sumw2();
+        hVnObsCorrected[i] = new TH1D(Form("hVnObsCorrected%02i",i+1),Form("hVnObsCorrected%02i",i+1),401,-1.5,1.5);
+        hVnObsCorrected[i]->Sumw2();
+
+        hQnQnA[i] = new TH1D(Form("hQnQnA%02i",i+1),Form("hQnQnA%02i",i+1),401,0.0,50.0);
+        hQnQnA[i]->Sumw2();
+        hQnAQnB[i] = new TH1D(Form("hQnAQnB%02i",i+1),Form("hQnAQnB%02i",i+1),401,-1.0,1.0);
+        hQnAQnB[i]->Sumw2();
+
+        hQnQnAcorrected[i] = new TH1D(Form("hQnQnAcorrected%02i",i+1),Form("hQnQnAcorrected%02i",i+1),401,0.0,50.0);
+        hQnQnAcorrected[i]->Sumw2();
+        hQnAQnBcorrected[i] = new TH1D(Form("hQnAQnBcorrected%02i",i+1),Form("hQnAQnBcorrected%02i",i+1),401,-1.0,1.0);
+        hQnAQnBcorrected[i]->Sumw2();
+
     }
 
     for (i=0; i<9; i++) {
         hPtBin[i] = new TH1D(Form("hPtBin%02i", i+1), Form("hPtBin%02i", i+1), 401, -10.0, 10.0);
         hPtBin[i]->Sumw2();
+        hSqrtSumWeightsPtBins[i] = new TH1D(Form("hSqrtSumWeightsPtBins%02i", i+1),Form("sqrt of sum of weights squares for pT bin %02i", i+1), 240, 0.0, 60.);
+        hSqrtSumWeightsPtBins[i]->Sumw2();
     }
 }
