@@ -28,11 +28,11 @@ public:
     TH1D *hSqrtSumWeightsANonuni;
     TH1D *hSqrtSumWeightsBNonuni;
 
-    TH1D *hCosPhi[5];
+    /**TH1D *hCosPhi[5];
     TH1D *hSinPhi[5];
 
     TH1D *hCosPhi2[5];
-    TH1D *hSinPhi2[5];
+    TH1D *hSinPhi2[5];**/
 
     // Historgrams for calculating vn values
     TH1D *hRtrue[5];
@@ -54,4 +54,18 @@ public:
     TH1D *hPtBin[9];
     TH1D *hSqrtSumWeightsPtBins[9];
 
+    // FOR TESTING
+    TH1D *hPsiA[5];
+    TH1D *hPsiB[5];
+    TH1D *hPsiAPsiB[5];
+    TH1D *hPsiAcorrected[5];
+    TH1D *hPsiBcorrected[5];
+    TH1D *hPsiAPsiBcorrected[5];
+
+    TH1D *hQ[5];
+    TH1D *hQA[5];
+    TH1D *hQB[5];
+    TH1D *hQcorr[5];
+    TH1D *hQAcorr[5];
+    TH1D *hQBcorr[5];
 };

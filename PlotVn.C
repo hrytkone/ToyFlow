@@ -2,6 +2,7 @@
 #include <TFile.h>
 
 const int nsets = 1;
+const int nCoef = 5;
 
 TString fileNames[nsets] = {"toyFlowGraphs.root"};
 
@@ -23,7 +24,7 @@ TGraphErrors *gPtBin[nsets];
 
 int mMarker[nsets] = {24};
 
-double mSize = 0.8;
+double mSize = 1.0;
 
 TFile *fIn[nsets];
 
@@ -58,19 +59,19 @@ void PlotVn() {
         gVnEPCorrected[i]->SetMarkerColor(i+2);
         gVnEPCorrected[i]->SetMarkerSize(mSize);
 
-        gVnEPtrue[i]->SetMarkerStyle(mMarker[i]);
+        gVnEPtrue[i]->SetMarkerStyle(mMarker[i]+1);
         gVnEPtrue[i]->SetMarkerColor(i+3);
         gVnEPtrue[i]->SetMarkerSize(mSize);
 
-        gVnEPCorrectedTrue[i]->SetMarkerStyle(mMarker[i]);
+        gVnEPCorrectedTrue[i]->SetMarkerStyle(mMarker[i]+1);
         gVnEPCorrectedTrue[i]->SetMarkerColor(i+4);
         gVnEPCorrectedTrue[i]->SetMarkerSize(mSize);
 
-        gVnAlt[i]->SetMarkerStyle(mMarker[i]);
+        gVnAlt[i]->SetMarkerStyle(mMarker[i]+2);
         gVnAlt[i]->SetMarkerColor(i+6);
         gVnAlt[i]->SetMarkerSize(mSize);
 
-        gVnAltCorrected[i]->SetMarkerStyle(mMarker[i]);
+        gVnAltCorrected[i]->SetMarkerStyle(mMarker[i]+2);
         gVnAltCorrected[i]->SetMarkerColor(i+7);
         gVnAltCorrected[i]->SetMarkerSize(mSize);
 
@@ -105,17 +106,18 @@ void PlotVn() {
     for (i=0; i<nsets; i++) {
         if (i==0) {
             gVnEPtrue[i]->Draw("AP");
+            gVnEPtrue[i]->SetTitle("Vn values with different methods; Vn; n");
             leg1->AddEntry(gVnEPtrue[i], "EP true RP", "p");
         }
 
-        gVnEPCorrected[i]->Draw("SAME P");
-        leg1->AddEntry(gVnEPCorrected[i], "Corrected EP", "p");
+        gVnEPCorrectedTrue[i]->Draw("SAME P");
+        leg1->AddEntry(gVnEPCorrectedTrue[i], "EP true RP, corrected", "p");
 
         gVnEP[i]->Draw("SAME P");
         leg1->AddEntry(gVnEP[i], "EP", "p");
 
-        gVnEPCorrectedTrue[i]->Draw("SAME P");
-        leg1->AddEntry(gVnEPCorrectedTrue[i], "EP corrected true RP", "p");
+        gVnEPCorrected[i]->Draw("SAME P");
+        leg1->AddEntry(gVnEPCorrected[i], "EP, corrected", "p");
 
         gVnAlt[i]->Draw("SAME P");
         leg1->AddEntry(gVnAlt[i], "Alternative EP", "p");
@@ -138,17 +140,18 @@ void PlotVn() {
     for (i=0; i<nsets; i++) {
         if (i==0) {
             gRtrue[i]->Draw("AP");
-            leg2->AddEntry(gRtrue[i], "R - true", "p");
+            gRtrue[i]->SetTitle("Resolution parameter; R; n");
+            leg2->AddEntry(gRtrue[i], "R true", "p");
         }
 
+        gRtrueCorrected[i]->Draw("SAME P");
+        leg2->AddEntry(gRtrueCorrected[i], "R true, corrected", "p");
+
         gR[i]->Draw("SAME P");
-        leg2->AddEntry(gR[i], "R - sub event method", "p");
+        leg2->AddEntry(gR[i], "R sub event method", "p");
 
         gRcorrected[i]->Draw("SAME P");
-        leg2->AddEntry(gRcorrected[i], "R - corrected", "p");
-
-        gRtrueCorrected[i]->Draw("SAME P");
-        leg2->AddEntry(gRtrueCorrected[i], "R - true corrected", "p");
+        leg2->AddEntry(gRcorrected[i], "R sub event method, corrected", "p");
     }
 
     leg2->Draw("SAME");
@@ -162,11 +165,11 @@ void PlotVn() {
     for (i=0; i<nsets; i++) {
         if (i==0) {
             gPtBin[i]->Draw("AP");
+            gPtBin[i]->SetTitle("v2 as function of pT; v2; pT");
         }
 
         fVnDist->Draw("SAME");
     }
-
 }
 
 double VnDist(double *x, double *p) {
@@ -174,8 +177,6 @@ double VnDist(double *x, double *p) {
     double alpha = p[0];
     double beta = p[1];
     double vnMax = p[2];
-
     double C = vnMax/(TMath::Power(alpha/beta, alpha)*TMath::Exp(-alpha));
-
     return C*TMath::Power(pt, alpha)*TMath::Exp(-beta*pt);
 }

@@ -38,6 +38,8 @@ double GetEventPlane(TComplex Q, int n);
 double GetVnObs(TComplex Q, double phi, int n);
 double GetScalarProduct(TComplex Qa, TComplex Qb);
 
+double CheckIfZero(double x, double thres);
+
 int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
@@ -57,7 +59,7 @@ int main(int argc, char **argv) {
 
     bool bRandomPsi = true;
     bool bUsePtDependence = true;
-    bool bUseWeight = true;
+    bool bUseWeight = false;
 
     int i, j; // indices for loops
     double pi = TMath::Pi();
@@ -80,6 +82,7 @@ int main(int argc, char **argv) {
     TF1 *fPtDist = new TF1("fPtDist", PtDist, 0.0, 10.0, 1);
     fPtDist->SetParameter(0, 1./Teff);
 
+    double pt = 0.0;
     TF1 *fPhiDist = new TF1("fPhiDist", PhiDist, -pi, pi, 10);
     fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4], Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
@@ -94,8 +97,8 @@ int main(int argc, char **argv) {
 
     // CORRECTIONS
     double phiMin = 1.0;
-    double phiMax = 1.9;
-    double percentage = 30.0;
+    double phiMax = 1.1;
+    double percentage = 20.0;
 
     TF1 *fA = new TF1("fA", AcceptanceFunc, -pi, pi, 4);
     TF1 *fTimesSin = new TF1("fTimesSin", AcceptanceFuncTimesSin, -pi, pi, 5);
@@ -195,17 +198,15 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
     int i, j, m;
     for (i = 0; i < nMult; i++) {
 
+        pT = fPt->GetRandom();
         if (bUsePtDependence) {
             for (j=0; j<5; j++) {
                 fVnDist->SetParameters(alpha, beta, vn[j]);
-                pT = fPt->GetRandom();
                 vnTemp[j] = fVnDist->Eval(pT);
             }
             fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
                 Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
-
-        } else {
-            pT = fPt->GetRandom();
+            //fPhi->SetParameter(10, pT);
         }
 
         phi = fPhi->GetRandom();
@@ -244,13 +245,13 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                 nNonuniB++;
             }
 
-            for (j=0; j<5; j++) {
+            /**for (j=0; j<5; j++) {
                 m = j+1;
                 histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
                 histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
                 histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
                 histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-            }
+            }**/
         } else {
             randNum = rand->Rndm();
             if ( randNum > percentage ) {
@@ -267,13 +268,13 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                     nNonuniB++;
                 }
 
-                for (j=0; j<5; j++) {
+                /**for (j=0; j<5; j++) {
                     m = j+1;
                     histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
                     histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
                     histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
                     histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-                }
+                }**/
             }
         }
 
@@ -307,11 +308,13 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
     double QnQnA, QnAQnB;
 
     int nPtBins = 9;
-    double width = 0.0;
+    double point = 0.0;
+    double step = 0.0;
     double binWidths[nPtBins+1];
     for (i=0; i<nPtBins+1; i++) {
-        binWidths[i] = width;
-        width += 0.2;
+        binWidths[i] = point;
+        step += 0.2;
+        point += step;
     }
     vector<vector<TComplex>> pTBinsQ;
     pTBinsQ.resize(nPtBins);
@@ -389,30 +392,12 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
         vobs /= nMult;
 
-        if (bDoCorrections) {
-            histos->hVnObsCorrected[i]->Fill(vobs);
-        } else {
-            histos->hVnObs[i]->Fill(vobs);
-        }
-
         // Resolution parameter calculations
         Rtrue = TMath::Cos(n*(GetEventPlane(Q, n) - Psi[i]));
-        if (bDoCorrections) {
-            histos->hRtrueCorrected[i]->Fill(Rtrue);
-        } else {
-            histos->hRtrue[i]->Fill(Rtrue);
-        }
 
         EventPlaneA = GetEventPlane(QsubA, n);
         EventPlaneB = GetEventPlane(QsubB, n);
-        Rsub = TMath::Cos(n*(TMath::Abs(EventPlaneA - EventPlaneB)));
-
-        if (bDoCorrections) {
-            histos->hRsubCorrected[i]->Fill(Rsub);
-            //cout << "Rsub=" << Rsub << "\n";
-        } else {
-            histos->hRsub[i]->Fill(Rsub);
-        }
+        Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
 
         // ALTERNATIVE EVENT PLANE METHOD
         norm = TMath::Sqrt(norm);
@@ -429,9 +414,15 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
         QnAQnB /= TComplex::Abs(QsubB);
 
         if (bDoCorrections) {
+            histos->hVnObsCorrected[i]->Fill(vobs);
+            histos->hRtrueCorrected[i]->Fill(Rtrue);
+            histos->hRsubCorrected[i]->Fill(Rsub);
             histos->hQnQnAcorrected[i]->Fill(QnQnA);
             histos->hQnAQnBcorrected[i]->Fill(QnAQnB);
         } else {
+            histos->hVnObs[i]->Fill(vobs);
+            histos->hRtrue[i]->Fill(Rtrue);
+            histos->hRsub[i]->Fill(Rsub);
             histos->hQnQnA[i]->Fill(QnQnA);
             histos->hQnAQnB[i]->Fill(QnAQnB);
         }
@@ -508,7 +499,6 @@ double VnDist(double *x, double *p) {
     double vnMax = p[2];
 
     double C = vnMax/(TMath::Power(alpha/beta, alpha)*TMath::Exp(-alpha));
-
     return C*TMath::Power(pt, alpha)*TMath::Exp(-beta*pt);
 }
 
@@ -554,15 +544,16 @@ double *GetCorrectionParam(double phiMin, double phiMax, double percentage, doub
     fTimesSin2->SetParameters(phiMin, phiMax, percentage, 2*n, 1.0/area);
     fTimesCos2->SetParameters(phiMin, phiMax, percentage, 2*n, 1.0/area);
 
+    double thres = 0.0001;
     double *corrections = new double[8];
-    corrections[0] = fTimesCos->Integral(-pi, pi); //cm
-    corrections[1] = fTimesSin->Integral(-pi, pi); //sm
-    corrections[2] = fTimesCos2->Integral(-pi, pi); //cm2
-    corrections[3] = fTimesSin2->Integral(-pi, pi); //sm2
-    corrections[4] = 1.0 - corrections[2]; //a-
-    corrections[5] = 1.0 + corrections[2]; //a+
-    corrections[6] = corrections[3]/corrections[4]; //lambda-
-    corrections[7] = corrections[3]/corrections[5]; //lambda+
+    corrections[0] = CheckIfZero(fTimesCos->Integral(-pi, pi), thres); //cm
+    corrections[1] = CheckIfZero(fTimesSin->Integral(-pi, pi), thres); //sm
+    corrections[2] = CheckIfZero(fTimesCos2->Integral(-pi, pi), thres); //cm2
+    corrections[3] = CheckIfZero(fTimesSin2->Integral(-pi, pi), thres); //sm2
+    corrections[4] = CheckIfZero(1.0 - corrections[2], thres); //a-
+    corrections[5] = CheckIfZero(1.0 + corrections[2], thres); //a+
+    corrections[6] = CheckIfZero(corrections[3]/corrections[4], thres); //lambda-
+    corrections[7] = CheckIfZero(corrections[3]/corrections[5], thres); //lambda+
 
     cout << "v" << n << ": {";
     for (int i=0; i<7; i++) {
@@ -571,6 +562,14 @@ double *GetCorrectionParam(double phiMin, double phiMax, double percentage, doub
     cout << corrections[7] << "}\n";
 
     return corrections;
+}
+
+double CheckIfZero(double x, double thres) {
+    if (abs(x) < thres) {
+        return 0.0;
+    } else {
+        return x;
+    }
 }
 
 double ShiftCorrection(double x, double correction) {
