@@ -28,11 +28,11 @@ public:
     TH1D *hSqrtSumWeightsANonuni;
     TH1D *hSqrtSumWeightsBNonuni;
 
-    /**TH1D *hCosPhi[5];
+    TH1D *hCosPhi[5];
     TH1D *hSinPhi[5];
 
     TH1D *hCosPhi2[5];
-    TH1D *hSinPhi2[5];**/
+    TH1D *hSinPhi2[5];
 
     // Historgrams for calculating vn values
     TH1D *hRtrue[5];

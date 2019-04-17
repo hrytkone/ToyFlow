@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 
     bool bRandomPsi = true;
     bool bUsePtDependence = true;
-    bool bUseWeight = false;
+    bool bUseWeight = true;
 
     int i, j; // indices for loops
     double pi = TMath::Pi();
@@ -82,7 +82,6 @@ int main(int argc, char **argv) {
     TF1 *fPtDist = new TF1("fPtDist", PtDist, 0.0, 10.0, 1);
     fPtDist->SetParameter(0, 1./Teff);
 
-    double pt = 0.0;
     TF1 *fPhiDist = new TF1("fPhiDist", PhiDist, -pi, pi, 10);
     fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4], Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
@@ -97,8 +96,8 @@ int main(int argc, char **argv) {
 
     // CORRECTIONS
     double phiMin = 1.0;
-    double phiMax = 1.1;
-    double percentage = 20.0;
+    double phiMax = 1.5;
+    double percentage = 30.0;
 
     TF1 *fA = new TF1("fA", AcceptanceFunc, -pi, pi, 4);
     TF1 *fTimesSin = new TF1("fTimesSin", AcceptanceFuncTimesSin, -pi, pi, 5);
@@ -206,7 +205,6 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
             }
             fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
                 Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
-            //fPhi->SetParameter(10, pT);
         }
 
         phi = fPhi->GetRandom();
@@ -245,13 +243,13 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                 nNonuniB++;
             }
 
-            /**for (j=0; j<5; j++) {
+            for (j=0; j<5; j++) {
                 m = j+1;
                 histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
                 histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
                 histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
                 histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-            }**/
+            }
         } else {
             randNum = rand->Rndm();
             if ( randNum > percentage ) {
@@ -268,13 +266,13 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                     nNonuniB++;
                 }
 
-                /**for (j=0; j<5; j++) {
+                for (j=0; j<5; j++) {
                     m = j+1;
                     histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
                     histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
                     histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
                     histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-                }**/
+                }
             }
         }
 

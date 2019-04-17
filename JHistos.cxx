@@ -48,7 +48,7 @@ JHistos::JHistos(){
 
     for (i=0; i<5; i++){
 
-        /**hCosPhi[i] = new TH1D(Form("hCosPhi%02i",i+1),Form("hCosPhi%02i",i+1),401,-1.0,1.0);
+        hCosPhi[i] = new TH1D(Form("hCosPhi%02i",i+1),Form("hCosPhi%02i",i+1),401,-1.0,1.0);
         hCosPhi[i]->Sumw2();
         hSinPhi[i] = new TH1D(Form("hSinPhi%02i",i+1),Form("hSinPhi%02i",i+1),401,-1.0,1.0);
         hSinPhi[i]->Sumw2();
@@ -56,7 +56,7 @@ JHistos::JHistos(){
         hCosPhi2[i] = new TH1D(Form("hCosPhi2%02i",i+1),Form("hCosPhi2%02i",i+1),401,-1.0,1.0);
         hCosPhi2[i]->Sumw2();
         hSinPhi2[i] = new TH1D(Form("hSinPhi2%02i",i+1),Form("hSinPhi2%02i",i+1),401,-1.0,1.0);
-        hSinPhi2[i]->Sumw2();**/
+        hSinPhi2[i]->Sumw2();
 
         hRtrue[i] = new TH1D(Form("hRtrue%02i",i+1),Form("hRtrue%02i",i+1),401,-1.0,1.0);
         hRtrue[i]->Sumw2();

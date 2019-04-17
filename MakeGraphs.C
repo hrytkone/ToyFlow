@@ -7,10 +7,10 @@ double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
 
-void MakeGraphs(TString sInputName = "test2.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "test.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "events-10000_dneta-1000.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "events-10000_dneta-1000_pt-depend.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "events-15000_dneta-1000_pt-depend.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "events-100_dneta-1000_pt-depend_pt-weight.root", TString sOutputName = "toyFlowGraphs.root") {
 
     TFile *fIn = TFile::Open(sInputName, "read");
