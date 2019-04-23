@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
 
     bool bRandomPsi = true;
-    bool bUsePtDependence = true;
-    bool bUseWeight = true;
+    bool bUsePtDependence = false;
+    bool bUseWeight = false;
 
     int i, j; // indices for loops
     double pi = TMath::Pi();
@@ -242,14 +242,6 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                 new((*listNonuniB)[nNonuniB]) JToyMCTrack(track);
                 nNonuniB++;
             }
-
-            for (j=0; j<5; j++) {
-                m = j+1;
-                histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
-                histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
-                histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
-                histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-            }
         } else {
             randNum = rand->Rndm();
             if ( randNum > percentage ) {
@@ -266,13 +258,6 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                     nNonuniB++;
                 }
 
-                for (j=0; j<5; j++) {
-                    m = j+1;
-                    histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
-                    histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
-                    histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
-                    histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-                }
             }
         }
 
@@ -284,26 +269,28 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
 void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *listSubB, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
 
     int nMult = listFull->GetEntriesFast();
-    int nMultA = listSubA->GetEntriesFast();
-    int nMultB = listSubB->GetEntriesFast();
+    int nMultPOI = listSubA->GetEntriesFast();
+    int nMultRef = listSubB->GetEntriesFast();
 
     int i, j, k, n;
     double w = 1.0;
     double phi, pt;
     double Rtrue;
 
-    TComplex Q = TComplex(0, 0);
-    TComplex QsubA = TComplex(0, 0);
-    TComplex QsubB = TComplex(0, 0);
+    TComplex Qfull = TComplex(0, 0);
+    TComplex QPOI = TComplex(0, 0);
+    TComplex Qref = TComplex(0, 0);
+    TComplex QrefA = TComplex(0, 0);
+    TComplex QrefB = TComplex(0, 0);
     TComplex unitVec = TComplex(0, 0);
     TComplex autocorr = TComplex(0, 0);
 
     double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
     double EventPlaneA, EventPlaneB, Rsub, vobs;
 
-    double norm, normA, normB;
+    double normFull, normPOI, normRef, normA, normB;
 
-    double QnQnA, QnAQnB;
+    double QnQnRef, QnAQnB;
 
     int nPtBins = 9;
     double point = 0.0;
@@ -330,49 +317,58 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
         lambdaMinus = corrections[i][6];
         lambdaPlus = corrections[i][7];
 
-        Q = TComplex(0, 0);
-        QsubA = TComplex(0, 0);
-        QsubB = TComplex(0, 0);
+        Qfull = TComplex(0, 0);
+        QPOI = TComplex(0, 0);
+        Qref = TComplex(0, 0);
+        QrefA = TComplex(0, 0);
+        QrefB = TComplex(0, 0);
 
         vobs = 0.0;
 
-        norm = 0.0; normA = 0.0; normB = 0.0;
+        normFull = 0.0; normPOI = 0.0; normRef = 0.0; normA = 0.0; normB = 0.0;
 
-        // Construct Q-vectors for full event and subevents
         for (j=0; j<nMult; j++) {
 
             track = (JToyMCTrack*)listFull->At(j);
             phi = track->GetPhi();
 
             if (bUseWeight) w = track->GetPt();
-            norm += w*w;
+            normFull += w*w;
 
             unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
             if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-            Q += unitVec;
+            Qfull += unitVec;
 
-            if ( j<nMultA ) {
+            if ( j<nMultPOI ) {
                 track = (JToyMCTrack*)listSubA->At(j);
                 phi = track->GetPhi();
 
                 if (bUseWeight) w = track->GetPt();
-                normA += w*w;
+                normPOI += w*w;
 
                 unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
                 if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-                QsubA += unitVec;
+                QPOI += unitVec;
             }
 
-            if ( j<nMultB ) {
+            if ( j<nMultRef ) {
                 track = (JToyMCTrack*)listSubB->At(j);
                 phi = track->GetPhi();
 
                 if (bUseWeight) w = track->GetPt();
-                normB += w*w;
+                normRef += w*w;
 
                 unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
                 if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-                QsubB += unitVec;
+                Qref += unitVec;
+
+                if (j<nMultRef/2.0) {
+                    normA += w*w;
+                    QrefA += unitVec;
+                } else {
+                    normB += w*w;
+                    QrefB += unitVec;
+                }
             }
         }
 
@@ -383,45 +379,46 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
             autocorr = TComplex(TMath::Cos(n*phi), TMath::Sin(n*phi));
 
-            Q -= autocorr;
-            vobs += GetVnObs(Q, phi, n);
-            Q += autocorr;
+            Qfull -= autocorr;
+            vobs += GetVnObs(Qfull, phi, n);
+            Qfull += autocorr;
         }
 
         vobs /= nMult;
 
         // Resolution parameter calculations
-        Rtrue = TMath::Cos(n*(GetEventPlane(Q, n) - Psi[i]));
+        Rtrue = TMath::Cos(n*(GetEventPlane(Qfull, n) - Psi[i]));
 
-        EventPlaneA = GetEventPlane(QsubA, n);
-        EventPlaneB = GetEventPlane(QsubB, n);
+        EventPlaneA = GetEventPlane(QrefA, n);
+        EventPlaneB = GetEventPlane(QrefB, n);
         Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
 
         // ALTERNATIVE EVENT PLANE METHOD
-        norm = TMath::Sqrt(norm);
+        normPOI = TMath::Sqrt(normPOI);
+        normRef = TMath::Sqrt(normRef);
         normA = TMath::Sqrt(normA);
         normB = TMath::Sqrt(normB);
 
-        Q /= norm; QsubA /= normA; QsubB /= normB;
+        QPOI /= normPOI; Qref /= normRef; QrefA /= normA; QrefB /= normB;
 
-        QnQnA = GetScalarProduct(Q, QsubA);
-        QnQnA /= TComplex::Abs(QsubA);
+        QnQnRef = GetScalarProduct(QPOI, Qref);
+        QnQnRef /= TComplex::Abs(Qref);
 
-        QnAQnB = GetScalarProduct(QsubA, QsubB);
-        QnAQnB /= TComplex::Abs(QsubA);
-        QnAQnB /= TComplex::Abs(QsubB);
+        QnAQnB = GetScalarProduct(QrefA, QrefB);
+        QnAQnB /= TComplex::Abs(QrefA);
+        QnAQnB /= TComplex::Abs(QrefB);
 
         if (bDoCorrections) {
             histos->hVnObsCorrected[i]->Fill(vobs);
             histos->hRtrueCorrected[i]->Fill(Rtrue);
             histos->hRsubCorrected[i]->Fill(Rsub);
-            histos->hQnQnAcorrected[i]->Fill(QnQnA);
+            histos->hQnQnAcorrected[i]->Fill(QnQnRef);
             histos->hQnAQnBcorrected[i]->Fill(QnAQnB);
         } else {
             histos->hVnObs[i]->Fill(vobs);
             histos->hRtrue[i]->Fill(Rtrue);
             histos->hRsub[i]->Fill(Rsub);
-            histos->hQnQnA[i]->Fill(QnQnA);
+            histos->hQnQnA[i]->Fill(QnQnRef);
             histos->hQnAQnB[i]->Fill(QnAQnB);
         }
 
@@ -431,7 +428,7 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
             double norms[nPtBins];
             for (j=0; j<nPtBins; j++) norms[j] = 0;
 
-            for (j=0; j < nMult; j++) {
+            for (j=0; j < nMultPOI; j++) {
 
                 track = (JToyMCTrack*)listFull->At(j);
                 phi = track->GetPhi();
@@ -450,15 +447,15 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
             }
 
             for (j=0; j<nPtBins; j++) {
-                Q = TComplex(0, 0);
+                QPOI = TComplex(0, 0);
                 for (k=0; k<pTBinsQ[j].size(); k++) {
-                    Q += pTBinsQ[j][k];
+                    QPOI += pTBinsQ[j][k];
                 }
                 weight = TMath::Sqrt(norms[j]);
-                Q /= weight;
-                QnQnA = GetScalarProduct(Q, QsubA);
-                QnQnA /= TComplex::Abs(QsubA);
-                histos->hPtBin[j]->Fill(QnQnA);
+                QPOI /= weight;
+                QnQnRef = GetScalarProduct(QPOI, Qref);
+                QnQnRef /= TComplex::Abs(Qref);
+                histos->hPtBin[j]->Fill(QnQnRef);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
                 pTBinsQ[j].clear();
             }
@@ -467,11 +464,11 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
     }
 
     if (bDoCorrections) {
-        histos->hSqrtSumWeightsNonuni->Fill(norm);
+        histos->hSqrtSumWeightsNonuni->Fill(normPOI);
         histos->hSqrtSumWeightsANonuni->Fill(normA);
         histos->hSqrtSumWeightsBNonuni->Fill(normB);
     } else {
-        histos->hSqrtSumWeights->Fill(norm);
+        histos->hSqrtSumWeights->Fill(normPOI);
         histos->hSqrtSumWeightsA->Fill(normA);
         histos->hSqrtSumWeightsB->Fill(normB);
     }

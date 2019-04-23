@@ -7,9 +7,9 @@ double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
 
-void MakeGraphs(TString sInputName = "test.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "events-10000_dneta-1000.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "test.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "events-10000_dndeta-1000.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "events-15000_dneta-1000_pt-depend.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "events-100_dneta-1000_pt-depend_pt-weight.root", TString sOutputName = "toyFlowGraphs.root") {
 
@@ -130,6 +130,7 @@ void MakeGraphs(TString sInputName = "test.root", TString sOutputName = "toyFlow
 
     double w = hSqrtSumWeights->GetMean();
     double wError = hSqrtSumWeights->GetMeanError();
+    wError = 0.0;
     double wCorrected = hSqrtSumWeightsNonuni->GetMean();
     double wCorrectedError = hSqrtSumWeightsNonuni->GetMeanError();
 
@@ -139,7 +140,7 @@ void MakeGraphs(TString sInputName = "test.root", TString sOutputName = "toyFlow
         vnEPalt[i] = CalculateVn(hQnQnA[i]->GetMean(), hQnAQnB[i]->GetMean(), w);
         errorVnEPalt[i] = CalculateVnError(hQnQnA[i]->GetMean(), hQnAQnB[i]->GetMean(), hQnQnA[i]->GetMeanError(), hQnAQnB[i]->GetMeanError(),  w, wError);
         vnEPCorrectedAlt[i] = CalculateVn(hQnQnAcorrected[i]->GetMean(), hQnAQnBcorrected[i]->GetMean(), wCorrected);
-        errorVnEPalt[i] = CalculateVnError(hQnQnAcorrected[i]->GetMean(), hQnAQnBcorrected[i]->GetMean(), hQnQnAcorrected[i]->GetMeanError(), hQnAQnBcorrected[i]->GetMeanError(),  wCorrected, wCorrectedError);
+        errorVnEPCorrectedAlt[i] = CalculateVnError(hQnQnAcorrected[i]->GetMean(), hQnAQnBcorrected[i]->GetMean(), hQnQnAcorrected[i]->GetMeanError(), hQnAQnBcorrected[i]->GetMeanError(),  wCorrected, wCorrectedError);
     }
 
     // pT bins
@@ -230,5 +231,5 @@ double CalculateVn(double QnQnA, double QnAQnB, double w) {
 
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr) {
     double vn = CalculateVn(QnQnA, QnAQnB, w);
-    return vn*(QnQnAerr/QnQnA + 0.5*QnAQnBerr/QnAQnB + wErr/w);
+    return vn*TMath::Sqrt(((QnQnAerr/QnQnA)*(QnQnAerr/QnQnA) + 0.25*(QnAQnBerr/QnAQnB)*(QnAQnBerr/QnAQnB) + (wErr/w)*(wErr/w)));
 }

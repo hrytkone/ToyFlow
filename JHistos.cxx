@@ -81,21 +81,6 @@ JHistos::JHistos(){
         hQnQnAcorrected[i]->Sumw2();
         hQnAQnBcorrected[i] = new TH1D(Form("hQnAQnBcorrected%02i",i+1),Form("hQnAQnBcorrected%02i",i+1),401,-1.0,1.0);
         hQnAQnBcorrected[i]->Sumw2();
-
-        // FOR TESTING PURPOSES
-        hPsiA[i] = new TH1D(Form("hPsiA%02i",i+1),Form("hPsiA%02i",i+1),401,-3.2,3.2);
-        hPsiB[i] = new TH1D(Form("hPsiB%02i",i+1),Form("hPsiB%02i",i+1),401,-3.2,3.2);
-        hPsiAPsiB[i] = new TH1D(Form("hPsiAPsiB%02i",i+1),Form("hPsiAPsiB%02i",i+1),401,-6.4,6.4);
-        hPsiAcorrected[i] = new TH1D(Form("hPsiAcorrected%02i",i+1),Form("hPsiAcorrected%02i",i+1),401,-3.2,3.2);
-        hPsiBcorrected[i] = new TH1D(Form("hPsiBcorrected%02i",i+1),Form("hPsiBcorrected%02i",i+1),401,-3.2,3.2);
-        hPsiAPsiBcorrected[i] = new TH1D(Form("hPsiAPsiBcorrected%02i",i+1),Form("hPsiAPsiBcorrected%02i",i+1),401,-6.4,6.4);
-
-        hQ[i] = new TH1D(Form("hQ%02i",i+1),Form("hQ%02i",i+1),401,0.0,100.0);
-        hQA[i] = new TH1D(Form("hQA%02i",i+1),Form("hQA%02i",i+1),401,0.0,100.0);
-        hQB[i] = new TH1D(Form("hQB%02i",i+1),Form("hQB%02i",i+1),401,0.0,100.0);
-        hQcorr[i] = new TH1D(Form("hQcorr%02i",i+1),Form("hQcorr%02i",i+1),401,0.0,100.0);
-        hQAcorr[i] = new TH1D(Form("hQAcorr%02i",i+1),Form("hQAcorr%02i",i+1),401,0.0,100.0);
-        hQBcorr[i] = new TH1D(Form("hQBcorr%02i",i+1),Form("hQBcorr%02i",i+1),401,0.0,100.0);
     }
 
     for (i=0; i<9; i++) {
