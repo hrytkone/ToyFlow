@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
 
     bool bRandomPsi = true;
-    bool bUsePtDependence = true;
-    bool bUseWeight = true;
+    bool bUsePtDependence = false;
+    bool bUseWeight = false;
 
     int i, j; // indices for loops
     double pi = TMath::Pi();
@@ -449,14 +449,18 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
                 }
             }
 
+            double l;
             for (j=0; j<nPtBins; j++) {
                 Q = TComplex(0, 0);
-                for (k=0; k<pTBinsQ[j].size(); k++) {
+                l = pTBinsQ[j].size();
+                for (k=0; k<l; k++) {
                     Q += pTBinsQ[j][k];
                 }
                 weight = TMath::Sqrt(norms[j]);
-                Q /= weight;
-                QnQnA = GetScalarProduct(Q, QsubA);
+                if (weight!=0) Q /= weight;
+                histos->hV2ComplexPart->Fill(Q.Im()*QsubA.Im());
+                QnQnA = Q*TComplex::Conjugate(QsubA);
+                //QnQnA = GetScalarProduct(Q, QsubA);
                 QnQnA /= TComplex::Abs(QsubA);
                 histos->hPtBin[j]->Fill(QnQnA);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
