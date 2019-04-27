@@ -72,15 +72,19 @@ JHistos::JHistos(){
         hVnObsCorrected[i] = new TH1D(Form("hVnObsCorrected%02i",i+1),Form("hVnObsCorrected%02i",i+1),401,-1.5,1.5);
         hVnObsCorrected[i]->Sumw2();
 
-        hQnQnA[i] = new TH1D(Form("hQnQnA%02i",i+1),Form("hQnQnA%02i",i+1),401,-10.0,10.0);
+        hQnQnA[i] = new TH1D(Form("hQnQnA%02i",i+1),Form("hQnQnA%02i",i+1),401,-50.0,50.0);
         hQnQnA[i]->Sumw2();
         hQnAQnB[i] = new TH1D(Form("hQnAQnB%02i",i+1),Form("hQnAQnB%02i",i+1),401,-1.0,1.0);
         hQnAQnB[i]->Sumw2();
 
-        hQnQnAcorrected[i] = new TH1D(Form("hQnQnAcorrected%02i",i+1),Form("hQnQnAcorrected%02i",i+1),401,-10.0,10.0);
+        hQnQnAcorrected[i] = new TH1D(Form("hQnQnAcorrected%02i",i+1),Form("hQnQnAcorrected%02i",i+1),401,-50.0,50.0);
         hQnQnAcorrected[i]->Sumw2();
         hQnAQnBcorrected[i] = new TH1D(Form("hQnAQnBcorrected%02i",i+1),Form("hQnAQnBcorrected%02i",i+1),401,-1.0,1.0);
         hQnAQnBcorrected[i]->Sumw2();
+
+        //FOR TESTING
+        hEPcorrealtion[i] = new TH2D(Form("hEPcorrelation%02i", i+1),Form("hEPcorrelation%02i", i+1),50,-2.0,2.0,50,-2.0,2.0);
+        hEPcorrealtionCorr[i] = new TH2D(Form("hEPcorrelationCorr%02i", i+1),Form("hEPcorrelationCorr%02i", i+1),50,-2.0,2.0,50,-2.0,2.0);
     }
 
     for (i=0; i<9; i++) {

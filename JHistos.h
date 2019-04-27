@@ -56,5 +56,7 @@ public:
 
     //FOR TESTING
     TH1D *hV2ComplexPart;
+    TH2D *hEPcorrealtion[5];
+    TH2D *hEPcorrealtionCorr[5];
 
 };

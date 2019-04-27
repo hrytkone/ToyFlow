@@ -21,7 +21,7 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double alpha, double beta, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence);
+void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double alpha, double beta, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
 void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *listSubB, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
 
 double AcceptanceFunc(double *x, double *p);
@@ -36,9 +36,9 @@ void DoCorrections(TComplex &Q, double cm, double sm, double lambdaMinus, double
 
 double GetEventPlane(TComplex Q, int n);
 double GetVnObs(TComplex Q, double phi, int n);
-double GetScalarProduct(TComplex Qa, TComplex Qb);
 
 double CheckIfZero(double x, double thres);
+double CheckPhi(double phi, double startAngle);
 
 int main(int argc, char **argv) {
 
@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
     bool bRandomPsi = true;
     bool bUsePtDependence = false;
     bool bUseWeight = false;
+    bool bUseGranularity = false;
 
     int i, j; // indices for loops
     double pi = TMath::Pi();
@@ -95,9 +96,9 @@ int main(int argc, char **argv) {
     TClonesArray *listNonuniB = new TClonesArray("JToyMCTrack", nMult+1);
 
     // CORRECTIONS
-    double phiMin = 1.0;
-    double phiMax = 1.5;
-    double percentage = 30.0;
+    double phiMin = -pi/4;
+    double percentage = 50.0;
+    double phiMax = pi/4;
 
     TF1 *fA = new TF1("fA", AcceptanceFunc, -pi, pi, 4);
     TF1 *fTimesSin = new TF1("fTimesSin", AcceptanceFuncTimesSin, -pi, pi, 5);
@@ -167,7 +168,7 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(listUniFull, listUniA, listUniB, listNonuniFull, listNonuniA, listNonuniB, histos, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, alpha, beta, nMult, percentage, phiMin, phiMax, bUsePtDependence);
+        GetEvent(listUniFull, listUniA, listUniB, listNonuniFull, listNonuniA, listNonuniB, histos, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, alpha, beta, nMult, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -pi);
         AnalyzeEvent(listUniFull, listUniA, listUniB, histos, Psi, bUseWeight, false, corrections);
         AnalyzeEvent(listNonuniFull, listNonuniA, listNonuniB, histos, Psi, bUseWeight, true, corrections);
 
@@ -179,7 +180,7 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double alpha, double beta, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence) {
+void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double alpha, double beta, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle) {
 
     double pT, phi, eta, E;
     double px, py, pz;
@@ -209,6 +210,9 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
 
         phi = fPhi->GetRandom();
         eta = rand->Uniform(-0.8, 0.8);
+
+        if (bUseGranularity)
+            phi = CheckPhi(phi, startAngle);
 
         histos->hPt->Fill(pT);
         histos->hPhi->Fill(phi);
@@ -397,6 +401,13 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
         EventPlaneB = GetEventPlane(QsubB, n);
         Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
 
+        // FOR TESTING
+        if (!bDoCorrections) {
+            histos->hEPcorrealtion[i]->Fill(EventPlaneA, EventPlaneB);
+        } else {
+            histos->hEPcorrealtionCorr[i]->Fill(EventPlaneA, EventPlaneB);
+        }
+
         // ALTERNATIVE EVENT PLANE METHOD
         norm = TMath::Sqrt(norm);
         normA = TMath::Sqrt(normA);
@@ -404,10 +415,10 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
 
         Q /= norm; QsubA /= normA; QsubB /= normB;
 
-        QnQnA = GetScalarProduct(Q, QsubA);
+        QnQnA = Q*TComplex::Conjugate(QsubA);
         QnQnA /= TComplex::Abs(QsubA);
 
-        QnAQnB = GetScalarProduct(QsubA, QsubB);
+        QnAQnB = QsubA*TComplex::Conjugate(QsubB);
         QnAQnB /= TComplex::Abs(QsubA);
         QnAQnB /= TComplex::Abs(QsubB);
 
@@ -460,7 +471,6 @@ void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *
                 if (weight!=0) Q /= weight;
                 histos->hV2ComplexPart->Fill(Q.Im()*QsubA.Im());
                 QnQnA = Q*TComplex::Conjugate(QsubA);
-                //QnQnA = GetScalarProduct(Q, QsubA);
                 QnQnA /= TComplex::Abs(QsubA);
                 histos->hPtBin[j]->Fill(QnQnA);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
@@ -546,7 +556,7 @@ double *GetCorrectionParam(double phiMin, double phiMax, double percentage, doub
     fTimesSin2->SetParameters(phiMin, phiMax, percentage, 2*n, 1.0/area);
     fTimesCos2->SetParameters(phiMin, phiMax, percentage, 2*n, 1.0/area);
 
-    double thres = 0.0001;
+    double thres = 0.000001;
     double *corrections = new double[8];
     corrections[0] = CheckIfZero(fTimesCos->Integral(-pi, pi), thres); //cm
     corrections[1] = CheckIfZero(fTimesSin->Integral(-pi, pi), thres); //sm
@@ -603,6 +613,17 @@ double GetVnObs(TComplex Q, double phi, int n) {
     return TMath::Cos(n*(phi - EP));
 }
 
-double GetScalarProduct(TComplex Qa, TComplex Qb) {
-    return Qa.Re()*Qb.Re() + Qa.Im()*Qb.Im();
+double CheckPhi(double phi, double startAngle) {
+    int i, sectors = 8;
+    double pi = TMath::Pi();
+    double lower, upper;
+
+    for (i=0; i<sectors; i++) {
+        lower = startAngle+2*pi*i/sectors;
+        upper = startAngle+2*pi*(i+1)/sectors;
+        if (lower < phi && phi < upper) {
+            return lower + (upper-lower)/2.0;
+        }
+    }
+    return 0;
 }
