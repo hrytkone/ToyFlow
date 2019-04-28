@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
 
     bool bRandomPsi = true;
-    bool bUsePtDependence = false;
+    bool bUsePtDependence = true;
     bool bUseWeight = false;
     bool bUseGranularity = false;
 
@@ -96,9 +96,9 @@ int main(int argc, char **argv) {
     TClonesArray *listNonuniB = new TClonesArray("JToyMCTrack", nMult+1);
 
     // CORRECTIONS
-    double phiMin = -pi/4;
+    double phiMin = pi/4;
     double percentage = 50.0;
-    double phiMax = pi/4;
+    double phiMax = pi/2;
 
     TF1 *fA = new TF1("fA", AcceptanceFunc, -pi, pi, 4);
     TF1 *fTimesSin = new TF1("fTimesSin", AcceptanceFuncTimesSin, -pi, pi, 5);
@@ -156,10 +156,10 @@ int main(int argc, char **argv) {
 
         if (bRandomPsi) {
             for (j=0; j<5; j++) {
-                Psi[j] = rand->Uniform(0, 2*pi);
+                Psi[j] = rand->Uniform(-pi, pi);
             }
         } else {
-            double psiTemp = rand->Uniform(0, 2*pi);
+            double psiTemp = rand->Uniform(-pi, pi);
             for (j=0; j<5;j++) {
                 Psi[j] = psiTemp;
             }
@@ -195,7 +195,7 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
 
     double randNum;
     double vnTemp[5];
-    int i, j, m;
+    int i, j;
     for (i = 0; i < nMult; i++) {
 
         pT = fPt->GetRandom();
@@ -247,13 +247,6 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                 nNonuniB++;
             }
 
-            for (j=0; j<5; j++) {
-                m = j+1;
-                histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
-                histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
-                histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
-                histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-            }
         } else {
             randNum = rand->Rndm();
             if ( randNum > percentage ) {
@@ -270,13 +263,6 @@ void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listU
                     nNonuniB++;
                 }
 
-                for (j=0; j<5; j++) {
-                    m = j+1;
-                    histos->hCosPhi[j]->Fill(TMath::Cos(m*phi));
-                    histos->hSinPhi[j]->Fill(TMath::Sin(m*phi));
-                    histos->hCosPhi2[j]->Fill(TMath::Cos(2*m*phi));
-                    histos->hSinPhi2[j]->Fill(TMath::Sin(2*m*phi));
-                }
             }
         }
 
@@ -549,7 +535,7 @@ double AcceptanceFuncTimesCos(double *x, double *p) {
 double *GetCorrectionParam(double phiMin, double phiMax, double percentage, double n, TF1 *fA, TF1 *fTimesSin, TF1 *fTimesCos, TF1 *fTimesSin2, TF1 *fTimesCos2) {
     double pi = TMath::Pi();
     fA->SetParameters(phiMin, phiMax, percentage, 1);
-    double area = fA->Integral(-pi, pi);
+    double area = fA->Integral(0.0, 2*pi);
 
     fTimesSin->SetParameters(phiMin, phiMax, percentage, n, 1.0/area);
     fTimesCos->SetParameters(phiMin, phiMax, percentage, n, 1.0/area);

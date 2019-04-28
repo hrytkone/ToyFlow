@@ -219,21 +219,6 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     gVnAltCorrected->Write("gVnAltCorrected");
     fOut->Close();
 
-    // TESTING PARAMETER EXTRACTION FROM THE DISTRIBUTIONS
-    TH1D *hCosPhi[nCoef];
-    TH1D *hSinPhi[nCoef];
-    double cn, sn;
-    for (i = 0; i < nCoef; i++) {
-        hCosPhi[i] = (TH1D*)fIn->Get(Form("hCosPhi%02i", i+1));
-        hSinPhi[i] = (TH1D*)fIn->Get(Form("hSinPhi%02i", i+1));
-        //TODO: Normalisaatio
-        hCosPhi[i] = hCosPhi[i]->Multiply(hCosPhi[i]->Integral());
-        hSinPhi[i] = hSinPhi[i]->Multiply(hSinPhi[i]->Integral());
-        cn = hCosPhi[i]->GetMean();
-        sn = hSinPhi[i]->GetMean();
-        cout << "v" << i+1 << ": cn=" << cn << "  sn=" << sn << "\n";
-    }
-
 }
 
 double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr) {

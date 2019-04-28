@@ -4,6 +4,7 @@
 JHistos::JHistos(){
 
     int i;
+    double pi = TMath::Pi();
 
     // pT -histograms, taken from JCORRAN version on 11th February 2013
     int NBINS = 150;
@@ -24,12 +25,12 @@ JHistos::JHistos(){
     hPt->Sumw2();
     hMultiplicity = new TH1D("hMultiplicity","Multiplicity - uniform", 125, 0.0, 2501.);
     hMultiplicity->Sumw2();
-    hPhi = new TH1D("hPhi", "phi - uniform", 129, -3.2, 3.2);
+    hPhi = new TH1D("hPhi", "phi - uniform", 129, 0.0, 2*pi);
     hPhi->Sumw2();
 
     hMultiplicityNonuni = new TH1D("hMultiplicityNonuni","Multiplicity - nonuniform", 125, 0.0, 2501.);
     hMultiplicityNonuni->Sumw2();
-    hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, -3.2, 3.2);
+    hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, 0.0, 2*pi);
     hPhiNonuni->Sumw2();
 
     hSqrtSumWeights = new TH1D("hSqrtSumWeights","sqrt of sum of weights squares", 240, 0.0, 60.0);
@@ -47,16 +48,6 @@ JHistos::JHistos(){
     hSqrtSumWeightsBNonuni->Sumw2();
 
     for (i=0; i<5; i++){
-
-        hCosPhi[i] = new TH1D(Form("hCosPhi%02i",i+1),Form("hCosPhi%02i",i+1),401,-1.0,1.0);
-        hCosPhi[i]->Sumw2();
-        hSinPhi[i] = new TH1D(Form("hSinPhi%02i",i+1),Form("hSinPhi%02i",i+1),401,-1.0,1.0);
-        hSinPhi[i]->Sumw2();
-
-        hCosPhi2[i] = new TH1D(Form("hCosPhi2%02i",i+1),Form("hCosPhi2%02i",i+1),401,-1.0,1.0);
-        hCosPhi2[i]->Sumw2();
-        hSinPhi2[i] = new TH1D(Form("hSinPhi2%02i",i+1),Form("hSinPhi2%02i",i+1),401,-1.0,1.0);
-        hSinPhi2[i]->Sumw2();
 
         hRtrue[i] = new TH1D(Form("hRtrue%02i",i+1),Form("hRtrue%02i",i+1),401,-1.0,1.0);
         hRtrue[i]->Sumw2();
