@@ -25,12 +25,12 @@ JHistos::JHistos(){
     hPt->Sumw2();
     hMultiplicity = new TH1D("hMultiplicity","Multiplicity - uniform", 125, 0.0, 2501.);
     hMultiplicity->Sumw2();
-    hPhi = new TH1D("hPhi", "phi - uniform", 129, 0.0, 2*pi);
+    hPhi = new TH1D("hPhi", "phi - uniform", 129, -pi, pi);
     hPhi->Sumw2();
 
     hMultiplicityNonuni = new TH1D("hMultiplicityNonuni","Multiplicity - nonuniform", 125, 0.0, 2501.);
     hMultiplicityNonuni->Sumw2();
-    hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, 0.0, 2*pi);
+    hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, -pi, pi);
     hPhiNonuni->Sumw2();
 
     hSqrtSumWeights = new TH1D("hSqrtSumWeights","sqrt of sum of weights squares", 240, 0.0, 60.0);

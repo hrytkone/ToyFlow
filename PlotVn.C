@@ -170,6 +170,18 @@ void PlotVn() {
 
         fVnDist->Draw("SAME");
     }
+
+    TH1D *hPhi = (TH1D*)fIn[0]->Get("hPhi");
+    TH1D *hPhiNonuni = (TH1D*)fIn[0]->Get("hPhiNonuni");
+
+    TCanvas *c4 = new TCanvas("c4", "c4");
+    c4->Divide(2,1);
+
+    c4->cd(1);
+    hPhi->Draw("HIST");
+
+    c4->cd(2);
+    hPhiNonuni->Draw("HIST");
 }
 
 double VnDist(double *x, double *p) {

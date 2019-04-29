@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
 
     bool bRandomPsi = true;
-    bool bUsePtDependence = true;
+    bool bUsePtDependence = false;
     bool bUseWeight = false;
     bool bUseGranularity = false;
 
@@ -96,9 +96,9 @@ int main(int argc, char **argv) {
     TClonesArray *listNonuniB = new TClonesArray("JToyMCTrack", nMult+1);
 
     // CORRECTIONS
-    double phiMin = pi/4;
-    double percentage = 50.0;
+    double phiMin = -pi/2;
     double phiMax = pi/2;
+    double percentage = 0.5; // REMEMBER TO GIVE PERCENTAGE IN RANGE 0.0-1.0!
 
     TF1 *fA = new TF1("fA", AcceptanceFunc, -pi, pi, 4);
     TF1 *fTimesSin = new TF1("fTimesSin", AcceptanceFuncTimesSin, -pi, pi, 5);
@@ -142,6 +142,7 @@ int main(int argc, char **argv) {
     hInputNumbers->Fill(16, percentage);
 
     int nOutput = nEvents/20;
+    if (nOutput<1) nOutput = 1;
     for (i=0; i<nEvents; i++) {
         if (i % nOutput == 0)
             cout << 100*i/nEvents << " % finished" << endl;

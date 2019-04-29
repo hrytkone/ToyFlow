@@ -49,6 +49,9 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     for(int i = 0; i < nCoef; i++)
         hInputFlow->Fill(double(i+1), inputFlow[i]);
 
+    TH1D *hPhi = (TH1D*)fIn->Get("hPhi");
+    TH1D *hPhiNonuni = (TH1D*)fIn->Get("hPhiNonuni");
+
     //=====vn=====
     // Observed vn
     TH1D *hVnObs[nCoef];
@@ -205,6 +208,8 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     }
 
     fOut->cd();
+    hPhi->Write("hPhi");
+    hPhiNonuni->Write("hPhiNonuni");
     hInputFlow->Write("hInputFlow");
     gVnEP->Write("gVnEP");
     gVnEPCorrected->Write("gVnEPCorrected");
