@@ -10,7 +10,7 @@ SOFLAGS       = -shared
 CXXFLAGS += $(shell root-config --cflags)
 LDFLAGS  = $(shell root-config --libs)
 
-HDRSDICT =  JToyMCTrack.h JHistos.h
+HDRSDICT =  JToyMCTrack.h JHistos.h JInputs.h
 
 HDRS    += $(HDRSDICT) nanoDict.h
 

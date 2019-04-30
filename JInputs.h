@@ -1,9 +1,15 @@
-#ifndef JTOYFLOWINPUTS_H
-#define JTOYFLOWINPUTS_H
+#ifndef JINPUTS_H
+#define JINPUTS_H
+
+#include "JConst.h"
+
+#include <TF1.h>
+#include <TGraph.h>
+#include <TH1D.h>
+#include <TFile.h>
 
 using namespace std;
 
-#define NCOEF 5
 #define ETADST_N 36
 
 static double etadst[ETADST_N] = {
@@ -13,10 +19,10 @@ static double etadst[ETADST_N] = {
      0.625, 0.875, 1.125, 1.375, 1.625, 1.875, 2.125, 2.375,
      2.625, 2.875, 3.125, 3.375, 3.625, 3.875, 4.125, 4.375,
      4.625, 4.875,
-	 5.2, //overflow
+	 5.2 //overflow
 };
 
-static double etanch[NCENTBINS-1][ETADST_N] = {
+static double etanch[CENTBINS_N-1][ETADST_N] = {
 	{1640,1643,1670,1718,1787,1835,1912,1968,2001,2021,2017,1995,1970,1943,1929,1929,1943,1970,1995,2017,2021,2001,1968,1912,1835,1787,1718,1670,1643,1563,1474,1370,1324,1281,1244,1240},
 	{1360,1364,1391,1424,1474,1507,1569,1644,1679,1682,1672,1646,1621,1597,1583,1583,1597,1621,1646,1672,1682,1679,1644,1569,1507,1474,1424,1391,1364,1292,1218,1132,1093,1062,1032,1030},
 	{1000,1038,1061,1080,1114,1136,1178,1229,1253,1256,1247,1229,1210,1191,1181,1181,1191,1210,1229,1247,1256,1253,1229,1178,1136,1114,1080,1061,1038,977,921.3,857.7,829.6,807.4,787,780},
@@ -27,12 +33,17 @@ static double etanch[NCENTBINS-1][ETADST_N] = {
 	{93,94.9,96.1,96.8,98.3,98.8,99.1,101.2,102.7,103.1,102,100.3,98,96.1,95.2,95.2,96.1,98,100.3,102,103.1,102.7,101.2,99.1,98.8,98.3,96.8,96.1,94.9,86.8,81.9,77.3,75.8,75.1,73.8,73}
 };
 
-class JToyFlowInputs {
+class JInputs {
 
 public:
-    JToyFlowInputs();
-    virtual ~JToyFlowInputs(){;}
+    JInputs();
+    virtual ~JInputs(){;}
 
-}
+    void Load();
+    int GetMultiplicity(int detId, double centrality) { return gNch[detId]->Eval(centrality); }
+
+    TFile *fOut;
+    TGraph *gNch[DET_N];
+};
 
 #endif

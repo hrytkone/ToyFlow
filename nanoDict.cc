@@ -39,6 +39,7 @@ namespace std {} using namespace std;
 // Header files passed as explicit arguments
 #include "JToyMCTrack.h"
 #include "JHistos.h"
+#include "JInputs.h"
 
 // Header files passed via #pragma extra_include
 
@@ -117,6 +118,51 @@ namespace ROOT {
    }
 
    static void JHistos_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   static TClass *JInputs_Dictionary();
+   static void JInputs_TClassManip(TClass*);
+   static void *new_JInputs(void *p = 0);
+   static void *newArray_JInputs(Long_t size, void *p);
+   static void delete_JInputs(void *p);
+   static void deleteArray_JInputs(void *p);
+   static void destruct_JInputs(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::JInputs*)
+   {
+      ::JInputs *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::JInputs));
+      static ::ROOT::TGenericClassInfo 
+         instance("JInputs", "JInputs.h", 36,
+                  typeid(::JInputs), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &JInputs_Dictionary, isa_proxy, 0,
+                  sizeof(::JInputs) );
+      instance.SetNew(&new_JInputs);
+      instance.SetNewArray(&newArray_JInputs);
+      instance.SetDelete(&delete_JInputs);
+      instance.SetDeleteArray(&deleteArray_JInputs);
+      instance.SetDestructor(&destruct_JInputs);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::JInputs*)
+   {
+      return GenerateInitInstanceLocal((::JInputs*)0);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal((const ::JInputs*)0x0); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *JInputs_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const ::JInputs*)0x0)->GetClass();
+      JInputs_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void JInputs_TClassManip(TClass* ){
    }
 
 } // end of namespace ROOT
@@ -221,11 +267,33 @@ namespace ROOT {
    }
 } // end of namespace ROOT for class ::JHistos
 
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_JInputs(void *p) {
+      return  p ? new(p) ::JInputs : new ::JInputs;
+   }
+   static void *newArray_JInputs(Long_t nElements, void *p) {
+      return p ? new(p) ::JInputs[nElements] : new ::JInputs[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_JInputs(void *p) {
+      delete ((::JInputs*)p);
+   }
+   static void deleteArray_JInputs(void *p) {
+      delete [] ((::JInputs*)p);
+   }
+   static void destruct_JInputs(void *p) {
+      typedef ::JInputs current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::JInputs
+
 namespace {
   void TriggerDictionaryInitialization_nanoDict_Impl() {
     static const char* headers[] = {
 "JToyMCTrack.h",
 "JHistos.h",
+"JInputs.h",
 0
     };
     static const char* includePaths[] = {
@@ -241,6 +309,7 @@ namespace {
 extern int __Cling_Autoloading_Map;
 class __attribute__((annotate("$clingAutoload$JToyMCTrack.h")))  JToyMCTrack;
 class __attribute__((annotate("$clingAutoload$JHistos.h")))  JHistos;
+class __attribute__((annotate("$clingAutoload$JInputs.h")))  JInputs;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
 #line 1 "nanoDict dictionary payload"
@@ -255,11 +324,13 @@ class __attribute__((annotate("$clingAutoload$JHistos.h")))  JHistos;
 #define _BACKWARD_BACKWARD_WARNING_H
 #include "JToyMCTrack.h"
 #include "JHistos.h"
+#include "JInputs.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
     static const char* classesHeaders[]={
 "JHistos", payloadCode, "@",
+"JInputs", payloadCode, "@",
 "JToyMCTrack", payloadCode, "@",
 nullptr};
 

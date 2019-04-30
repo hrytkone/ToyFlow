@@ -13,20 +13,14 @@ JHistos::JHistos(){
     for (i=0; i<=NBINS; i++)
         LogBinsX[i] = LimL*exp(i*logBW);
 
-    // xT -histograms, use also here logarithmic bins
-    int binsQ = 400;
-    double LogQ2BinsX[binsQ+1];
-    double LimQL = 0.1, LimQ2H=2.e2;
-    double logQ2BW = (TMath::Log(LimQ2H)-TMath::Log(LimQL))/binsQ;
-    for(i=0; i<=binsQ; i++)
-        LogQ2BinsX[i] = LimQL*exp(i*logQ2BW);
-
 	hPt = new TH1D("hPt","pT - inclusive", NBINS, LogBinsX);
     hPt->Sumw2();
     hMultiplicity = new TH1D("hMultiplicity","Multiplicity - uniform", 125, 0.0, 2501.);
     hMultiplicity->Sumw2();
     hPhi = new TH1D("hPhi", "phi - uniform", 129, -pi, pi);
     hPhi->Sumw2();
+    hCentrality = new TH1D("hCentrality", "centrality", 8, 0.0, 70.0);
+    hCentrality->Sumw2();
 
     hMultiplicityNonuni = new TH1D("hMultiplicityNonuni","Multiplicity - nonuniform", 125, 0.0, 2501.);
     hMultiplicityNonuni->Sumw2();
@@ -73,9 +67,6 @@ JHistos::JHistos(){
         hQnAQnBcorrected[i] = new TH1D(Form("hQnAQnBcorrected%02i",i+1),Form("hQnAQnBcorrected%02i",i+1),401,-1.0,1.0);
         hQnAQnBcorrected[i]->Sumw2();
 
-        //FOR TESTING
-        hEPcorrealtion[i] = new TH2D(Form("hEPcorrelation%02i", i+1),Form("hEPcorrelation%02i", i+1),50,-2.0,2.0,50,-2.0,2.0);
-        hEPcorrealtionCorr[i] = new TH2D(Form("hEPcorrelationCorr%02i", i+1),Form("hEPcorrelationCorr%02i", i+1),50,-2.0,2.0,50,-2.0,2.0);
     }
 
     for (i=0; i<9; i++) {
