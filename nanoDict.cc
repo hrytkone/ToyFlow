@@ -40,6 +40,7 @@ namespace std {} using namespace std;
 #include "JToyMCTrack.h"
 #include "JHistos.h"
 #include "JInputs.h"
+#include "JEventLists.h"
 
 // Header files passed via #pragma extra_include
 
@@ -137,7 +138,7 @@ namespace ROOT {
       ::JInputs *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::JInputs));
       static ::ROOT::TGenericClassInfo 
-         instance("JInputs", "JInputs.h", 36,
+         instance("JInputs", "JInputs.h", 37,
                   typeid(::JInputs), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &JInputs_Dictionary, isa_proxy, 0,
                   sizeof(::JInputs) );
@@ -163,6 +164,51 @@ namespace ROOT {
    }
 
    static void JInputs_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
+   static TClass *JEventLists_Dictionary();
+   static void JEventLists_TClassManip(TClass*);
+   static void *new_JEventLists(void *p = 0);
+   static void *newArray_JEventLists(Long_t size, void *p);
+   static void delete_JEventLists(void *p);
+   static void deleteArray_JEventLists(void *p);
+   static void destruct_JEventLists(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::JEventLists*)
+   {
+      ::JEventLists *ptr = 0;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::JEventLists));
+      static ::ROOT::TGenericClassInfo 
+         instance("JEventLists", "JEventLists.h", 6,
+                  typeid(::JEventLists), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &JEventLists_Dictionary, isa_proxy, 0,
+                  sizeof(::JEventLists) );
+      instance.SetNew(&new_JEventLists);
+      instance.SetNewArray(&newArray_JEventLists);
+      instance.SetDelete(&delete_JEventLists);
+      instance.SetDeleteArray(&deleteArray_JEventLists);
+      instance.SetDestructor(&destruct_JEventLists);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::JEventLists*)
+   {
+      return GenerateInitInstanceLocal((::JEventLists*)0);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal((const ::JEventLists*)0x0); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *JEventLists_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const ::JEventLists*)0x0)->GetClass();
+      JEventLists_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void JEventLists_TClassManip(TClass* ){
    }
 
 } // end of namespace ROOT
@@ -288,12 +334,34 @@ namespace ROOT {
    }
 } // end of namespace ROOT for class ::JInputs
 
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_JEventLists(void *p) {
+      return  p ? new(p) ::JEventLists : new ::JEventLists;
+   }
+   static void *newArray_JEventLists(Long_t nElements, void *p) {
+      return p ? new(p) ::JEventLists[nElements] : new ::JEventLists[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_JEventLists(void *p) {
+      delete ((::JEventLists*)p);
+   }
+   static void deleteArray_JEventLists(void *p) {
+      delete [] ((::JEventLists*)p);
+   }
+   static void destruct_JEventLists(void *p) {
+      typedef ::JEventLists current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::JEventLists
+
 namespace {
   void TriggerDictionaryInitialization_nanoDict_Impl() {
     static const char* headers[] = {
 "JToyMCTrack.h",
 "JHistos.h",
 "JInputs.h",
+"JEventLists.h",
 0
     };
     static const char* includePaths[] = {
@@ -310,6 +378,7 @@ extern int __Cling_Autoloading_Map;
 class __attribute__((annotate("$clingAutoload$JToyMCTrack.h")))  JToyMCTrack;
 class __attribute__((annotate("$clingAutoload$JHistos.h")))  JHistos;
 class __attribute__((annotate("$clingAutoload$JInputs.h")))  JInputs;
+class __attribute__((annotate("$clingAutoload$JEventLists.h")))  JEventLists;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
 #line 1 "nanoDict dictionary payload"
@@ -325,10 +394,12 @@ class __attribute__((annotate("$clingAutoload$JInputs.h")))  JInputs;
 #include "JToyMCTrack.h"
 #include "JHistos.h"
 #include "JInputs.h"
+#include "JEventLists.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
     static const char* classesHeaders[]={
+"JEventLists", payloadCode, "@",
 "JHistos", payloadCode, "@",
 "JInputs", payloadCode, "@",
 "JToyMCTrack", payloadCode, "@",

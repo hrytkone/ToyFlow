@@ -11,10 +11,11 @@ const double beta = 1.0;
 const double Tdec = 0.12;
 const double vr = 0.6;
 
-// for detectors
 #define SECTORS_N 8
+#define RINGS_N 5
 
-//#define DET_N 4
+static double ringEta[RINGS_N+1] = {2.20, 2.81, 3.41, 3.9, 4.47, 5.06};
+
 enum DETECTOR {
     D_TPC,
     D_TPC_A,
@@ -27,7 +28,7 @@ static double cov[DET_N][2] = {
     {-1.5, 1.5},
     {-1.5, -0.4},
     {0.4, 1.5},
-    {2.19, 5.08}
+    {2.2, 5.06}
 };
 
 #define PTBINS_N 9

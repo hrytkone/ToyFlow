@@ -34,13 +34,15 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     double Teff = hInputNumbers->GetBinContent(12);
     double slope = hInputNumbers->GetBinContent(13);
 
-    TH1D *hSqrtSumWeights = (TH1D*)fIn->Get("hSqrtSumWeights");
-    TH1D *hSqrtSumWeightsA = (TH1D*)fIn->Get("hSqrtSumWeightsA");
-    TH1D *hSqrtSumWeightsB = (TH1D*)fIn->Get("hSqrtSumWeightsB");
+    TH1D *hSqrtSumWeightsTPC = (TH1D*)fIn->Get("hSqrtSumWeightsTPC");
+    TH1D *hSqrtSumWeightsTPCA = (TH1D*)fIn->Get("hSqrtSumWeightsTPCA");
+    TH1D *hSqrtSumWeightsTPCC = (TH1D*)fIn->Get("hSqrtSumWeightsTPCC");
+    TH1D *hSqrtSumWeightsV0P = (TH1D*)fIn->Get("hSqrtSumWeightsV0P");
 
-    TH1D *hSqrtSumWeightsNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsNonuni");
-    TH1D *hSqrtSumWeightsANonuni = (TH1D*)fIn->Get("hSqrtSumWeightsANonuni");
-    TH1D *hSqrtSumWeightsBNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsBNonuni");
+    TH1D *hSqrtSumWeightsTPCNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsTPCNonuni");
+    TH1D *hSqrtSumWeightsTPCANonuni = (TH1D*)fIn->Get("hSqrtSumWeightsTPCANonuni");
+    TH1D *hSqrtSumWeightsTPCCNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsTPCCNonuni");
+    TH1D *hSqrtSumWeightsV0PNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsV0PNonuni");
 
     TH1D *hInputFlow = new TH1D("hInputFlow", "hInputFlow", nCoef, 0.5, double(nCoef)+0.5);
     hInputFlow->SetLineStyle(1);
@@ -131,10 +133,10 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         hQnAQnBcorrected[i] = (TH1D*)fIn->Get(Form("hQnAQnBcorrected%02i", i+1));
     }
 
-    double w = hSqrtSumWeights->GetMean();
-    double wError = hSqrtSumWeights->GetMeanError();
-    double wCorrected = hSqrtSumWeightsNonuni->GetMean();
-    double wCorrectedError = hSqrtSumWeightsNonuni->GetMeanError();
+    double w = hSqrtSumWeightsTPC->GetMean();
+    double wError = hSqrtSumWeightsTPC->GetMeanError();
+    double wCorrected = hSqrtSumWeightsTPCNonuni->GetMean();
+    double wCorrectedError = hSqrtSumWeightsTPCNonuni->GetMeanError();
 
     double vnEPalt[nCoef], errorVnEPalt[nCoef] = {0};
     double vnEPCorrectedAlt[nCoef], errorVnEPCorrectedAlt[nCoef] = {0};

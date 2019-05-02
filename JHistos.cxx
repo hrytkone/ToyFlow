@@ -27,19 +27,23 @@ JHistos::JHistos(){
     hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, -pi, pi);
     hPhiNonuni->Sumw2();
 
-    hSqrtSumWeights = new TH1D("hSqrtSumWeights","sqrt of sum of weights squares", 240, 0.0, 60.0);
-    hSqrtSumWeights->Sumw2();
-    hSqrtSumWeightsA = new TH1D("hSqrtSumWeightsA","sqrt of sum of weights squares in subevent A", 240, 0.0, 60.0);
-    hSqrtSumWeightsA->Sumw2();
-    hSqrtSumWeightsB = new TH1D("hSqrtSumWeightsB","sqrt of sum of weights squares in subevent B", 240, 0.0, 60.0);
-    hSqrtSumWeightsB->Sumw2();
+    hSqrtSumWeightsTPC = new TH1D("hSqrtSumWeightsTPC","sqrt of sum of weights squares - TPC", 240, 0.0, 60.0);
+    hSqrtSumWeightsTPC->Sumw2();
+    hSqrtSumWeightsTPCA = new TH1D("hSqrtSumWeightsTPCA","sqrt of sum of weights squares - TPC-A", 240, 0.0, 60.0);
+    hSqrtSumWeightsTPCA->Sumw2();
+    hSqrtSumWeightsTPCC = new TH1D("hSqrtSumWeightsTPCC","sqrt of sum of weights squares - TPC-C", 240, 0.0, 60.0);
+    hSqrtSumWeightsTPCC->Sumw2();
+    hSqrtSumWeightsV0P = new TH1D("hSqrtSumWeightsV0P","sqrt of sum of weights squares - V0+", 240, 0.0, 60.0);
+    hSqrtSumWeightsV0P->Sumw2();
 
-    hSqrtSumWeightsNonuni = new TH1D("hSqrtSumWeightsNonuni","sqrt of sum of weights squares", 240, 0.0, 60.0);
-    hSqrtSumWeightsNonuni->Sumw2();
-    hSqrtSumWeightsANonuni = new TH1D("hSqrtSumWeightsANonuni","sqrt of sum of weights squares in subevent A", 240, 0.0, 60.0);
-    hSqrtSumWeightsANonuni->Sumw2();
-    hSqrtSumWeightsBNonuni = new TH1D("hSqrtSumWeightsBNonuni","sqrt of sum of weights squares in subevent B", 240, 0.0, 60.0);
-    hSqrtSumWeightsBNonuni->Sumw2();
+    hSqrtSumWeightsTPCNonuni = new TH1D("hSqrtSumWeightsTPCNonuni","sqrt of sum of weights squares - nonuni TPC", 240, 0.0, 60.0);
+    hSqrtSumWeightsTPCNonuni->Sumw2();
+    hSqrtSumWeightsTPCANonuni = new TH1D("hSqrtSumWeightsTPCANonuni","sqrt of sum of weights squares - nonuni TPC-A", 240, 0.0, 60.0);
+    hSqrtSumWeightsTPCANonuni->Sumw2();
+    hSqrtSumWeightsTPCCNonuni = new TH1D("hSqrtSumWeightsTPCCNonuni","sqrt of sum of weights squares - nonuni TPC-C", 240, 0.0, 60.0);
+    hSqrtSumWeightsTPCCNonuni->Sumw2();
+    hSqrtSumWeightsV0PNonuni = new TH1D("hSqrtSumWeightsV0PNonuni","sqrt of sum of weights squares - nonuni V0P", 240, 0.0, 60.0);
+    hSqrtSumWeightsV0PNonuni->Sumw2();
 
     for (i=0; i<5; i++){
 

@@ -7,6 +7,7 @@
 #include <TGraph.h>
 #include <TH1D.h>
 #include <TFile.h>
+#include <TRandom3.h>
 
 using namespace std;
 
@@ -41,9 +42,11 @@ public:
 
     void Load();
     int GetMultiplicity(int detId, double centrality) { return gNch[detId]->Eval(centrality); }
+    double GetEta(int detId);
 
     TFile *fOut;
     TGraph *gNch[DET_N];
+    TRandom3 *rand;
 };
 
 #endif

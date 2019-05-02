@@ -1,6 +1,9 @@
 #include "JInputs.h"
 
 JInputs::JInputs() {
+    rand = new TRandom3(0);
+    rand->SetSeed(0);
+
     for (int i=0; i<DET_N; i++)
         gNch[i] = new TGraph(CENTBINS_N-1);
 }
@@ -21,4 +24,8 @@ void JInputs::Load() {
         }
     }
     fOut->Close();
+}
+
+double JInputs::GetEta(int detId) {
+    return rand->Uniform(cov[detId][0], cov[detId][1]);
 }

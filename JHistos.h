@@ -17,17 +17,19 @@ public:
     TH1D *hPhi;
     TH1D *hCentrality;
 
-    TH1D *hSqrtSumWeights;
-    TH1D *hSqrtSumWeightsA;
-    TH1D *hSqrtSumWeightsB;
+    TH1D *hSqrtSumWeightsTPC;
+    TH1D *hSqrtSumWeightsTPCA;
+    TH1D *hSqrtSumWeightsTPCC;
+    TH1D *hSqrtSumWeightsV0P;
 
     TH1D *hPtNonuni;
     TH1D *hMultiplicityNonuni;
     TH1D *hPhiNonuni;
 
-    TH1D *hSqrtSumWeightsNonuni;
-    TH1D *hSqrtSumWeightsANonuni;
-    TH1D *hSqrtSumWeightsBNonuni;
+    TH1D *hSqrtSumWeightsTPCNonuni;
+    TH1D *hSqrtSumWeightsTPCANonuni;
+    TH1D *hSqrtSumWeightsTPCCNonuni;
+    TH1D *hSqrtSumWeightsV0PNonuni;
 
     // Historgrams for calculating vn values
     TH1D *hRtrue[5];
