@@ -6,7 +6,6 @@ JHistos::JHistos(){
     int i;
     double pi = TMath::Pi();
 
-    // pT -histograms, taken from JCORRAN version on 11th February 2013
     int NBINS = 150;
     double LogBinsX[NBINS+1], LimL=0.1, LimH=100;
     double logBW = (TMath::Log(LimH)-TMath::Log(LimL))/NBINS;
@@ -15,17 +14,21 @@ JHistos::JHistos(){
 
 	hPt = new TH1D("hPt","pT - inclusive", NBINS, LogBinsX);
     hPt->Sumw2();
-    hMultiplicity = new TH1D("hMultiplicity","Multiplicity - uniform", 125, 0.0, 2501.);
-    hMultiplicity->Sumw2();
     hPhi = new TH1D("hPhi", "phi - uniform", 129, -pi, pi);
     hPhi->Sumw2();
     hCentrality = new TH1D("hCentrality", "centrality", 8, 0.0, 70.0);
     hCentrality->Sumw2();
+    hEta = new TH1D("hEta", "pseudorapidity", 401, -0.8, 0.8);
 
-    hMultiplicityNonuni = new TH1D("hMultiplicityNonuni","Multiplicity - nonuniform", 125, 0.0, 2501.);
-    hMultiplicityNonuni->Sumw2();
     hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, -pi, pi);
     hPhiNonuni->Sumw2();
+
+    for (i=0; i<DET_N; i++) {
+        hMultiplicity[i] = new TH1D(Form("hMultiplicity_Det%02i",i+1),Form("Multiplicity detector %02i - uniform",i+1), 125, 0.0, 2501.);
+        hMultiplicity[i]->Sumw2();
+        hMultiplicityNonuni[i] = new TH1D(Form("hMultiplicityNonuni_Det%02i",i+1),Form("Multiplicity detector %02i - non-uniform",i+1), 125, 0.0, 2501.);
+        hMultiplicityNonuni[i]->Sumw2();
+    }
 
     hSqrtSumWeightsTPC = new TH1D("hSqrtSumWeightsTPC","sqrt of sum of weights squares - TPC", 240, 0.0, 60.0);
     hSqrtSumWeightsTPC->Sumw2();

@@ -2,21 +2,20 @@
 #include <TFile.h>
 
 #include "ResIter.h"
+#include "JConst.h"
 
 double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
 
-//void MakeGraphs(TString sInputName = "test.root", TString sOutputName = "toyFlowGraphs.root") {
-void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "events-10000_dneta-1000.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "events-15000_dneta-1000_pt-depend.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "events-100_dneta-1000_pt-depend_pt-weight.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "n100000-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "n100000.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "n1000-ptDepend.root", TString sOutputName = "toyFlowGraphs.root") {
 
     TFile *fIn = TFile::Open(sInputName, "read");
     TFile *fOut = TFile::Open(sOutputName, "recreate");
 
-    const int nCoef = 5;
     int nPtBins = 9;
 
     int i, n;
@@ -25,14 +24,7 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
 
     TH1D *hInputNumbers = (TH1D*)fIn->Get("hInputNumbers");
     double nEvents = hInputNumbers->GetBinContent(1);
-    double dNdeta = hInputNumbers->GetBinContent(2);
-    double etaRange = hInputNumbers->GetBinContent(3);
-    double nMult = hInputNumbers->GetBinContent(4);
-    for(int i = 0; i < nCoef; i++) inputFlow[i] = hInputNumbers->GetBinContent(5+i);
-    double Tdec = hInputNumbers->GetBinContent(10);
-    double vr = hInputNumbers->GetBinContent(11);
-    double Teff = hInputNumbers->GetBinContent(12);
-    double slope = hInputNumbers->GetBinContent(13);
+    for(int i = 0; i < nCoef; i++) inputFlow[i] = hInputNumbers->GetBinContent(2+i);
 
     TH1D *hSqrtSumWeightsTPC = (TH1D*)fIn->Get("hSqrtSumWeightsTPC");
     TH1D *hSqrtSumWeightsTPCA = (TH1D*)fIn->Get("hSqrtSumWeightsTPCA");
@@ -47,9 +39,10 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TH1D *hInputFlow = new TH1D("hInputFlow", "hInputFlow", nCoef, 0.5, double(nCoef)+0.5);
     hInputFlow->SetLineStyle(1);
     hInputFlow->SetLineColor(1);
-    hInputFlow->SetLineWidth(2);
+    hInputFlow->SetLineWidth(1);
     for(int i = 0; i < nCoef; i++)
         hInputFlow->Fill(double(i+1), inputFlow[i]);
+    hInputFlow->Fill(double(nCoef+1), 0.0);
 
     TH1D *hPhi = (TH1D*)fIn->Get("hPhi");
     TH1D *hPhiNonuni = (TH1D*)fIn->Get("hPhiNonuni");
@@ -87,6 +80,7 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     double R[nCoef], errorR[nCoef] = {0};
     double RCorrected[nCoef], errorRCorrected[nCoef] = {0};
 
+    cout << "Uniform:\n";
     for (i = 0; i < nCoef; i++) {
         n = i+1;
         vnEP[i] = hVnObs[i]->GetMean();
@@ -97,6 +91,8 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         R[i] = Rk(TMath::Sqrt(2)*khi, n);
         errorR[i] = CalculateRerror(khi, err, n);
 
+        cout << "R=" << R[i] << "  err=" << errorR[i] << "\n";
+
         vnEP[i] /= R[i];
         errorVnEP[i] = GetVnError(hVnObs[i]->GetMean(), hVnObs[i]->GetMeanError(), R[i], errorR[i]);
 
@@ -104,6 +100,7 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         errorVnEPtrue[i] = GetVnError(hVnObs[i]->GetMean(), hVnObs[i]->GetMeanError(), hRtrue[i]->GetMean(), hRtrue[i]->GetMeanError());
     }
 
+    cout << "\nNon-uniform:\n";
     for (i=0; i<nCoef; i++) {
         n = i+1;
         vnEPCorrected[i] = hVnObsCorrected[i]->GetMean();
@@ -114,7 +111,10 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         RCorrected[i] = Rk(TMath::Sqrt(2)*khi, n);
         errorRCorrected[i] = CalculateRerror(khi, err, n);
 
+        cout << "R=" << RCorrected[i] << "  err=" << errorRCorrected[i] << "\n";
+
         vnEPCorrected[i] /= RCorrected[i];
+        if (RCorrected[i]==0) vnEPCorrected[i] = 0.0;
         errorVnEPCorrected[i] = GetVnError(hVnObsCorrected[i]->GetMean(), hVnObsCorrected[i]->GetMeanError(), RCorrected[i], errorRCorrected[i]);
 
         vnEPCorrectedTrue[i] /=hRtrueCorrected[i]->GetMean();
@@ -133,18 +133,19 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         hQnAQnBcorrected[i] = (TH1D*)fIn->Get(Form("hQnAQnBcorrected%02i", i+1));
     }
 
-    double w = hSqrtSumWeightsTPC->GetMean();
-    double wError = hSqrtSumWeightsTPC->GetMeanError();
-    double wCorrected = hSqrtSumWeightsTPCNonuni->GetMean();
-    double wCorrectedError = hSqrtSumWeightsTPCNonuni->GetMeanError();
+    double w = hSqrtSumWeightsV0P->GetMean();
+    double wError = hSqrtSumWeightsV0P->GetMeanError();
+    double wCorrected = hSqrtSumWeightsV0PNonuni->GetMean();
+    double wCorrectedError = hSqrtSumWeightsV0PNonuni->GetMeanError();
 
     double vnEPalt[nCoef], errorVnEPalt[nCoef] = {0};
     double vnEPCorrectedAlt[nCoef], errorVnEPCorrectedAlt[nCoef] = {0};
     for (i=0; i<nCoef; i++) {
         vnEPalt[i] = CalculateVn(hQnQnA[i]->GetMean(), hQnAQnB[i]->GetMean(), w);
         errorVnEPalt[i] = CalculateVnError(hQnQnA[i]->GetMean(), hQnAQnB[i]->GetMean(), hQnQnA[i]->GetMeanError(), hQnAQnB[i]->GetMeanError(),  w, wError);
+
         vnEPCorrectedAlt[i] = CalculateVn(hQnQnAcorrected[i]->GetMean(), hQnAQnBcorrected[i]->GetMean(), wCorrected);
-        errorVnEPalt[i] = CalculateVnError(hQnQnAcorrected[i]->GetMean(), hQnAQnBcorrected[i]->GetMean(), hQnQnAcorrected[i]->GetMeanError(), hQnAQnBcorrected[i]->GetMeanError(),  wCorrected, wCorrectedError);
+        errorVnEPCorrectedAlt[i] = CalculateVnError(hQnQnAcorrected[i]->GetMean(), hQnAQnBcorrected[i]->GetMean(), hQnQnAcorrected[i]->GetMeanError(), hQnAQnBcorrected[i]->GetMeanError(),  wCorrected, wCorrectedError);
     }
 
     // pT bins
@@ -177,27 +178,27 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TGraphErrors *gVnAltCorrected = new TGraphErrors(nCoef);
 
     for(i = 0; i < nCoef; i++){
-        gVnEP->SetPoint(i, double(i+1)-0.1, vnEP[i]);
-        gVnEP->SetPointError(i, 0.0, errorVnEP[i]);
-        gVnEPCorrected->SetPoint(i, double(i+1)+0.1, vnEPCorrected[i]);
-        gVnEPCorrected->SetPointError(i, 0.0, errorVnEPCorrected[i]);
-        gVnEPtrue->SetPoint(i, double(i+1), vnEPtrue[i]);
+        gVnEPtrue->SetPoint(i, double(i+1)-0.25, vnEPtrue[i]);
         gVnEPtrue->SetPointError(i, 0.0, errorVnEPtrue[i]);
-        gVnEPCorrectedTrue->SetPoint(i, double(i+1)+0.2, vnEPCorrectedTrue[i]);
+        gVnEPCorrectedTrue->SetPoint(i, double(i+1)-0.15, vnEPCorrectedTrue[i]);
         gVnEPCorrectedTrue->SetPointError(i, 0.0, errorvnEPCorrectedTrue[i]);
-        gRtrue->SetPoint(i, double(i+1)-0.1, hRtrue[i]->GetMean());
-        gRtrue->SetPointError(i, 0.0, hRtrue[i]->GetMeanError());
-        gRtrueCorrected->SetPoint(i, double(i+1)-0.2, hRtrueCorrected[i]->GetMean());
-        gRtrueCorrected->SetPointError(i, 0.0, hRtrueCorrected[i]->GetMeanError());
-        gR->SetPoint(i, double(i+1), R[i]);
-        gR->SetPointError(i, 0.0, errorR[i]);
-        gRcorrected->SetPoint(i, double(i+1)+0.1, RCorrected[i]);
-        gRcorrected->SetPointError(i, 0.0, errorRCorrected[i]);
-
-        gVnAlt->SetPoint(i, double(i+1)-0.2, vnEPalt[i]);
+        gVnEP->SetPoint(i, double(i+1)-0.05, vnEP[i]);
+        gVnEP->SetPointError(i, 0.0, errorVnEP[i]);
+        gVnEPCorrected->SetPoint(i, double(i+1)+0.05, vnEPCorrected[i]);
+        gVnEPCorrected->SetPointError(i, 0.0, errorVnEPCorrected[i]);
+        gVnAlt->SetPoint(i, double(i+1)+0.15, vnEPalt[i]);
         gVnAlt->SetPointError(i, 0.0, errorVnEPalt[i]);
-        gVnAltCorrected->SetPoint(i, double(i+1)-0.3, vnEPCorrectedAlt[i]);
+        gVnAltCorrected->SetPoint(i, double(i+1)+0.25, vnEPCorrectedAlt[i]);
         gVnAltCorrected->SetPointError(i, 0.0, errorVnEPCorrectedAlt[i]);
+
+        gRtrue->SetPoint(i, double(i+1)-0.15, hRtrue[i]->GetMean());
+        gRtrue->SetPointError(i, 0.0, hRtrue[i]->GetMeanError());
+        gRtrueCorrected->SetPoint(i, double(i+1)-0.05, hRtrueCorrected[i]->GetMean());
+        gRtrueCorrected->SetPointError(i, 0.0, hRtrueCorrected[i]->GetMeanError());
+        gR->SetPoint(i, double(i+1)+0.05, R[i]);
+        gR->SetPointError(i, 0.0, errorR[i]);
+        gRcorrected->SetPoint(i, double(i+1)+0.15, RCorrected[i]);
+        gRcorrected->SetPointError(i, 0.0, errorRCorrected[i]);
     }
 
     double point = 0.0;

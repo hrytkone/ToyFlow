@@ -93,7 +93,7 @@ namespace ROOT {
       ::JHistos *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::JHistos));
       static ::ROOT::TGenericClassInfo 
-         instance("JHistos", "JHistos.h", 9,
+         instance("JHistos", "JHistos.h", 11,
                   typeid(::JHistos), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &JHistos_Dictionary, isa_proxy, 0,
                   sizeof(::JHistos) );

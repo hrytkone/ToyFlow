@@ -2,7 +2,6 @@
 #include <TFile.h>
 
 const int nsets = 1;
-const int nCoef = 5;
 
 TString fileNames[nsets] = {"toyFlowGraphs.root"};
 

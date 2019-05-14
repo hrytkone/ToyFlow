@@ -30,11 +30,8 @@ double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
 // TESTING
-void GetEventTest(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
-void AnalyzeEventTest(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
-
-//void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
-//void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *listSubB, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
+void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
 
 double AcceptanceFunc(double *x, double *p);
 double AcceptanceFuncTimesSin(double *x, double *p);
@@ -58,18 +55,14 @@ int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     int nEvents = argc > 2 ? atol(argv[2]):1000;
-    const double dNdeta = argc > 3 ? atof(argv[3]):1500.0;
-    const double etaRange = 0.8;
-    const int nMult = int(2. * etaRange * dNdeta);
-    cout << "dNdeta=" << dNdeta << "     total multiplicity=" << nMult << endl;
+    bool bUsePtDependence = argc > 3 ? atol(argv[3]):0;
+    bool bUseGranularity = argc > 4 ? atol(argv[4]):0;
+
+    bool bUseWeight = false;
+    bool bRandomPsi = true;
 
     const double scale = 1.0;
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
-
-    bool bRandomPsi = true;
-    bool bUsePtDependence = false;
-    bool bUseWeight = false;
-    bool bUseGranularity = false;
 
     int i, j; // indices for loops
 
@@ -96,13 +89,6 @@ int main(int argc, char **argv) {
     fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4], Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
     TF1 *fVnDist = new TF1("fVnDist", VnDist, 0.0, 10.0, 3);
-
-    TClonesArray *listUniFull = new TClonesArray("JToyMCTrack", nMult+1);
-    TClonesArray *listUniA = new TClonesArray("JToyMCTrack", nMult+1);
-    TClonesArray *listUniB = new TClonesArray("JToyMCTrack", nMult+1);
-    TClonesArray *listNonuniFull = new TClonesArray("JToyMCTrack", nMult+1);
-    TClonesArray *listNonuniA = new TClonesArray("JToyMCTrack", nMult+1);
-    TClonesArray *listNonuniB = new TClonesArray("JToyMCTrack", nMult+1);
 
     // CORRECTIONS
     double phiMin = 1.12;
@@ -132,23 +118,20 @@ int main(int argc, char **argv) {
     }
 
     // Save input numbers
-    TH1D *hInputNumbers = new TH1D("hInputNumbers","hInputNumbers",16, 0.5, 16.5);
+    TH1D *hInputNumbers = new TH1D("hInputNumbers","hInputNumbers",13, 0.5, 13.5);
     hInputNumbers->Fill(1, double(nEvents));
-    hInputNumbers->Fill(2, double(dNdeta));
-    hInputNumbers->Fill(3, etaRange);
-    hInputNumbers->Fill(4, double(nMult));
-    hInputNumbers->Fill(5, vn[0]);
-    hInputNumbers->Fill(6, vn[1]);
-    hInputNumbers->Fill(7, vn[2]);
-    hInputNumbers->Fill(8, vn[3]);
-    hInputNumbers->Fill(9, vn[4]);
-    hInputNumbers->Fill(10, Tdec);
-    hInputNumbers->Fill(11, vr);
-    hInputNumbers->Fill(12, Teff);
-    hInputNumbers->Fill(13, 1./Teff);
-    hInputNumbers->Fill(14, phiMin);
-    hInputNumbers->Fill(15, phiMax);
-    hInputNumbers->Fill(16, percentage);
+    hInputNumbers->Fill(2, vn[0]);
+    hInputNumbers->Fill(3, vn[1]);
+    hInputNumbers->Fill(4, vn[2]);
+    hInputNumbers->Fill(5, vn[3]);
+    hInputNumbers->Fill(6, vn[4]);
+    hInputNumbers->Fill(7, Tdec);
+    hInputNumbers->Fill(8, vr);
+    hInputNumbers->Fill(9, Teff);
+    hInputNumbers->Fill(10, 1./Teff);
+    hInputNumbers->Fill(11, phiMin);
+    hInputNumbers->Fill(12, phiMax);
+    hInputNumbers->Fill(13, percentage);
     fOut->cd();
     hInputNumbers->Write("hInputNumbers");
 
@@ -158,15 +141,6 @@ int main(int argc, char **argv) {
         if (i % nOutput == 0)
             cout << 100*i/nEvents << " % finished" << endl;
 
-        // Good to use argument "C" in case of pointers
-        listUniFull->Clear("C");
-        listUniA->Clear("C");
-        listUniB->Clear("C");
-        listNonuniFull->Clear("C");
-        listNonuniA->Clear("C");
-        listNonuniB->Clear("C");
-
-        // TESTING
         lists->ClearLists();
 
         if (bRandomPsi) {
@@ -183,13 +157,9 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEventTest(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, nMult, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI);
-        AnalyzeEventTest(lists, histos, Psi, bUseWeight, 0, corrections);
-        AnalyzeEventTest(lists, histos, Psi, bUseWeight, 1, corrections);
-
-        /**GetEvent(listUniFull, listUniA, listUniB, listNonuniFull, listNonuniA, listNonuniB, histos, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, nMult, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI);
-        AnalyzeEvent(listUniFull, listUniA, listUniB, histos, Psi, bUseWeight, false, corrections);
-        AnalyzeEvent(listNonuniFull, listNonuniA, listNonuniB, histos, Psi, bUseWeight, true, corrections);**/
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI);
+        AnalyzeEvent(lists, histos, Psi, bUseWeight, 0, corrections);
+        AnalyzeEvent(lists, histos, Psi, bUseWeight, 1, corrections);
 
     }
 
@@ -200,19 +170,23 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEventTest(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle) {
-    double pT, phi, eta, E;
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle) {
+    double pT, phi, eta, Energy;
     double px, py, pz;
     double centrality, randNum;
     double vnTemp[nCoef];
+
+    double nMult, nMultNonuni;
+    double alpha = 2.0, beta = 1.0;
 
     JToyMCTrack track;
     TLorentzVector lVec;
     TClonesArray *tempList;
 
-    int i, j, nMultNonuni;
+    int i, j, k;
     for (i=0; i<DET_N; i++) {
 
+        nMult = 0;
         nMultNonuni = 0;
 
         centrality = rand->Uniform(0.0, 70.0);
@@ -228,9 +202,9 @@ void GetEventTest(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3
             eta = inputs->GetEta(i);
             pT = fPt->GetRandom();
             if (bUsePtDependence) {
-                for (j=0; j<nCoef; j++) {
-                    fVnDist->SetParameters(alpha, beta, vn[j]);
-                    vnTemp[j] = fVnDist->Eval(pT);
+                for (k=0; k<nCoef; k++) {
+                    fVnDist->SetParameters(alpha, beta, vn[k]);
+                    vnTemp[k] = fVnDist->Eval(pT);
                 }
                 fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
                     Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
@@ -244,12 +218,13 @@ void GetEventTest(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3
 
             histos->hPt->Fill(pT);
             histos->hPhi->Fill(phi);
+            histos->hEta->Fill(eta);
 
             px = pT*TMath::Cos(phi);
             py = pT*TMath::Sin(phi);
             pz = pT*TMath::SinH(eta);
-            E = TMath::Sqrt(pT*pT + pz*pz);
-            lVec.SetPxPyPzE(px, py, pz, E);
+            Energy = TMath::Sqrt(pT*pT + pz*pz);
+            lVec.SetPxPyPzE(px, py, pz, Energy);
             track.SetTrack(lVec);
 
             tempList = lists->GetList(i, 0);
@@ -275,29 +250,29 @@ void GetEventTest(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3
                 }
             }
 
-            histos->hMultiplicity->Fill(nMult);
-            histos->hMultiplicityNonuni->Fill(nMultNonuni);
+            histos->hMultiplicity[i]->Fill(nMult);
+            histos->hMultiplicityNonuni[i]->Fill(nMultNonuni);
         }
     }
 }
 
-void AnalyzeEventTest(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
+void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
 
     int nMultTPC, nMultTPCA, nMultTPCC, nMultV0P;
 
-    if (!bDoCorrections) {
-        nMultTPC = lists->TPClist->GetEntriesFast();
-        nMultTPCA = lists->TPCAlist->GetEntriesFast();
-        nMultTPCC = lists->TPCClist->GetEntriesFast();
-        nMultV0P = lists->V0Plist->GetEntriesFast();
-    } else {
+    if (bDoCorrections) {
         nMultTPC = lists->TPClistNonuni->GetEntriesFast();
         nMultTPCA = lists->TPCAlistNonuni->GetEntriesFast();
         nMultTPCC = lists->TPCClistNonuni->GetEntriesFast();
         nMultV0P = lists->V0PlistNonuni->GetEntriesFast();
+    } else {
+        nMultTPC = lists->TPClist->GetEntriesFast();
+        nMultTPCA = lists->TPCAlist->GetEntriesFast();
+        nMultTPCC = lists->TPCClist->GetEntriesFast();
+        nMultV0P = lists->V0Plist->GetEntriesFast();
     }
 
-    int i, j, k, n;
+    int i, j, k, n, jMax;
     double w = 1.0;
     double phi, pt;
     double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
@@ -342,12 +317,16 @@ void AnalyzeEventTest(JEventLists *lists, JHistos *histos, double *Psi, bool bUs
             CalculateQvector(track, unitVec, QvecTPC, normTPC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
         }
 
-        for (j=0; j<nMultTPCA; j++) {
-            track = (JToyMCTrack*)lists->TPCAlist->At(j);
-            CalculateQvector(track, unitVec, QvecTPCA, normTPCA, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+        if (nMultTPCA<nMultTPCC) {
+            jMax = nMultTPCA;
+        } else {
+            jMax = nMultTPCC;
         }
 
-        for (j=0; j<nMultTPCC; j++) {
+        for (j=0; j<jMax; j++) {
+            track = (JToyMCTrack*)lists->TPCAlist->At(j);
+            CalculateQvector(track, unitVec, QvecTPCA, normTPCA, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+
             track = (JToyMCTrack*)lists->TPCClist->At(j);
             CalculateQvector(track, unitVec, QvecTPCC, normTPCC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
         }
@@ -464,287 +443,6 @@ void AnalyzeEventTest(JEventLists *lists, JHistos *histos, double *Psi, bool bUs
         histos->hSqrtSumWeightsV0P->Fill(normV0P);
     }
 }
-
-/**void GetEvent(TClonesArray *listUni, TClonesArray *listUniA, TClonesArray *listUniB, TClonesArray *listNonuni, TClonesArray *listNonuniA, TClonesArray *listNonuniB, JHistos *histos, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, int nMult, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle) {
-
-    double pT, phi, eta, E;
-    double px, py, pz;
-    int nNonuniFull = 0;
-    int nUniA = 0;
-    int nUniB = 0;
-    int nNonuniA = 0;
-    int nNonuniB = 0;
-
-    JToyMCTrack track;
-    TLorentzVector lVec;
-
-    double randNum;
-    double vnTemp[nCoef];
-    int i, j;
-    for (i = 0; i < nMult; i++) {
-
-        pT = fPt->GetRandom();
-        if (bUsePtDependence) {
-            for (j=0; j<nCoef; j++) {
-                fVnDist->SetParameters(alpha, beta, vn[j]);
-                vnTemp[j] = fVnDist->Eval(pT);
-            }
-            fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
-                Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
-        }
-
-        phi = fPhi->GetRandom();
-        eta = rand->Uniform(-0.8, 0.8);
-
-        if (bUseGranularity)
-            phi = CheckPhi(phi, startAngle);
-
-        histos->hPt->Fill(pT);
-        histos->hPhi->Fill(phi);
-
-        px = pT*TMath::Cos(phi);
-        py = pT*TMath::Sin(phi);
-        pz = pT*TMath::SinH(eta);
-        E = TMath::Sqrt(pT*pT + pz*pz);
-        lVec.SetPxPyPzE(px, py, pz, E);
-        track.SetTrack(lVec);
-
-        new((*listUni)[i]) JToyMCTrack(track);
-        if (i%2 == 0) {
-            new((*listUniA)[nUniA]) JToyMCTrack(track);
-            nUniA++;
-        } else {
-            new((*listUniB)[nUniB]) JToyMCTrack(track);
-            nUniB++;
-        }
-
-        if (phi < phiMin || phi > phiMax) {
-
-            histos->hPhiNonuni->Fill(phi);
-
-            new((*listNonuni)[nNonuniFull]) JToyMCTrack(track);
-            nNonuniFull++;
-            if ( nNonuniA<nNonuniB ) {
-                new((*listNonuniA)[nNonuniA]) JToyMCTrack(track);
-                nNonuniA++;
-            } else {
-                new((*listNonuniB)[nNonuniB]) JToyMCTrack(track);
-                nNonuniB++;
-            }
-
-        } else {
-            randNum = rand->Rndm();
-            if ( randNum > percentage ) {
-
-                histos->hPhiNonuni->Fill(phi);
-
-                new((*listNonuni)[nNonuniFull]) JToyMCTrack(track);
-                nNonuniFull++;
-                if ( nNonuniA<nNonuniB ) {
-                    new((*listNonuniA)[nNonuniA]) JToyMCTrack(track);
-                    nNonuniA++;
-                } else {
-                    new((*listNonuniB)[nNonuniB]) JToyMCTrack(track);
-                    nNonuniB++;
-                }
-
-            }
-        }
-
-        histos->hMultiplicity->Fill(nMult);
-        histos->hMultiplicityNonuni->Fill(nNonuniFull);
-    }
-}**/
-
-/**void AnalyzeEvent(TClonesArray *listFull, TClonesArray *listSubA, TClonesArray *listSubB, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
-
-    int nMult = listFull->GetEntriesFast();
-    int nMultA = listSubA->GetEntriesFast();
-    int nMultB = listSubB->GetEntriesFast();
-
-    int i, j, k, n;
-    double w = 1.0;
-    double phi, pt;
-    double Rtrue;
-
-    TComplex Qvec = TComplex(0, 0);
-    TComplex QsubA = TComplex(0, 0);
-    TComplex QsubB = TComplex(0, 0);
-    TComplex unitVec = TComplex(0, 0);
-    TComplex autocorr = TComplex(0, 0);
-
-    double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
-    double EventPlaneA, EventPlaneB, Rsub, vobs;
-
-    double norm, normA, normB;
-
-    double QnQnA, QnAQnB;
-
-    vector<vector<TComplex>> pTBinsQ;
-    pTBinsQ.resize(PTBINS_N);
-
-    JToyMCTrack *track;
-
-    for (i=0; i<nCoef; i++) {
-
-        n = i+1;
-
-        cm = corrections[i][0];
-        sm = corrections[i][1];
-        aMinus = corrections[i][4];
-        aPlus = corrections[i][5];
-        lambdaMinus = corrections[i][6];
-        lambdaPlus = corrections[i][7];
-
-        Qvec = TComplex(0, 0);
-        QsubA = TComplex(0, 0);
-        QsubB = TComplex(0, 0);
-
-        vobs = 0.0;
-
-        norm = 0.0; normA = 0.0; normB = 0.0;
-
-        // Construct Q-vectors for full event and subevents
-        for (j=0; j<nMult; j++) {
-
-            track = (JToyMCTrack*)listFull->At(j);
-            phi = track->GetPhi();
-
-            if (bUseWeight) w = track->GetPt();
-            norm += w*w;
-
-            unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
-            if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-            Qvec += unitVec;
-
-            if ( j<nMultA ) {
-                track = (JToyMCTrack*)listSubA->At(j);
-                phi = track->GetPhi();
-
-                if (bUseWeight) w = track->GetPt();
-                normA += w*w;
-
-                unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
-                if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-                QsubA += unitVec;
-            }
-
-            if ( j<nMultB ) {
-                track = (JToyMCTrack*)listSubB->At(j);
-                phi = track->GetPhi();
-
-                if (bUseWeight) w = track->GetPt();
-                normB += w*w;
-
-                unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
-                if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-                QsubB += unitVec;
-            }
-        }
-
-        for (j=0; j<nMult; j++) {
-
-            track = (JToyMCTrack*)listFull->At(j);
-            phi = track->GetPhi();
-
-            autocorr = TComplex(TMath::Cos(n*phi), TMath::Sin(n*phi));
-
-            Qvec -= autocorr;
-            vobs += GetVnObs(Qvec, phi, n);
-            Qvec += autocorr;
-        }
-
-        vobs /= nMult;
-
-        // Resolution parameter calculations
-        Rtrue = TMath::Cos(n*(GetEventPlane(Qvec, n) - Psi[i]));
-
-        EventPlaneA = GetEventPlane(QsubA, n);
-        EventPlaneB = GetEventPlane(QsubB, n);
-        Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
-
-        // ALTERNATIVE EVENT PLANE METHOD
-        norm = TMath::Sqrt(norm);
-        normA = TMath::Sqrt(normA);
-        normB = TMath::Sqrt(normB);
-
-        Qvec /= norm; QsubA /= normA; QsubB /= normB;
-
-        QnQnA = Qvec*TComplex::Conjugate(QsubA);
-        QnQnA /= TComplex::Abs(QsubA);
-
-        QnAQnB = QsubA*TComplex::Conjugate(QsubB);
-        QnAQnB /= TComplex::Abs(QsubA);
-        QnAQnB /= TComplex::Abs(QsubB);
-
-        if (bDoCorrections) {
-            histos->hVnObsCorrected[i]->Fill(vobs);
-            histos->hRtrueCorrected[i]->Fill(Rtrue);
-            histos->hRsubCorrected[i]->Fill(Rsub);
-            histos->hQnQnAcorrected[i]->Fill(QnQnA);
-            histos->hQnAQnBcorrected[i]->Fill(QnAQnB);
-        } else {
-            histos->hVnObs[i]->Fill(vobs);
-            histos->hRtrue[i]->Fill(Rtrue);
-            histos->hRsub[i]->Fill(Rsub);
-            histos->hQnQnA[i]->Fill(QnQnA);
-            histos->hQnAQnB[i]->Fill(QnAQnB);
-        }
-
-        // Divide into pT-bins
-        if (n==2 && !bDoCorrections) {
-            double weight = 0.0;
-            double norms[PTBINS_N];
-            for (j=0; j<PTBINS_N; j++) norms[j] = 0;
-
-            for (j=0; j<nMult; j++) {
-
-                track = (JToyMCTrack*)listFull->At(j);
-                phi = track->GetPhi();
-                pt = track->GetPt();
-
-                if (bUseWeight) w = pt;
-
-                unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
-
-                for (k=0; k<PTBINS_N; k++) {
-                    if ((pTBins[k] <= pt) && (pTBins[k+1] > pt)) {
-                        pTBinsQ[k].push_back(unitVec);
-                        norms[k] += w*w;
-                    }
-                }
-            }
-
-            double l;
-            for (j=0; j<PTBINS_N; j++) {
-                Qvec = TComplex(0, 0);
-                l = pTBinsQ[j].size();
-                for (k=0; k<l; k++) {
-                    Qvec += pTBinsQ[j][k];
-                }
-                weight = TMath::Sqrt(norms[j]);
-                if (weight!=0) Qvec /= weight;
-                histos->hV2ComplexPart->Fill(Qvec.Im()*QsubA.Im());
-                QnQnA = Qvec*TComplex::Conjugate(QsubA);
-                QnQnA /= TComplex::Abs(QsubA);
-                histos->hPtBin[j]->Fill(QnQnA);
-                histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
-                pTBinsQ[j].clear();
-            }
-
-        }
-    }
-
-    if (bDoCorrections) {
-        histos->hSqrtSumWeightsNonuni->Fill(norm);
-        histos->hSqrtSumWeightsANonuni->Fill(normA);
-        histos->hSqrtSumWeightsBNonuni->Fill(normB);
-    } else {
-        histos->hSqrtSumWeights->Fill(norm);
-        histos->hSqrtSumWeightsA->Fill(normA);
-        histos->hSqrtSumWeightsB->Fill(normB);
-    }
-}**/
 
 double PtDist(double *x, double *p) {
     return TMath::Exp(-p[0]*x[0]);

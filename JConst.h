@@ -6,8 +6,6 @@
 const int nCoef = 5;
 
 // for pT-dependence
-const double alpha = 2.0;
-const double beta = 1.0;
 const double Tdec = 0.12;
 const double vr = 0.6;
 

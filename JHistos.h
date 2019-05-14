@@ -6,6 +6,8 @@
 #include "TH1D.h"
 #include "TH2D.h"
 
+#include "JConst.h"
+
 class JHistos {
 
 public:
@@ -13,22 +15,22 @@ public:
 	virtual ~JHistos(){;}
 
 	TH1D *hPt;
-    TH1D *hMultiplicity;
     TH1D *hPhi;
+    TH1D *hPtNonuni;
+    TH1D *hPhiNonuni;
     TH1D *hCentrality;
+    TH1D *hEta;
+
+    TH1D *hMultiplicity[DET_N];
+    TH1D *hMultiplicityNonuni[DET_N];
 
     TH1D *hSqrtSumWeightsTPC;
-    TH1D *hSqrtSumWeightsTPCA;
-    TH1D *hSqrtSumWeightsTPCC;
-    TH1D *hSqrtSumWeightsV0P;
-
-    TH1D *hPtNonuni;
-    TH1D *hMultiplicityNonuni;
-    TH1D *hPhiNonuni;
-
     TH1D *hSqrtSumWeightsTPCNonuni;
+    TH1D *hSqrtSumWeightsTPCA;
     TH1D *hSqrtSumWeightsTPCANonuni;
+    TH1D *hSqrtSumWeightsTPCC;
     TH1D *hSqrtSumWeightsTPCCNonuni;
+    TH1D *hSqrtSumWeightsV0P;
     TH1D *hSqrtSumWeightsV0PNonuni;
 
     // Historgrams for calculating vn values
