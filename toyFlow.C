@@ -1,5 +1,3 @@
-// TODO: Tsekkaa vielä painot että ne menee oikein
-
 #include <iostream>
 #include <stdlib.h>
 
@@ -29,7 +27,6 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-// TESTING
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
 void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
 
