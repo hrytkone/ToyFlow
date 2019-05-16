@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     }
 
     // Save input numbers
-    TH1D *hInputNumbers = new TH1D("hInputNumbers","hInputNumbers",13, 0.5, 13.5);
+    TH1D *hInputNumbers = new TH1D("hInputNumbers","hInputNumbers",14, 0.5, 14.5);
     hInputNumbers->Fill(1, double(nEvents));
     hInputNumbers->Fill(2, vn[0]);
     hInputNumbers->Fill(3, vn[1]);
@@ -129,6 +129,7 @@ int main(int argc, char **argv) {
     hInputNumbers->Fill(11, phiMin);
     hInputNumbers->Fill(12, phiMax);
     hInputNumbers->Fill(13, percentage);
+    hInputNumbers->Fill(14, 1.0); // Counting number of files added with hadd.
     fOut->cd();
     hInputNumbers->Write("hInputNumbers");
 
@@ -181,19 +182,20 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     TClonesArray *tempList;
 
     int i, j, k;
-    for (i=0; i<DET_N; i++) {
 
-        nMult = 0;
-        nMultNonuni = 0;
+    nMult = 0;
+    nMultNonuni = 0;
 
-        centrality = rand->Uniform(0.0, 70.0);
-        for (j=0; j<CENTBINS_N; j++) {
-            if (centrality>centBins[j] && centrality<centBins[j+1]) {
-                centrality = centBins[j+1] - (centBins[j+1]-centBins[j])/2.0;
-                histos->hCentrality->Fill(centrality);
-                nMult = inputs->GetMultiplicity(i, centrality);
-            }
+    centrality = rand->Uniform(0.0, 70.0);
+    for (j=0; j<CENTBINS_N; j++) {
+        if (centrality>centBins[j] && centrality<centBins[j+1]) {
+            centrality = centBins[j+1] - (centBins[j+1]-centBins[j])/2.0;
+            histos->hCentrality->Fill(centrality);
+            nMult = inputs->GetMultiplicity(i, centrality);
         }
+    }
+
+    for (i=0; i<DET_N; i++) {
 
         for (j=0; j<nMult; j++) {
             eta = inputs->GetEta(i);
@@ -247,9 +249,9 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
                 }
             }
 
-            histos->hMultiplicity[i]->Fill(nMult);
-            histos->hMultiplicityNonuni[i]->Fill(nMultNonuni);
         }
+        histos->hMultiplicity[i]->Fill(nMult);
+        histos->hMultiplicityNonuni[i]->Fill(nMultNonuni);
     }
 }
 
@@ -338,8 +340,11 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
 
             track = (JToyMCTrack*)lists->TPClist->At(j);
             phi = track->GetPhi();
+            pt = track->GetPt();
 
-            autocorr = TComplex(TMath::Cos(n*phi), TMath::Sin(n*phi));
+            if (bUseWeight) w = pt;
+
+            autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
 
             QvecTPC -= autocorr;
             vobs += GetVnObs(QvecTPC, phi, n);
@@ -550,8 +555,9 @@ void DoCorrections(TComplex &Qvec, double cm, double sm, double lambdaMinus, dou
 
 void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, double &norm, bool bUseWeight, bool bDoCorrections, int n, double w, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
     double phi = track->GetPhi();
+    double pt = track->GetPt();
 
-    if (bUseWeight) w = phi;
+    if (bUseWeight) w = pt;
     norm += w*w;
 
     unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
