@@ -183,19 +183,20 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
 
     int i, j, k;
 
-    nMult = 0;
-    nMultNonuni = 0;
-
     centrality = rand->Uniform(0.0, 70.0);
-    for (j=0; j<CENTBINS_N; j++) {
-        if (centrality>centBins[j] && centrality<centBins[j+1]) {
-            centrality = centBins[j+1] - (centBins[j+1]-centBins[j])/2.0;
-            histos->hCentrality->Fill(centrality);
-            nMult = inputs->GetMultiplicity(i, centrality);
-        }
-    }
 
     for (i=0; i<DET_N; i++) {
+
+        nMult = 0;
+        nMultNonuni = 0;
+
+        for (j=0; j<CENTBINS_N; j++) {
+            if (centrality>centBins[j] && centrality<centBins[j+1]) {
+                centrality = centBins[j+1] - (centBins[j+1]-centBins[j])/2.0;
+                histos->hCentrality->Fill(centrality);
+                nMult = inputs->GetMultiplicity(i, centrality);
+            }
+        }
 
         for (j=0; j<nMult; j++) {
             eta = inputs->GetEta(i);
