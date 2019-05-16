@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
     int nEvents = argc > 2 ? atol(argv[2]):1000;
     bool bUsePtDependence = argc > 3 ? atol(argv[3]):0;
     bool bUseGranularity = argc > 4 ? atol(argv[4]):0;
+    int iSeed = argc > 5 ? atol(argv[5]):0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
@@ -68,8 +69,8 @@ int main(int argc, char **argv) {
 
     TFile *fOut = TFile::Open(outFileName, "RECREATE");
 
-    TRandom3 *rand = new TRandom3(0);
-    rand->SetSeed(0);
+    TRandom3 *rand = new TRandom3(iSeed);
+    //rand->SetSeed(0);
 
     JHistos *histos = new JHistos();
     JEventLists *lists = new JEventLists();
