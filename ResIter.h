@@ -1,10 +1,11 @@
 /*
- * Iterointi Newtonin menetelmällä
+ * Iteration using Newton's method
  */
 
 #include "TMath.h"
 #include <boost/math/special_functions/bessel.hpp>
 
+// When dealing with mixed harmonics?
 double Rk(double khi, int n) {
     try {
         double k = n;
@@ -16,39 +17,31 @@ double Rk(double khi, int n) {
     }
 }
 
-double func(double *x, double *p) {
-    double khi = x[0];
-    double k = p[0];
-    double Rk = p[1];
-    double bessel = boost::math::cyl_bessel_i((k-1)/2, khi*khi/2) + boost::math::cyl_bessel_i((k+1)/2, khi*khi/2);
-    return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*bessel - Rk;
+double R1(double khi) {
+    return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*(TMath::BesselI0(khi*khi/2) + TMath::BesselI1(khi*khi/2));
 }
 
-double RkIter(double x0, double R0, int n, double err) {
-    try {
-        double x = 0;
-        TF1 *fRes = new TF1("fRes", func, 0, 50.0, 2);
-        fRes->SetParameters(n, R0);
-        while (TMath::Abs(Rk(x, n) - R0) > err) {
-            x = x0 - fRes->Eval(x0)/fRes->Derivative(x0);
-            x0 = x;
-        }
-        return x;
-    } catch (const std::overflow_error& e) {
-        cout << "overflow_error during iteration: set khi=0 in case n=" << n << "\n";
-        return 0;
+double func(double *x, double *p) {
+    double khi = x[0];
+    double Rk = p[0];
+    return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*(TMath::BesselI0(khi*khi/2) + TMath::BesselI1(khi*khi/2)) - Rk;
+}
+
+double RIter(double x0, double R0, double err) {
+    double x = 0;
+    TF1 *fRes = new TF1("fRes", func, 0, 50.0, 1);
+    fRes->SetParameter(0, R0);
+    while (TMath::Abs(R1(x) - R0) > err) {
+        x = x0 - fRes->Eval(x0)/fRes->Derivative(x0);
+        x0 = x;
     }
+    return x;
 }
 
 // Virheen yleisellä etenemisellä R(khi):n lausekkeesta
-double CalculateRerror(double khi, double khiErr, double k) {
-    try {
-        double sum1 = (1-2*khi*khi)*(boost::math::cyl_bessel_i((k-1)/2, khi*khi/2) + boost::math::cyl_bessel_i((k+1)/2, khi*khi/2));
-        double sum2 = (khi/2)*(boost::math::cyl_bessel_i((k-3)/2, khi*khi/2) + boost::math::cyl_bessel_i((k+1)/2, khi*khi/2) + boost::math::cyl_bessel_i((k-1)/2, khi*khi/2) + boost::math::cyl_bessel_i((k+3)/2, khi*khi/2));
-        return TMath::Sqrt(TMath::Pi()/2)*TMath::Exp(-khi*khi)*(sum1 + sum2)*khiErr;
-    } catch (const std::overflow_error& e) {
-        cout << "overflow_error during error calculation: set err=0\n";
-        return 0;
-    }
-
+double CalculateRerror(double khi, double khiErr) {
+    double bessel0 = -(khi*khi-2)*TMath::BesselI0(khi*khi/2);
+    double bessel1 = 2*TMath::BesselI1(khi*khi/2);
+    double bessel2 = khi*khi*TMath::BesselI(2,khi*khi/2);
+    return TMath::Sqrt(TMath::Pi()/4)*TMath::Exp(-khi*khi)*(bessel0 + bessel1 + bessel2)*khiErr;
 }

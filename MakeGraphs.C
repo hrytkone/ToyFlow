@@ -74,7 +74,7 @@ void MakeGraphs(TString sInputName = "n100000-granOn.root", TString sOutputName 
     double vnEPCorrectedTrue[nCoef], errorvnEPCorrectedTrue[nCoef] = {0};
     double Rinit;
 
-    double khi0 = 1.0;
+    double khi0 = 0.5;
     double err = 0.0001;
     double khi;
     double R[nCoef], errorR[nCoef] = {0};
@@ -87,9 +87,9 @@ void MakeGraphs(TString sInputName = "n100000-granOn.root", TString sOutputName 
         vnEPtrue[i] = hVnObs[i]->GetMean();
 
         Rinit = hRsub[i]->GetMean();
-        khi = RkIter(khi0, Rinit, n, err);
-        R[i] = Rk(TMath::Sqrt(2)*khi, n);
-        errorR[i] = CalculateRerror(khi, err, n);
+        khi = RIter(khi0, Rinit, err);
+        R[i] = R1(TMath::Sqrt(2)*khi);
+        errorR[i] = CalculateRerror(khi, err);
 
         cout << "R=" << R[i] << "  err=" << errorR[i] << "\n";
 
@@ -107,9 +107,9 @@ void MakeGraphs(TString sInputName = "n100000-granOn.root", TString sOutputName 
         vnEPCorrectedTrue[i] = hVnObsCorrected[i]->GetMean();
 
         Rinit = hRsubCorrected[i]->GetMean();
-        khi = RkIter(khi0, Rinit, n, err);
-        RCorrected[i] = Rk(TMath::Sqrt(2)*khi, n);
-        errorRCorrected[i] = CalculateRerror(khi, err, n);
+        khi = RIter(khi0, Rinit, err);
+        RCorrected[i] = R1(TMath::Sqrt(2)*khi);
+        errorRCorrected[i] = CalculateRerror(khi, err);
 
         cout << "R=" << RCorrected[i] << "  err=" << errorRCorrected[i] << "\n";
 
