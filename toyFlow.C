@@ -2,11 +2,11 @@
 #include <stdlib.h>
 
 // OWN
-#include "JHistos.h"
-#include "JEventLists.h"
-#include "JToyMCTrack.h"
-#include "JInputs.h"
-#include "JConst.h"
+#include "src/JHistos.h"
+#include "src/JEventLists.h"
+#include "src/JToyMCTrack.h"
+#include "src/JInputs.h"
+#include "src/JConst.h"
 
 // ROOT
 #include "TFile.h"
