@@ -4,6 +4,7 @@
 #define PI TMath::Pi()
 
 const int nCoef = 5;
+const int nCorrParam = 8;
 
 // for pT-dependence
 const double Tdec = 0.12;

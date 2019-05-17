@@ -102,15 +102,15 @@ int main(int argc, char **argv) {
     cout << "CORRECTIONS:\n";
     cout << "vn: {cm, sm, cm2, sm2, a-, a+, lambda-, lambda+}\n";
 
-    double *corrections[5];
-    for (i=0; i<5; i++) {
+    double *corrections[nCoef];
+    for (i=0; i<nCoef; i++) {
         corrections[i] = GetCorrectionParam(phiMin, phiMax, percentage, i+1, fA, fTimesSin, fTimesCos, fTimesSin2, fTimesCos2);
     }
 
     // Save correction parameters
     TH2D *hCorrectionParameters = new TH2D("hCorrectionParameters", "hCorrectionParameters", 5, 0.5, 5.5, 8, 0.5, 8.5);
-    for (i=0; i<5; i++) {
-        for (j=0; j<8; j++) {
+    for (i=0; i<nCoef; i++) {
+        for (j=0; j<nCorrParam; j++) {
             hCorrectionParameters->Fill(i, j, corrections[i][j]);
         }
     }
@@ -510,7 +510,7 @@ double *GetCorrectionParam(double phiMin, double phiMax, double percentage, doub
     fTimesCos2->SetParameters(phiMin, phiMax, percentage, 2*n, 1.0/area);
 
     double thres = 0.000001;
-    double *corrections = new double[8];
+    double *corrections = new double[nCorrParam];
     corrections[0] = CheckIfZero(fTimesCos->Integral(-PI, PI), thres); //cm
     corrections[1] = CheckIfZero(fTimesSin->Integral(-PI, PI), thres); //sm
     corrections[2] = CheckIfZero(fTimesCos2->Integral(-PI, PI), thres); //cm2
@@ -521,7 +521,7 @@ double *GetCorrectionParam(double phiMin, double phiMax, double percentage, doub
     corrections[7] = CheckIfZero(corrections[3]/corrections[5], thres); //lambda+
 
     cout << "v" << n << ": {";
-    for (int i=0; i<7; i++) {
+    for (int i=0; i<nCorrParam-1; i++) {
         cout << corrections[i] << ", ";
     }
     cout << corrections[7] << "}\n";
