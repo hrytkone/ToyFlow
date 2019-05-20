@@ -2,7 +2,7 @@ PROGRAM       = toyFlow
 
 version       = toka
 CXX           = g++
-CXXFLAGS      = -Ofast -Wall -g -Wno-deprecated -D$(version)
+CXXFLAGS      = -Ofast -Wall -g -D$(version)
 
 LD            = g++
 LDFLAGS       = -Ofast
