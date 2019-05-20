@@ -9,7 +9,7 @@ double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
 
 //void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
-void MakeGraphs(TString sInputName = "n100000-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "n2000k-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n100000.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n1000-ptDepend.root", TString sOutputName = "toyFlowGraphs.root") {
 
@@ -24,7 +24,11 @@ void MakeGraphs(TString sInputName = "n100000-granOn.root", TString sOutputName 
 
     TH1D *hInputNumbers = (TH1D*)fIn->Get("hInputNumbers");
     double nEvents = hInputNumbers->GetBinContent(1);
-    for(int i = 0; i < nCoef; i++) inputFlow[i] = hInputNumbers->GetBinContent(2+i);
+    double nOfFiles = hInputNumbers->GetBinContent(14);
+    for(int i = 0; i < nCoef; i++) {
+        inputFlow[i] = hInputNumbers->GetBinContent(2+i);
+        inputFlow[i] /= nOfFiles;
+    }
 
     TH1D *hSqrtSumWeightsTPC = (TH1D*)fIn->Get("hSqrtSumWeightsTPC");
     TH1D *hSqrtSumWeightsTPCA = (TH1D*)fIn->Get("hSqrtSumWeightsTPCA");
