@@ -1,15 +1,16 @@
 #include <TMath.h>
 #include <TFile.h>
 
-#include "ResIter.h"
-#include "JConst.h"
+#include "src/ResIter.h"
+#include "src/JConst.h"
 
 double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
 
 //void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
-void MakeGraphs(TString sInputName = "n2000k-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "n2000k-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "toyFlow_noGran_100000000evt_PtDep0_Gran0.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n100000.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n1000-ptDepend.root", TString sOutputName = "toyFlowGraphs.root") {
 

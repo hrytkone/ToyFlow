@@ -3,6 +3,8 @@
 
 const int nsets = 1;
 
+void ErrorExit(TString error, int errnum=1 ){cout<<"ERROR: "<<error<<endl;gSystem->Exit(errnum);}
+
 TString fileNames[nsets] = {"toyFlowGraphs.root"};
 
 TGraphErrors *gVnEP[nsets];
@@ -34,6 +36,7 @@ void PlotVn() {
     int i, j;
     for (i=0; i<nsets; i++) {
         fIn[i] = TFile::Open(fileNames[i], "read");
+        if(fIn[i]==0) ErrorExit(Form("Cannot open file: %s",fileNames[i].Data()));
         gVnEP[i] = (TGraphErrors*) fIn[i]->Get("gVnEP");
         hInputFlow[i] = (TH1D*) fIn[i]->Get("hInputFlow");
         gVnEPtrue[i] = (TGraphErrors*) fIn[i]->Get("gVnEPtrue");
