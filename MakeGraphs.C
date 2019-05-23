@@ -10,7 +10,9 @@ double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnA
 
 //void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n2000k-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
-void MakeGraphs(TString sInputName = "toyFlow_noGran_100000000evt_PtDep0_Gran0.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "toyFlow_noGran_100000000evt_PtDep0_Gran0.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "granDoubled.root", TString sOutputName = "toyFlowGraphs.root") {
+//void MakeGraphs(TString sInputName = "toyFlow_yesGran_100000000evt_PtDep0_Gran1.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n100000.root", TString sOutputName = "toyFlowGraphs.root") {
 //void MakeGraphs(TString sInputName = "n1000-ptDepend.root", TString sOutputName = "toyFlowGraphs.root") {
 

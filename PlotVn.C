@@ -30,8 +30,16 @@ double mSize = 1.0;
 TFile *fIn[nsets];
 
 double VnDist(double *x, double *p);
+void hset(TH1& hid, TString xtit="", TString ytit="",
+		double titoffx = 1.1, double titoffy = 1.1,
+		double titsizex = 0.06, double titsizey = 0.06,
+		double labeloffx = 0.01, double labeloffy = 0.001,
+		double labelsizex = 0.05, double labelsizey = 0.05,
+		int divx = 505, int divy=505);
 
 void PlotVn() {
+
+    TH2F *hfr;
 
     int i, j;
     for (i=0; i<nsets; i++) {
@@ -99,15 +107,21 @@ void PlotVn() {
 
     }
 
+    gStyle->SetOptStat(0);
+
     TCanvas *c1 = new TCanvas("c1", "vn values with different methods");
     c1->cd();
 
-    TLegend *leg1 = new TLegend(0.65,0.6,0.85,0.75);
-    leg1->SetTextSize(0.037);leg1->SetBorderSize(1);
+    TLegend *leg1 = new TLegend(0.50,0.6,0.85,0.85,"","brNDC");
+    leg1->SetTextSize(0.037);leg1->SetBorderSize(0);
+
+    hfr = new TH2F(Form("hfr%d",0)," ", 1, 0.5, 5.5, 1, -0.021, 0.18);
+    hset( *hfr, "n", "v_{n}",1.0,1.0, 0.04,0.04, 0.01,0.01, 0.03,0.03, 510,510);
+    hfr->Draw();
 
     for (i=0; i<nsets; i++) {
         if (i==0) {
-            gVnEPtrue[i]->Draw("AP");
+            gVnEPtrue[i]->Draw("SAME P");
             gVnEPtrue[i]->SetTitle("Vn values with different methods; Vn; n");
             leg1->AddEntry(gVnEPtrue[i], "EP true RP", "p");
         }
@@ -128,20 +142,25 @@ void PlotVn() {
         leg1->AddEntry(gVnAltCorrected[i], "Alternative EP, corrected", "p");
 
         hInputFlow[i]->Draw("SAME HIST");
-        leg1->AddEntry(hInputFlow[i], "Input", "p");
+        leg1->AddEntry(hInputFlow[i], "Input", "l");
     }
 
     leg1->Draw("SAME");
+    c1->SaveAs("figures/vn.pdf");
 
     TCanvas *c2 = new TCanvas("c2", "R values with different methods");
     c2->cd();
 
-    TLegend *leg2 = new TLegend(0.65,0.6,0.85,0.75);
-    leg2->SetTextSize(0.037);leg2->SetBorderSize(1);
+    hfr = new TH2F(Form("hfr%d",1)," ", 1, 0.5, 5.5, 1, -0.021, 1.04);
+    hset( *hfr, "n", "R_{n}",1.0,1.0, 0.04,0.04, 0.01,0.01, 0.03,0.03, 510,510);
+    hfr->Draw();
+
+    TLegend *leg2 = new TLegend(0.25,0.15,0.55,0.30,"","brNDC");
+    leg2->SetTextSize(0.037);leg2->SetBorderSize(0);
 
     for (i=0; i<nsets; i++) {
         if (i==0) {
-            gRtrue[i]->Draw("AP");
+            gRtrue[i]->Draw("SAME P");
             gRtrue[i]->SetTitle("Resolution parameter; R; n");
             leg2->AddEntry(gRtrue[i], "R true", "p");
         }
@@ -157,6 +176,7 @@ void PlotVn() {
     }
 
     leg2->Draw("SAME");
+    c2->SaveAs("figures/Rn.pdf");
 
     TCanvas *c3 = new TCanvas("c3", "v2(pT)");
     c3->cd();
@@ -172,6 +192,7 @@ void PlotVn() {
 
         fVnDist->Draw("SAME");
     }
+    c3->SaveAs("figures/v2Pt.pdf");
 
     TH1D *hPhi = (TH1D*)fIn[0]->Get("hPhi");
     TH1D *hPhiNonuni = (TH1D*)fIn[0]->Get("hPhiNonuni");
@@ -184,6 +205,8 @@ void PlotVn() {
 
     c4->cd(2);
     hPhiNonuni->Draw("HIST");
+
+    c4->SaveAs("figures/phi.pdf");
 }
 
 double VnDist(double *x, double *p) {
@@ -194,3 +217,38 @@ double VnDist(double *x, double *p) {
     double C = vnMax/(TMath::Power(alpha/beta, alpha)*TMath::Exp(-alpha));
     return C*TMath::Power(pt, alpha)*TMath::Exp(-beta*pt);
 }
+
+void hset(TH1& hid, TString xtit="", TString ytit="",
+		double titoffx = 1.1, double titoffy = 1.1,
+		double titsizex = 0.06, double titsizey = 0.06,
+		double labeloffx = 0.01, double labeloffy = 0.001,
+		double labelsizex = 0.05, double labelsizey = 0.05,
+		int divx = 505, int divy=505)
+{
+	hid.GetXaxis()->CenterTitle(1);
+	hid.GetYaxis()->CenterTitle(1);
+
+	hid.GetXaxis()->SetTitleOffset(titoffx);
+	hid.GetYaxis()->SetTitleOffset(titoffy);
+
+	hid.GetXaxis()->SetTitleSize(titsizex);
+	hid.GetYaxis()->SetTitleSize(titsizey);
+
+	hid.GetXaxis()->SetLabelOffset(labeloffx);
+	hid.GetYaxis()->SetLabelOffset(labeloffy);
+
+	hid.GetXaxis()->SetLabelSize(labelsizex);
+	hid.GetYaxis()->SetLabelSize(labelsizey);
+
+	hid.GetXaxis()->SetNdivisions(divx);
+	hid.GetYaxis()->SetNdivisions(divy);
+
+	hid.GetXaxis()->SetTitle(xtit);
+	hid.GetYaxis()->SetTitle(ytit);
+
+	hid.GetXaxis()->SetLabelFont(42);
+	hid.GetYaxis()->SetLabelFont(42);
+	hid.GetXaxis()->SetTitleFont(42);
+	hid.GetYaxis()->SetTitleFont(42);
+}
+
