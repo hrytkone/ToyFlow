@@ -8,13 +8,7 @@ double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
 
-//void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "n2000k-granOn.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "toyFlow_noGran_100000000evt_PtDep0_Gran0.root", TString sOutputName = "toyFlowGraphs.root") {
-void MakeGraphs(TString sInputName = "granDoubled.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "toyFlow_yesGran_100000000evt_PtDep0_Gran1.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "n100000.root", TString sOutputName = "toyFlowGraphs.root") {
-//void MakeGraphs(TString sInputName = "n1000-ptDepend.root", TString sOutputName = "toyFlowGraphs.root") {
+void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root") {
 
     TFile *fIn = TFile::Open(sInputName, "read");
     TFile *fOut = TFile::Open(sOutputName, "recreate");
@@ -34,13 +28,13 @@ void MakeGraphs(TString sInputName = "granDoubled.root", TString sOutputName = "
     }
 
     TH1D *hSqrtSumWeightsTPC = (TH1D*)fIn->Get("hSqrtSumWeightsTPC");
-    TH1D *hSqrtSumWeightsTPCA = (TH1D*)fIn->Get("hSqrtSumWeightsTPCA");
-    TH1D *hSqrtSumWeightsTPCC = (TH1D*)fIn->Get("hSqrtSumWeightsTPCC");
+    TH1D *hSqrtSumWeightsT0PA = (TH1D*)fIn->Get("hSqrtSumWeightsT0PA");
+    TH1D *hSqrtSumWeightsT0PC = (TH1D*)fIn->Get("hSqrtSumWeightsT0PC");
     TH1D *hSqrtSumWeightsV0P = (TH1D*)fIn->Get("hSqrtSumWeightsV0P");
 
     TH1D *hSqrtSumWeightsTPCNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsTPCNonuni");
-    TH1D *hSqrtSumWeightsTPCANonuni = (TH1D*)fIn->Get("hSqrtSumWeightsTPCANonuni");
-    TH1D *hSqrtSumWeightsTPCCNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsTPCCNonuni");
+    TH1D *hSqrtSumWeightsT0PANonuni = (TH1D*)fIn->Get("hSqrtSumWeightsT0PANonuni");
+    TH1D *hSqrtSumWeightsT0PCNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsT0PCNonuni");
     TH1D *hSqrtSumWeightsV0PNonuni = (TH1D*)fIn->Get("hSqrtSumWeightsV0PNonuni");
 
     TH1D *hInputFlow = new TH1D("hInputFlow", "hInputFlow", nCoef, 0.5, double(nCoef)+0.5);

@@ -13,13 +13,13 @@ public:
     TClonesArray *GetList(int det_i, bool bNonuni);
 
     TClonesArray *TPClist;
-    TClonesArray *TPCAlist;
-    TClonesArray *TPCClist;
+    TClonesArray *T0PAlist;
+    TClonesArray *T0PClist;
     TClonesArray *V0Plist;
 
     TClonesArray *TPClistNonuni;
-    TClonesArray *TPCAlistNonuni;
-    TClonesArray *TPCClistNonuni;
+    TClonesArray *T0PAlistNonuni;
+    TClonesArray *T0PClistNonuni;
     TClonesArray *V0PlistNonuni;
 
 };

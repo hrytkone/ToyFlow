@@ -32,19 +32,19 @@ JHistos::JHistos(){
 
     hSqrtSumWeightsTPC = new TH1D("hSqrtSumWeightsTPC","sqrt of sum of weights squares - TPC", 240, 0.0, 60.0);
     hSqrtSumWeightsTPC->Sumw2();
-    hSqrtSumWeightsTPCA = new TH1D("hSqrtSumWeightsTPCA","sqrt of sum of weights squares - TPC-A", 240, 0.0, 60.0);
-    hSqrtSumWeightsTPCA->Sumw2();
-    hSqrtSumWeightsTPCC = new TH1D("hSqrtSumWeightsTPCC","sqrt of sum of weights squares - TPC-C", 240, 0.0, 60.0);
-    hSqrtSumWeightsTPCC->Sumw2();
+    hSqrtSumWeightsT0PA = new TH1D("hSqrtSumWeightsT0PA","sqrt of sum of weights squares - T0P-A", 240, 0.0, 60.0);
+    hSqrtSumWeightsT0PA->Sumw2();
+    hSqrtSumWeightsT0PC = new TH1D("hSqrtSumWeightsT0PC","sqrt of sum of weights squares - T0P-C", 240, 0.0, 60.0);
+    hSqrtSumWeightsT0PC->Sumw2();
     hSqrtSumWeightsV0P = new TH1D("hSqrtSumWeightsV0P","sqrt of sum of weights squares - V0+", 240, 0.0, 60.0);
     hSqrtSumWeightsV0P->Sumw2();
 
     hSqrtSumWeightsTPCNonuni = new TH1D("hSqrtSumWeightsTPCNonuni","sqrt of sum of weights squares - nonuni TPC", 240, 0.0, 60.0);
     hSqrtSumWeightsTPCNonuni->Sumw2();
-    hSqrtSumWeightsTPCANonuni = new TH1D("hSqrtSumWeightsTPCANonuni","sqrt of sum of weights squares - nonuni TPC-A", 240, 0.0, 60.0);
-    hSqrtSumWeightsTPCANonuni->Sumw2();
-    hSqrtSumWeightsTPCCNonuni = new TH1D("hSqrtSumWeightsTPCCNonuni","sqrt of sum of weights squares - nonuni TPC-C", 240, 0.0, 60.0);
-    hSqrtSumWeightsTPCCNonuni->Sumw2();
+    hSqrtSumWeightsT0PANonuni = new TH1D("hSqrtSumWeightsT0PANonuni","sqrt of sum of weights squares - nonuni T0P-A", 240, 0.0, 60.0);
+    hSqrtSumWeightsT0PANonuni->Sumw2();
+    hSqrtSumWeightsT0PCNonuni = new TH1D("hSqrtSumWeightsT0PCNonuni","sqrt of sum of weights squares - nonuni T0P-C", 240, 0.0, 60.0);
+    hSqrtSumWeightsT0PCNonuni->Sumw2();
     hSqrtSumWeightsV0PNonuni = new TH1D("hSqrtSumWeightsV0PNonuni","sqrt of sum of weights squares - nonuni V0P", 240, 0.0, 60.0);
     hSqrtSumWeightsV0PNonuni->Sumw2();
 

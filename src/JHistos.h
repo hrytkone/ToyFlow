@@ -26,10 +26,10 @@ public:
 
     TH1D *hSqrtSumWeightsTPC;
     TH1D *hSqrtSumWeightsTPCNonuni;
-    TH1D *hSqrtSumWeightsTPCA;
-    TH1D *hSqrtSumWeightsTPCANonuni;
-    TH1D *hSqrtSumWeightsTPCC;
-    TH1D *hSqrtSumWeightsTPCCNonuni;
+    TH1D *hSqrtSumWeightsT0PA;
+    TH1D *hSqrtSumWeightsT0PANonuni;
+    TH1D *hSqrtSumWeightsT0PC;
+    TH1D *hSqrtSumWeightsT0PCNonuni;
     TH1D *hSqrtSumWeightsV0P;
     TH1D *hSqrtSumWeightsV0PNonuni;
 

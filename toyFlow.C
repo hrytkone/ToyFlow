@@ -259,17 +259,17 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
 
 void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
 
-    int nMultTPC, nMultTPCA, nMultTPCC, nMultV0P;
+    int nMultTPC, nMultT0PA, nMultT0PC, nMultV0P;
 
     if (bDoCorrections) {
         nMultTPC = lists->TPClistNonuni->GetEntriesFast();
-        nMultTPCA = lists->TPCAlistNonuni->GetEntriesFast();
-        nMultTPCC = lists->TPCClistNonuni->GetEntriesFast();
+        nMultT0PA = lists->T0PAlistNonuni->GetEntriesFast();
+        nMultT0PC = lists->T0PClistNonuni->GetEntriesFast();
         nMultV0P = lists->V0PlistNonuni->GetEntriesFast();
     } else {
         nMultTPC = lists->TPClist->GetEntriesFast();
-        nMultTPCA = lists->TPCAlist->GetEntriesFast();
-        nMultTPCC = lists->TPCClist->GetEntriesFast();
+        nMultT0PA = lists->T0PAlist->GetEntriesFast();
+        nMultT0PC = lists->T0PClist->GetEntriesFast();
         nMultV0P = lists->V0Plist->GetEntriesFast();
     }
 
@@ -279,11 +279,11 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
     double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
     double EventPlaneA, EventPlaneB, Rtrue, Rsub, vobs;
 
-    TComplex QvecTPC, QvecTPCA, QvecTPCC, QvecV0P;
+    TComplex QvecTPC, QvecT0PA, QvecT0PC, QvecV0P;
     TComplex unitVec = TComplex(0, 0);
     TComplex autocorr = TComplex(0, 0);
 
-    double normTPC, normTPCA, normTPCC, normV0P;
+    double normTPC, normT0PA, normT0PC, normV0P;
 
     double QnQnA, QnAQnB;
 
@@ -304,13 +304,13 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
         lambdaPlus = corrections[i][7];
 
         QvecTPC = TComplex(0, 0);
-        QvecTPCA = TComplex(0, 0);
-        QvecTPCC = TComplex(0, 0);
+        QvecT0PA = TComplex(0, 0);
+        QvecT0PC = TComplex(0, 0);
         QvecV0P = TComplex(0, 0);
 
         vobs = 0.0;
 
-        normTPC = 0.0; normTPCA = 0.0; normTPCC = 0.0; normV0P = 0.0;
+        normTPC = 0.0; normT0PA = 0.0; normT0PC = 0.0; normV0P = 0.0;
 
         // Construct Q-vectors for the detectors
         for (j=0; j<nMultTPC; j++) {
@@ -318,18 +318,18 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
             CalculateQvector(track, unitVec, QvecTPC, normTPC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
         }
 
-        if (nMultTPCA<nMultTPCC) {
-            jMax = nMultTPCA;
+        if (nMultT0PA<nMultT0PC) {
+            jMax = nMultT0PA;
         } else {
-            jMax = nMultTPCC;
+            jMax = nMultT0PC;
         }
 
         for (j=0; j<jMax; j++) {
-            track = (JToyMCTrack*)lists->TPCAlist->At(j);
-            CalculateQvector(track, unitVec, QvecTPCA, normTPCA, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            track = (JToyMCTrack*)lists->T0PAlist->At(j);
+            CalculateQvector(track, unitVec, QvecT0PA, normT0PA, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
 
-            track = (JToyMCTrack*)lists->TPCClist->At(j);
-            CalculateQvector(track, unitVec, QvecTPCC, normTPCC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            track = (JToyMCTrack*)lists->T0PClist->At(j);
+            CalculateQvector(track, unitVec, QvecT0PC, normT0PC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
         }
 
         for (j=0; j<nMultV0P; j++) {
@@ -358,24 +358,24 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
         // Resolution parameter calculations
         Rtrue = TMath::Cos(n*(GetEventPlane(QvecTPC, n) - Psi[i]));
 
-        EventPlaneA = GetEventPlane(QvecTPCA, n);
-        EventPlaneB = GetEventPlane(QvecTPCC, n);
+        EventPlaneA = GetEventPlane(QvecT0PA, n);
+        EventPlaneB = GetEventPlane(QvecT0PC, n);
         Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
 
         // ALTERNATIVE EVENT PLANE METHOD
         normTPC = TMath::Sqrt(normTPC);
-        normTPCA = TMath::Sqrt(normTPCA);
-        normTPCC = TMath::Sqrt(normTPCC);
+        normT0PA = TMath::Sqrt(normT0PA);
+        normT0PC = TMath::Sqrt(normT0PC);
         normV0P = TMath::Sqrt(normV0P);
 
-        QvecTPC /= normTPC; QvecTPCA /= normTPCA; QvecTPCC /= normTPCC; QvecV0P /= normV0P;
+        QvecTPC /= normTPC; QvecT0PA /= normT0PA; QvecT0PC /= normT0PC; QvecV0P /= normV0P;
 
-        QnQnA = QvecV0P*TComplex::Conjugate(QvecTPCA);
-        QnQnA /= TComplex::Abs(QvecTPCA);
+        QnQnA = QvecV0P*TComplex::Conjugate(QvecT0PA);
+        QnQnA /= TComplex::Abs(QvecT0PA);
 
-        QnAQnB = QvecTPCA*TComplex::Conjugate(QvecTPCC);
-        QnAQnB /= TComplex::Abs(QvecTPCA);
-        QnAQnB /= TComplex::Abs(QvecTPCC);
+        QnAQnB = QvecT0PA*TComplex::Conjugate(QvecT0PC);
+        QnAQnB /= TComplex::Abs(QvecT0PA);
+        QnAQnB /= TComplex::Abs(QvecT0PC);
 
         if (bDoCorrections) {
             histos->hVnObsCorrected[i]->Fill(vobs);
@@ -424,9 +424,9 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
                 }
                 weight = TMath::Sqrt(norms[j]);
                 if (weight!=0) QvecTPC /= weight;
-                histos->hV2ComplexPart->Fill(QvecTPC.Im()*QvecTPCA.Im());
-                QnQnA = QvecTPC*TComplex::Conjugate(QvecTPCA);
-                QnQnA /= TComplex::Abs(QvecTPCA);
+                histos->hV2ComplexPart->Fill(QvecTPC.Im()*QvecT0PA.Im());
+                QnQnA = QvecTPC*TComplex::Conjugate(QvecT0PA);
+                QnQnA /= TComplex::Abs(QvecT0PA);
                 histos->hPtBin[j]->Fill(QnQnA);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
                 pTBinsQ[j].clear();
@@ -437,13 +437,13 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
 
     if (bDoCorrections) {
         histos->hSqrtSumWeightsTPCNonuni->Fill(normTPC);
-        histos->hSqrtSumWeightsTPCANonuni->Fill(normTPCA);
-        histos->hSqrtSumWeightsTPCCNonuni->Fill(normTPCC);
+        histos->hSqrtSumWeightsT0PANonuni->Fill(normT0PA);
+        histos->hSqrtSumWeightsT0PCNonuni->Fill(normT0PC);
         histos->hSqrtSumWeightsV0PNonuni->Fill(normV0P);
     } else {
         histos->hSqrtSumWeightsTPC->Fill(normTPC);
-        histos->hSqrtSumWeightsTPCA->Fill(normTPCA);
-        histos->hSqrtSumWeightsTPCC->Fill(normTPCC);
+        histos->hSqrtSumWeightsT0PA->Fill(normT0PA);
+        histos->hSqrtSumWeightsT0PC->Fill(normT0PC);
         histos->hSqrtSumWeightsV0P->Fill(normV0P);
     }
 }
