@@ -184,7 +184,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
 
     int i, j, k;
 
-    centrality = rand->Uniform(0.0, 70.0);
+    centrality = rand->Uniform(0.0, 90.0);
 
     for (i=0; i<DET_N; i++) {
 

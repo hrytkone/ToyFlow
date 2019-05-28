@@ -33,7 +33,7 @@ const double cov[DET_N][2] = {
 #define PTBINS_N 9
 const double pTBins[PTBINS_N+1] = {0.0, 0.2, 0.6, 1.2, 2.0, 3.0, 4.2, 5.6, 7.2, 9.0};
 
-#define CENTBINS_N 9
-const double centBins[CENTBINS_N] = {0.0, 5.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0};
+#define CENTBINS_N 11
+const double centBins[CENTBINS_N] = {0.0, 5.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0};
 
 #endif

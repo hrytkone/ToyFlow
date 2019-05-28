@@ -9,8 +9,9 @@ JHistos::JHistos(){
     int NBINS = 150;
     double LogBinsX[NBINS+1], LimL=0.1, LimH=100;
     double logBW = (TMath::Log(LimH)-TMath::Log(LimL))/NBINS;
-    for (i=0; i<=NBINS; i++)
+    for (i=0; i<=NBINS; i++) {
         LogBinsX[i] = LimL*exp(i*logBW);
+    }
 
 	hPt = new TH1D("hPt","pT - inclusive", NBINS, LogBinsX);
     hPt->Sumw2();
