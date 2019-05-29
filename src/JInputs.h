@@ -7,6 +7,7 @@
 #include <TGraph.h>
 #include <TH1D.h>
 #include <TRandom3.h>
+#include <TFile.h>
 
 using namespace std;
 
@@ -23,6 +24,8 @@ const double etadst[ETADST_N] = {
 };
 
 // Data from arXiv:1612.08966 (10.17182/hepdata.78365)
+// The first and the last bins are not data.
+// Check sources on this paper: arXiv:1509.07299
 const double etanch[CENTBINS_N-1][ETADST_N] = {
 	{1640,1643,1670,1718,1787,1835,1912,1968,2001,2021,2017,1995,1970,1943,1929,1929,1943,1970,1995,2017,2021,2001,1968,1912,1835,1787,1718,1670,1643,1563,1474,1370,1324,1281,1244,1240},
 	{1360,1364,1391,1424,1474,1507,1569,1644,1679,1682,1672,1646,1621,1597,1583,1583,1597,1621,1646,1672,1682,1679,1644,1569,1507,1474,1424,1391,1364,1292,1218,1132,1093,1062,1032,1030},
@@ -43,10 +46,13 @@ public:
     virtual ~JInputs(){;}
 
     void Load();
-    int GetMultiplicity(int detId, double centrality) { return gNch[detId]->Eval(centrality); }
-    double GetEta(int detId);
+    // double -> int
+    int GetMultiplicity(double centrality) { return hEtaDist[centrality]->Integral();}//{ return gNch[detId]->Eval(centrality); }
+    double GetEta(int centrality) { return hEtaDist[centrality]->GetRandom();}
 
+private:
     TGraph *gNch[DET_N];
+    TH1F *hEtaDist[CENTBINS_N-1];
     TRandom3 *rand;
 };
 
