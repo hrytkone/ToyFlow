@@ -63,6 +63,20 @@ int main(int argc, char **argv) {
     const double scale = 1.0;
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
 
+    cout << "=========================================== Settings ===========================================" << endl;
+    cout << "Output: " << outFileName.Data()
+         << ", Events: " << nEvents
+         << ", Pt-dep: " << bUsePtDependence
+         << ", Granularity: " << bUseGranularity
+         << ", Seed: " << iSeed
+         << ", Weight: " << bUseWeight
+         << ", Random Psi: " << bRandomPsi
+         << endl;
+    cout << "Vn inputs: ";
+    for(int i=0; i<nCoef; i++) cout << vn[i] << ", ";
+    cout << endl;
+    cout << "================================================================================================" << endl;
+
     int i, j; // indices for loops
 
     TStopwatch timer;
