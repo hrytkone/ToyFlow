@@ -21,8 +21,8 @@ public:
     TH1D *hCentrality;
     TH1D *hEta;
 
-    TH1D *hMultiplicity[DET_N];
-    TH1D *hMultiplicityNonuni[DET_N];
+    TH1D *hMultiplicity;
+    TH1D *hMultiplicityNonuni;
 
     TH1D *hSqrtSumWeightsTPC;
     TH1D *hSqrtSumWeightsTPCNonuni;

@@ -5,11 +5,13 @@ JEventLists::JEventLists() {
 
     int size = 3000;
 
+    fullEvent = new TClonesArray("JToyMCTrack", 10*size);
     TPClist = new TClonesArray("JToyMCTrack", size);
     T0PAlist = new TClonesArray("JToyMCTrack", size);
     T0PClist = new TClonesArray("JToyMCTrack", size);
     V0Plist = new TClonesArray("JToyMCTrack", size);
 
+    fullEventNonuni = new TClonesArray("JToyMCTrack", 10*size);
     TPClistNonuni = new TClonesArray("JToyMCTrack", size);
     T0PAlistNonuni = new TClonesArray("JToyMCTrack", size);
     T0PClistNonuni = new TClonesArray("JToyMCTrack", size);
@@ -17,10 +19,12 @@ JEventLists::JEventLists() {
 }
 
 void JEventLists::ClearLists() {
+    fullEvent->Clear("C");
     TPClist->Clear("C");
     T0PAlist->Clear("C");
     T0PClist->Clear("C");
     V0Plist->Clear("C");
+    fullEventNonuni->Clear("C");
     TPClistNonuni->Clear("C");
     T0PAlistNonuni->Clear("C");
     T0PClistNonuni->Clear("C");

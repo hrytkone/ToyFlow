@@ -12,11 +12,13 @@ public:
     void ClearLists();
     TClonesArray *GetList(int det_i, bool bNonuni);
 
+    TClonesArray *fullEvent;
     TClonesArray *TPClist;
     TClonesArray *T0PAlist;
     TClonesArray *T0PClist;
     TClonesArray *V0Plist;
 
+    TClonesArray *fullEventNonuni;
     TClonesArray *TPClistNonuni;
     TClonesArray *T0PAlistNonuni;
     TClonesArray *T0PClistNonuni;

@@ -28,6 +28,7 @@ double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
+void GetParticleLists(JEventLists *lists, bool bDoCorrections);
 void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
 
 double AcceptanceFunc(double *x, double *p);
@@ -134,6 +135,8 @@ int main(int argc, char **argv) {
     fOut->cd();
     hInputNumbers->Write("hInputNumbers");
 
+    bool bDoCorrections;
+
     int nOutput = nEvents/20;
     if (nOutput<1) nOutput = 1;
     for (i=0; i<nEvents; i++) {
@@ -157,8 +160,16 @@ int main(int argc, char **argv) {
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
         GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI);
-        AnalyzeEvent(lists, histos, Psi, bUseWeight, 0, corrections);
-        AnalyzeEvent(lists, histos, Psi, bUseWeight, 1, corrections);
+
+        // Analysis of uniform distribution
+        bDoCorrections = false;
+        GetParticleLists(lists, bDoCorrections);
+        AnalyzeEvent(lists, histos, Psi, bUseWeight, bDoCorrections, corrections);
+
+        // Analysis of non-uniform distribution
+        bDoCorrections = true;
+        GetParticleLists(lists, bDoCorrections);
+        AnalyzeEvent(lists, histos, Psi, bUseWeight, bDoCorrections, corrections);
 
     }
 
@@ -180,81 +191,109 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
 
     JToyMCTrack track;
     TLorentzVector lVec;
-    TClonesArray *tempList;
-
-    int i, j, k;
 
     centrality = rand->Uniform(0.0, 90.0);
+    int centBin = 0;
 
-    for (i=0; i<DET_N; i++) {
+    nMult = 0;
+    nMultNonuni = 0;
 
-        nMult = 0;
-        nMultNonuni = 0;
+    int i, j;
+    for (i=0; i<CENTBINS_N-1; i++) {
+        if (centrality>centBins[i] && centrality<centBins[i+1]) {
+            centrality = centBins[i+1] - (centBins[i+1]-centBins[i])/2.0;
+            centBin = i;
+            histos->hCentrality->Fill(centrality);
+            nMult = inputs->GetMultiplicity(centBin);
+        }
+    }
 
-        for (j=0; j<CENTBINS_N; j++) {
-            if (centrality>centBins[j] && centrality<centBins[j+1]) {
-                centrality = centBins[j+1] - (centBins[j+1]-centBins[j])/2.0;
-                histos->hCentrality->Fill(centrality);
-                nMult = inputs->GetMultiplicity(i, centrality);
+    for (i=0; i<nMult; i++) {
+        eta = inputs->GetEta(centBin);
+        pT = fPt->GetRandom();
+
+        if (bUsePtDependence) {
+            for (j=0; j<nCoef; j++) {
+                fVnDist->SetParameters(alpha, beta, vn[j]);
+                vnTemp[j] = fVnDist->Eval(pT);
             }
+            fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
+                Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
+
         }
 
-        for (j=0; j<nMult; j++) {
-            eta = inputs->GetEta(i);
-            pT = fPt->GetRandom();
-            if (bUsePtDependence) {
-                for (k=0; k<nCoef; k++) {
-                    fVnDist->SetParameters(alpha, beta, vn[k]);
-                    vnTemp[k] = fVnDist->Eval(pT);
-                }
-                fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
-                    Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
-            }
+        phi = fPhi->GetRandom();
+        if (bUseGranularity) {
+            phi = CheckPhi(phi, startAngle);
+            eta = CheckEta(eta);
+        }
 
-            phi = fPhi->GetRandom();
-            if (bUseGranularity) {
-                phi = CheckPhi(phi, startAngle);
-                eta = CheckEta(eta);
-            }
+        histos->hPt->Fill(pT);
+        histos->hPhi->Fill(phi);
+        histos->hEta->Fill(eta);
 
-            histos->hPt->Fill(pT);
-            histos->hPhi->Fill(phi);
-            histos->hEta->Fill(eta);
+        px = pT*TMath::Cos(phi);
+        py = pT*TMath::Sin(phi);
+        pz = pT*TMath::SinH(eta);
+        Energy = TMath::Sqrt(pT*pT + pz*pz);
+        lVec.SetPxPyPzE(px, py, pz, Energy);
+        track.SetTrack(lVec);
 
-            px = pT*TMath::Cos(phi);
-            py = pT*TMath::Sin(phi);
-            pz = pT*TMath::SinH(eta);
-            Energy = TMath::Sqrt(pT*pT + pz*pz);
-            lVec.SetPxPyPzE(px, py, pz, Energy);
-            track.SetTrack(lVec);
+        new((*lists->fullEvent)[i]) JToyMCTrack(track);
 
-            tempList = lists->GetList(i, 0);
-            new((*tempList)[j]) JToyMCTrack(track);
+        if (phi < phiMin || phi > phiMax) {
 
-            tempList = lists->GetList(i, 1);
-            if (phi < phiMin || phi > phiMax) {
+            histos->hPhiNonuni->Fill(phi);
+
+            new((*lists->fullEventNonuni)[nMultNonuni]) JToyMCTrack(track);
+            nMultNonuni++;
+
+        } else {
+            randNum = rand->Rndm();
+            if ( randNum > percentage ) {
 
                 histos->hPhiNonuni->Fill(phi);
 
-                new((*tempList)[nMultNonuni]) JToyMCTrack(track);
+                new((*lists->fullEventNonuni)[nMultNonuni]) JToyMCTrack(track);
                 nMultNonuni++;
 
-            } else {
-                randNum = rand->Rndm();
-                if ( randNum > percentage ) {
-
-                    histos->hPhiNonuni->Fill(phi);
-
-                    new((*tempList)[nMultNonuni]) JToyMCTrack(track);
-                    nMultNonuni++;
-
-                }
             }
-
         }
-        histos->hMultiplicity[i]->Fill(nMult);
-        histos->hMultiplicityNonuni[i]->Fill(nMultNonuni);
+
     }
+
+    histos->hMultiplicity->Fill(nMult);
+    histos->hMultiplicityNonuni->Fill(nMultNonuni);
+
+}
+
+void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
+    int nMult = bDoCorrections ? lists->fullEventNonuni->GetEntriesFast()
+                                : lists->fullEvent->GetEntriesFast();
+
+    TClonesArray *tempList = new TClonesArray("JToyMCTrack", 3000);
+    JToyMCTrack *tempTrack, track;
+    double eta;
+    int detMult[DET_N] = {0};
+
+    int i, j;
+    for (i=0; i<nMult; i++) {
+        tempTrack = bDoCorrections ? (JToyMCTrack*)lists->fullEventNonuni->At(i)
+                                    : (JToyMCTrack*)lists->fullEvent->At(i);
+        eta = tempTrack->GetEta();
+
+        for (j=0; j<DET_N; j++) {
+            if (cov[j][0]<eta && eta<cov[j][1]) {
+                tempList = lists->GetList(j, bDoCorrections);
+                track = *tempTrack;
+                new((*tempList)[detMult[j]]) JToyMCTrack(track);
+                detMult[j]++;
+            }
+        }
+    }
+
+    tempList = new TClonesArray("JToyMCTrack", 0);
+    tempList->Delete();
 }
 
 void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
@@ -290,12 +329,11 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
     vector<vector<TComplex>> pTBinsQ;
     pTBinsQ.resize(PTBINS_N);
 
-    JToyMCTrack *track;
+    JToyMCTrack *track;;
 
     for (i=0; i<nCoef; i++) {
 
         n = i+1;
-
         cm = corrections[i][0];
         sm = corrections[i][1];
         aMinus = corrections[i][4];
@@ -556,6 +594,7 @@ void DoCorrections(TComplex &Qvec, double cm, double sm, double lambdaMinus, dou
 }
 
 void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, double &norm, bool bUseWeight, bool bDoCorrections, int n, double w, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
+
     double phi = track->GetPhi();
     double pt = track->GetPt();
 
@@ -592,5 +631,5 @@ double CheckEta(double eta) {
         if (ringEta[i] < eta && eta < ringEta[i+1])
             return ringEta[i] + (ringEta[i+1]-ringEta[i])/2.0;
     }
-    return 0;
+    return eta;
 }
