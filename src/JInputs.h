@@ -7,7 +7,6 @@
 #include <TGraph.h>
 #include <TH1D.h>
 #include <TRandom3.h>
-#include <TFile.h>
 
 using namespace std;
 
@@ -43,17 +42,17 @@ class JInputs {
 
 public:
     JInputs();
-    virtual ~JInputs(){;}
+    virtual ~JInputs();
 
     void Load();
-    // double -> int
-    int GetMultiplicity(double centrality) { return hEtaDist[centrality]->Integral();}//{ return gNch[detId]->Eval(centrality); }
-    double GetEta(int centrality) { return hEtaDist[centrality]->GetRandom();}
+    int GetMultiplicity(int centrality);
+    double GetEta(int centrality);
 
 private:
-    TGraph *gNch[DET_N];
-    TH1F *hEtaDist[CENTBINS_N-1];
-    TRandom3 *rand;
+    bool CheckCentBin(int centBin);
+
+    TH1F *hEtaDist[CENTBINS_N-1] = {NULL};
+    int dMulti[CENTBINS_N-1] = {0};
 };
 
 #endif

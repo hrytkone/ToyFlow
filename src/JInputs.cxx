@@ -1,38 +1,50 @@
 #include "JInputs.h"
 
-JInputs::JInputs() {
-    rand = new TRandom3(0);
-    rand->SetSeed(0);
+JInputs::JInputs() {;}
 
-    for (int i=0; i<DET_N; i++)
-        gNch[i] = new TGraph(CENTBINS_N-1);
+JInputs::~JInputs() {
+    for (int i=0; i<CENTBINS_N-1; i++) {
+        if(hEtaDist[i]!=0x0) delete hEtaDist[i];
+    }
 }
 
+// Initializes the eta distribution histogram
+// and the total multiplicities for each centrality
+// bin.
 void JInputs::Load() {
-    double nch;
     int i, j;
-    //TFile *f = new TFile("test.root","recreate");
     for (i=0; i<CENTBINS_N-1; i++) {
-        TGraph gEta(ETADST_N, etadst, etanch[i]);
-        TF1 fEtach("etach", [&](double *px, double *pp)->double{ return gEta.Eval(px[0]); }, -3.5, 5.1, 0);
-
-        for (j=0; j<DET_N; j++) {
-            nch = fEtach.Integral(cov[j][0], cov[j][1])/(cov[j][1]-cov[j][0]);
-            gNch[j]->SetPoint(i, 0.5*(centBins[i]+centBins[i+1]),nch);
-        }
-
         //Initialize histo:
         hEtaDist[i] = new TH1F(Form("hEtaDist%d",i),Form("hEtaDist%d",i),ETADST_N-1,etadst);
         for (j=0; j<ETADST_N; j++) {
             hEtaDist[i]->SetBinContent(j,etanch[i][j]);
         }
+        dMulti[i] = hEtaDist[i]->Integral();
+        //cout << "CentBin: " << i << ", Multi: " << dMulti[i] << endl;
     }
-    //f->Write();
-    //f->Close();
 }
 
-/*
-double JInputs::GetEta(int detId) {
-    return rand->Uniform(cov[detId][0], cov[detId][1]);
+bool JInputs::CheckCentBin(int centBin) {
+    return centBin<CENTBINS_N-1 && centBin>-1;
 }
-*/
+
+int JInputs::GetMultiplicity(int centrality) {
+    double multi;
+    if(CheckCentBin(centrality)) {
+        multi = dMulti[centrality];
+    } else {
+        multi = 0;
+    }
+    return (int)TMath::Floor(multi);
+}
+
+double JInputs::GetEta(int centrality) {
+    double eta;
+    if(CheckCentBin(centrality)) {
+        eta = hEtaDist[centrality]->GetRandom();
+    } else {
+        eta = -999; //ok?
+    }
+    return eta;
+}
+
