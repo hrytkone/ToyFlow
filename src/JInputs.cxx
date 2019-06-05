@@ -19,8 +19,8 @@ void JInputs::Load() {
         for (j=0; j<ETADST_N; j++) {
             hEtaDist[i]->SetBinContent(j,etanch[i][j]);
         }
-        dMulti[i] = hEtaDist[i]->Integral();
-        //cout << "CentBin: " << i << ", Multi: " << dMulti[i] << endl;
+        dMulti[i] = hEtaDist[i]->Integral("width");
+        cout << "CentBin: " << i << ", Multi: " << dMulti[i] << endl;
     }
 }
 

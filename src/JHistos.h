@@ -24,34 +24,28 @@ public:
     TH1D *hMultiplicity;
     TH1D *hMultiplicityNonuni;
 
-    TH1D *hSqrtSumWeightsTPC;
-    TH1D *hSqrtSumWeightsTPCNonuni;
-    TH1D *hSqrtSumWeightsT0PA;
-    TH1D *hSqrtSumWeightsT0PANonuni;
-    TH1D *hSqrtSumWeightsT0PC;
-    TH1D *hSqrtSumWeightsT0PCNonuni;
-    TH1D *hSqrtSumWeightsV0P;
-    TH1D *hSqrtSumWeightsV0PNonuni;
+    TH1D *hSqrtSumWeights[DET_N];
+    TH1D *hSqrtSumWeightsNonuni[DET_N];
 
     // Historgrams for calculating vn values
-    TH1D *hRtrue[5];
-    TH1D *hRsub[5];
-    TH1D *hVnObs[5];
+    TH1D *hRtrue[nCoef][DET_N];
+    TH1D *hRsub[nCoef][DET_N];
+    TH1D *hVnObs[nCoef][DET_N];
 
-    TH1D *hRtrueCorrected[5];
-    TH1D *hRsubCorrected[5];
-    TH1D *hVnObsCorrected[5];
+    TH1D *hRtrueCorrected[nCoef][DET_N];
+    TH1D *hRsubCorrected[nCoef][DET_N];
+    TH1D *hVnObsCorrected[nCoef][DET_N];
 
     // Histograms for the alternative event plane method
-    TH1D *hQnQnA[5];
-    TH1D *hQnAQnB[5];
+    TH1D *hQnQnA[nCoef][DET_N];
+    TH1D *hQnAQnB[nCoef][DET_N];
 
-    TH1D *hQnQnAcorrected[5];
-    TH1D *hQnAQnBcorrected[5];
+    TH1D *hQnQnAcorrected[nCoef][DET_N];
+    TH1D *hQnAQnBcorrected[nCoef][DET_N];
 
     // pT bins for v2
-    TH1D *hPtBin[9];
-    TH1D *hSqrtSumWeightsPtBins[9];
+    TH1D *hPtBin[PTBINS_N];
+    TH1D *hSqrtSumWeightsPtBins[PTBINS_N];
 
     //FOR TESTING
     TH1D *hV2ComplexPart;

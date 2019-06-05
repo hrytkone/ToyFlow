@@ -48,6 +48,7 @@ double GetVnObs(TComplex Qvec, double phi, int n);
 double CheckIfZero(double x, double thres);
 double CheckPhi(double phi, double startAngle);
 double CheckEta(double eta);
+double BelongsToA(double phi);
 
 int main(int argc, char **argv) {
 
@@ -84,6 +85,7 @@ int main(int argc, char **argv) {
 
     TFile *fOut = TFile::Open(outFileName, "RECREATE");
 
+    gRandom->SetSeed(iSeed);
     TRandom3 *rand = new TRandom3(iSeed);
     //rand->SetSeed(0);
 
@@ -285,10 +287,11 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
     int nMult = bDoCorrections ? lists->fullEventNonuni->GetEntriesFast()
                                 : lists->fullEvent->GetEntriesFast();
 
-    TClonesArray *tempList = new TClonesArray("JToyMCTrack", 3000);
-    JToyMCTrack *tempTrack, track;
-    double eta;
+    JToyMCTrack *tempTrack, track, trackA, trackB;
+    double eta, phi;
     int detMult[DET_N] = {0};
+    int detMultA[DET_N] = {0};
+    int detMultB[DET_N] = {0};
 
     int i, j;
     for (i=0; i<nMult; i++) {
@@ -298,32 +301,33 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
 
         for (j=0; j<DET_N; j++) {
             if (cov[j][0]<eta && eta<cov[j][1]) {
-                tempList = lists->GetList(j, bDoCorrections);
                 track = *tempTrack;
-                new((*tempList)[detMult[j]]) JToyMCTrack(track);
+                new((*lists->GetList(j,bDoCorrections))[detMult[j]]) JToyMCTrack(track);
                 detMult[j]++;
+
+                phi = tempTrack->GetPhi();
+                if(i%2==0 /*BelongsToA(phi)*/) { //Later use the function.
+                    trackA = *tempTrack;
+                    new((*lists->GetList(j,bDoCorrections,"A"))[detMultA[j]]) JToyMCTrack(trackA);
+                    detMultA[j]++;
+                } else {
+                    trackB = *tempTrack;
+                    new((*lists->GetList(j,bDoCorrections,"B"))[detMultB[j]]) JToyMCTrack(trackB);
+                    detMultB[j]++;
+                }
             }
         }
     }
-
-    tempList = new TClonesArray("JToyMCTrack", 0);
-    tempList->Delete();
 }
 
 void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
 
-    int nMultTPC, nMultT0PA, nMultT0PC, nMultV0P;
+    int nMult[DET_N], nMultA[DET_N], nMultB[DET_N];
 
-    if (bDoCorrections) {
-        nMultTPC = lists->TPClistNonuni->GetEntriesFast();
-        nMultT0PA = lists->T0PAlistNonuni->GetEntriesFast();
-        nMultT0PC = lists->T0PClistNonuni->GetEntriesFast();
-        nMultV0P = lists->V0PlistNonuni->GetEntriesFast();
-    } else {
-        nMultTPC = lists->TPClist->GetEntriesFast();
-        nMultT0PA = lists->T0PAlist->GetEntriesFast();
-        nMultT0PC = lists->T0PClist->GetEntriesFast();
-        nMultV0P = lists->V0Plist->GetEntriesFast();
+    for(int iDet=0; iDet<DET_N; iDet++) {
+        nMult[iDet] = lists->GetList(iDet,bDoCorrections)->GetEntriesFast();
+        nMultA[iDet] = lists->GetList(iDet,bDoCorrections,"A")->GetEntriesFast();
+        nMultB[iDet] = lists->GetList(iDet,bDoCorrections,"B")->GetEntriesFast();
     }
 
     int i, j, k, n, jMax;
@@ -332,11 +336,11 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
     double cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus;
     double EventPlaneA, EventPlaneB, Rtrue, Rsub, vobs;
 
-    TComplex QvecTPC, QvecT0PA, QvecT0PC, QvecV0P;
+    TComplex Qvec[DET_N], QvecA[DET_N], QvecB[DET_N];
     TComplex unitVec = TComplex(0, 0);
     TComplex autocorr = TComplex(0, 0);
 
-    double normTPC, normT0PA, normT0PC, normV0P;
+    double norm[DET_N], normA[DET_N], normB[DET_N];
 
     double QnQnA, QnAQnB;
 
@@ -355,92 +359,88 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
         lambdaMinus = corrections[i][6];
         lambdaPlus = corrections[i][7];
 
-        QvecTPC = TComplex(0, 0);
-        QvecT0PA = TComplex(0, 0);
-        QvecT0PC = TComplex(0, 0);
-        QvecV0P = TComplex(0, 0);
+        for(int iDet=0; iDet<DET_N; iDet++) {
 
-        vobs = 0.0;
+            Qvec[iDet]= TComplex(0, 0);
+            QvecA[iDet] = TComplex(0, 0);
+            QvecB[iDet] = TComplex(0, 0);
 
-        normTPC = 0.0; normT0PA = 0.0; normT0PC = 0.0; normV0P = 0.0;
+            vobs = 0.0;
 
-        // Construct Q-vectors for the detectors
-        for (j=0; j<nMultTPC; j++) {
-            track = (JToyMCTrack*)lists->TPClist->At(j);
-            CalculateQvector(track, unitVec, QvecTPC, normTPC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-        }
+            norm[iDet]= 0.0; normA[iDet] = 0.0; normB[iDet] = 0.0;
 
-        if (nMultT0PA<nMultT0PC) {
-            jMax = nMultT0PA;
-        } else {
-            jMax = nMultT0PC;
-        }
+            // Construct Q-vectors for the detectors
+            for (j=0; j<nMult[iDet]; j++) {
+                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections)->At(j);
+                CalculateQvector(track, unitVec, Qvec[iDet], norm[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            }
 
-        for (j=0; j<jMax; j++) {
-            track = (JToyMCTrack*)lists->T0PAlist->At(j);
-            CalculateQvector(track, unitVec, QvecT0PA, normT0PA, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            if (nMultA[iDet]<nMultB[iDet]) {
+                jMax = nMultA[iDet];
+            } else {
+                jMax = nMultB[iDet];
+            }
 
-            track = (JToyMCTrack*)lists->T0PClist->At(j);
-            CalculateQvector(track, unitVec, QvecT0PC, normT0PC, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-        }
+            for (j=0; j<jMax; j++) {
+                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections,"A")->At(j);
+                CalculateQvector(track, unitVec, QvecA[iDet], normA[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
 
-        for (j=0; j<nMultV0P; j++) {
-            track = (JToyMCTrack*)lists->V0Plist->At(j);
-            CalculateQvector(track, unitVec, QvecV0P, normV0P, bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-        }
+                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections,"B")->At(j);
+                CalculateQvector(track, unitVec, QvecB[iDet], normB[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+            }
 
-        // Calculate vobs from TPC events
-        for (j=0; j<nMultTPC; j++) {
+            // Calculate vobs from TPC events
+            for (j=0; j<nMult[iDet]; j++) {
 
-            track = (JToyMCTrack*)lists->TPClist->At(j);
-            phi = track->GetPhi();
-            pt = track->GetPt();
+                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections)->At(j);
+                phi = track->GetPhi();
+                pt = track->GetPt();
 
-            if (bUseWeight) w = pt;
+                if (bUseWeight) w = pt;
 
-            autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
+                autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
 
-            QvecTPC -= autocorr;
-            vobs += GetVnObs(QvecTPC, phi, n);
-            QvecTPC += autocorr;
-        }
+                Qvec[iDet] -= autocorr;
+                vobs += GetVnObs(Qvec[iDet], phi, n);
+                Qvec[iDet] += autocorr;
+            }
 
-        vobs /= nMultTPC;
+            vobs /= nMult[iDet];
 
-        // Resolution parameter calculations
-        Rtrue = TMath::Cos(n*(GetEventPlane(QvecTPC, n) - Psi[i]));
+            // Resolution parameter calculations
+            Rtrue = TMath::Cos(n*(GetEventPlane(Qvec[iDet], n) - Psi[i]));
 
-        EventPlaneA = GetEventPlane(QvecT0PA, n);
-        EventPlaneB = GetEventPlane(QvecT0PC, n);
-        Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
+            EventPlaneA = GetEventPlane(QvecA[iDet], n);
+            EventPlaneB = GetEventPlane(QvecB[iDet], n);
+            Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
 
-        // ALTERNATIVE EVENT PLANE METHOD
-        normTPC = TMath::Sqrt(normTPC);
-        normT0PA = TMath::Sqrt(normT0PA);
-        normT0PC = TMath::Sqrt(normT0PC);
-        normV0P = TMath::Sqrt(normV0P);
+            // ALTERNATIVE EVENT PLANE METHOD
+            norm[iDet] = TMath::Sqrt(norm[iDet]);
+            normA[iDet] = TMath::Sqrt(normA[iDet]);
+            normB[iDet] = TMath::Sqrt(normB[iDet]);
 
-        QvecTPC /= normTPC; QvecT0PA /= normT0PA; QvecT0PC /= normT0PC; QvecV0P /= normV0P;
+            Qvec[iDet] /= norm[iDet]; QvecA[iDet] /= normA[iDet]; QvecB[iDet] /= normB[iDet];
 
-        QnQnA = QvecV0P*TComplex::Conjugate(QvecT0PA);
-        QnQnA /= TComplex::Abs(QvecT0PA);
+            QnQnA = Qvec[iDet]*TComplex::Conjugate(QvecA[iDet]);
+            QnQnA /= TComplex::Abs(QvecA[iDet]);
 
-        QnAQnB = QvecT0PA*TComplex::Conjugate(QvecT0PC);
-        QnAQnB /= TComplex::Abs(QvecT0PA);
-        QnAQnB /= TComplex::Abs(QvecT0PC);
+            QnAQnB = QvecA[iDet]*TComplex::Conjugate(QvecB[iDet]);
+            QnAQnB /= TComplex::Abs(QvecA[iDet]);
+            QnAQnB /= TComplex::Abs(QvecB[iDet]);
 
-        if (bDoCorrections) {
-            histos->hVnObsCorrected[i]->Fill(vobs);
-            histos->hRtrueCorrected[i]->Fill(Rtrue);
-            histos->hRsubCorrected[i]->Fill(Rsub);
-            histos->hQnQnAcorrected[i]->Fill(QnQnA);
-            histos->hQnAQnBcorrected[i]->Fill(QnAQnB);
-        } else {
-            histos->hVnObs[i]->Fill(vobs);
-            histos->hRtrue[i]->Fill(Rtrue);
-            histos->hRsub[i]->Fill(Rsub);
-            histos->hQnQnA[i]->Fill(QnQnA);
-            histos->hQnAQnB[i]->Fill(QnAQnB);
+            if (bDoCorrections) {
+                histos->hVnObsCorrected[i][iDet]->Fill(vobs);
+                histos->hRtrueCorrected[i][iDet]->Fill(Rtrue);
+                histos->hRsubCorrected[i][iDet]->Fill(Rsub);
+                histos->hQnQnAcorrected[i][iDet]->Fill(QnQnA);
+                histos->hQnAQnBcorrected[i][iDet]->Fill(QnAQnB);
+            } else {
+                histos->hVnObs[i][iDet]->Fill(vobs);
+                histos->hRtrue[i][iDet]->Fill(Rtrue);
+                histos->hRsub[i][iDet]->Fill(Rsub);
+                histos->hQnQnA[i][iDet]->Fill(QnQnA);
+                histos->hQnAQnB[i][iDet]->Fill(QnAQnB);
+            }
         }
 
         // Divide into pT-bins
@@ -449,7 +449,7 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
             double norms[PTBINS_N];
             for (j=0; j<PTBINS_N; j++) norms[j] = 0;
 
-            for (j=0; j<nMultTPC; j++) {
+            for (j=0; j<nMult[0]; j++) { //Only do this for TPC.
 
                 track = (JToyMCTrack*)lists->TPClist->At(j);
                 phi = track->GetPhi();
@@ -469,16 +469,16 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
 
             double l;
             for (j=0; j<PTBINS_N; j++) {
-                QvecTPC = TComplex(0, 0);
+                Qvec[0] = TComplex(0, 0);
                 l = pTBinsQ[j].size();
                 for (k=0; k<l; k++) {
-                    QvecTPC += pTBinsQ[j][k];
+                    Qvec[0] += pTBinsQ[j][k];
                 }
                 weight = TMath::Sqrt(norms[j]);
-                if (weight!=0) QvecTPC /= weight;
-                histos->hV2ComplexPart->Fill(QvecTPC.Im()*QvecT0PA.Im());
-                QnQnA = QvecTPC*TComplex::Conjugate(QvecT0PA);
-                QnQnA /= TComplex::Abs(QvecT0PA);
+                if (weight!=0) Qvec[0] /= weight;
+                histos->hV2ComplexPart->Fill(Qvec[0].Im()*Qvec[1].Im());
+                QnQnA = Qvec[0]*TComplex::Conjugate(Qvec[1]);
+                QnQnA /= TComplex::Abs(Qvec[1]);
                 histos->hPtBin[j]->Fill(QnQnA);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
                 pTBinsQ[j].clear();
@@ -486,18 +486,15 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
 
         }
     }
-
-    if (bDoCorrections) {
-        histos->hSqrtSumWeightsTPCNonuni->Fill(normTPC);
-        histos->hSqrtSumWeightsT0PANonuni->Fill(normT0PA);
-        histos->hSqrtSumWeightsT0PCNonuni->Fill(normT0PC);
-        histos->hSqrtSumWeightsV0PNonuni->Fill(normV0P);
-    } else {
-        histos->hSqrtSumWeightsTPC->Fill(normTPC);
-        histos->hSqrtSumWeightsT0PA->Fill(normT0PA);
-        histos->hSqrtSumWeightsT0PC->Fill(normT0PC);
-        histos->hSqrtSumWeightsV0P->Fill(normV0P);
+    for(int iDet=0; iDet<DET_N; iDet++) {
+        if (bDoCorrections) {
+            histos->hSqrtSumWeightsNonuni[iDet]->Fill(norm[iDet]);
+        } else {
+            histos->hSqrtSumWeights[iDet]->Fill(norm[iDet]);
+        }
     }
+
+
 }
 
 double PtDist(double *x, double *p) {
@@ -646,4 +643,8 @@ double CheckEta(double eta) {
             return ringEta[i] + (ringEta[i+1]-ringEta[i])/2.0;
     }
     return eta;
+}
+
+double BelongsToA(double phi) {
+    return phi>0;
 }
