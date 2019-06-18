@@ -208,7 +208,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     JToyMCTrack track;
     TLorentzVector lVec;
 
-    centrality = rand->Uniform(0.0, 90.0);
+    centrality = rand->Uniform(0.0, 5.0);
     int centBin = 0;
 
     nMult = 0;
