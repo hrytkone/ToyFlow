@@ -7,6 +7,7 @@
 double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr);
+void checkUnderOverFlow( TH1 *h );
 
 void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowGraphs.root", const int iDet=0) {
 
@@ -20,6 +21,7 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     double inputFlow[nCoef] = {0.0};
 
     TH1D *hInputNumbers = (TH1D*)fIn->Get("hInputNumbers");
+    checkUnderOverFlow(hInputNumbers);
     double nEvents = hInputNumbers->GetBinContent(1);
     double nOfFiles = hInputNumbers->GetBinContent(14);
     for(int i = 0; i < nCoef; i++) {
@@ -31,7 +33,9 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TH1D *hSqrtSumWeightsNonuni[DET_N];
 
     hSqrtSumWeights[iDet] = (TH1D*)fIn->Get(Form("hSqrtSumWeightsD%02i",iDet));
+    checkUnderOverFlow(hSqrtSumWeights[iDet]);
     hSqrtSumWeightsNonuni[iDet] = (TH1D*)fIn->Get(Form("hSqrtSumWeightsNonuniD%02i",iDet));
+    checkUnderOverFlow(hSqrtSumWeightsNonuni[iDet]);
 
     TH1D *hInputFlow = new TH1D("hInputFlow", "hInputFlow", nCoef, 0.5, double(nCoef)+0.5);
     hInputFlow->SetLineStyle(1);
@@ -42,7 +46,9 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     hInputFlow->Fill(double(nCoef+1), 0.0);
 
     TH1D *hPhi = (TH1D*)fIn->Get("hPhi");
+    checkUnderOverFlow(hPhi);
     TH1D *hPhiNonuni = (TH1D*)fIn->Get("hPhiNonuni");
+    checkUnderOverFlow(hPhiNonuni);
 
     //=====vn=====
     // Observed vn
@@ -50,7 +56,9 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TH1D *hVnObsCorrected[nCoef][DET_N];
     for (i = 0; i < nCoef; i++) {
         hVnObs[i][iDet] = (TH1D*)fIn->Get(Form("hVnObsH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hVnObs[i][iDet]);
         hVnObsCorrected[i][iDet] = (TH1D*)fIn->Get(Form("hVnObsCorrectedH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hVnObsCorrected[i][iDet]);
     }
 
     // Resolution parameter
@@ -60,9 +68,13 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TH1D *hRtrueCorrected[nCoef][DET_N];
     for (i = 0; i < nCoef; i++) {
         hRsub[i][iDet] = (TH1D*)fIn->Get(Form("hRsubH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hRsub[i][iDet]);
         hRsubCorrected[i][iDet] = (TH1D*)fIn->Get(Form("hRsubCorrectedH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hRsubCorrected[i][iDet]);
         hRtrue[i][iDet] = (TH1D*)fIn->Get(Form("hRtrueH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hRtrue[i][iDet]);
         hRtrueCorrected[i][iDet] = (TH1D*)fIn->Get(Form("hRtrueCorrectedH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hRtrueCorrected[i][iDet]);
     }
 
     double vnEP[nCoef], errorVnEP[nCoef] = {0};
@@ -125,9 +137,13 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TH1D *hQnAQnBcorrected[nCoef][DET_N];
     for (i = 0; i < nCoef; i++) {
         hQnQnA[i][iDet] = (TH1D*)fIn->Get(Form("hQnQnAH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hQnQnA[i][iDet]);
         hQnAQnB[i][iDet] = (TH1D*)fIn->Get(Form("hQnAQnBH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hQnAQnB[i][iDet]);
         hQnQnAcorrected[i][iDet] = (TH1D*)fIn->Get(Form("hQnQnAcorrectedH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hQnQnAcorrected[i][iDet]);
         hQnAQnBcorrected[i][iDet] = (TH1D*)fIn->Get(Form("hQnAQnBcorrectedH%02iD%02i", i+1,iDet));
+        checkUnderOverFlow(hQnAQnBcorrected[i][iDet]);
     }
 
     double w = hSqrtSumWeights[iDet]->GetMean();
@@ -146,18 +162,20 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     }
 
     // pT bins
-    TH1D *hPtBin[nPtBins];
+    TH1D *hQnQnAPtBin[nPtBins];
     TH1D *hSqrtSumWeightsPtBins[nPtBins];
     for (i=0; i<nPtBins; i++) {
-        hPtBin[i] = (TH1D*)fIn->Get(Form("hPtBinH%02i", i+1));
+        hQnQnAPtBin[i] = (TH1D*)fIn->Get(Form("hQnQnAPtBin%02i", i+1));
+        checkUnderOverFlow(hQnQnAPtBin[i]);
         hSqrtSumWeightsPtBins[i] = (TH1D*)fIn->Get(Form("hSqrtSumWeightsPtBinsH%02i", i+1));
+        checkUnderOverFlow(hSqrtSumWeightsPtBins[i]);
     }
 
     double ptBin[nPtBins];
     double ptBinError[nPtBins];
     for (i=0; i<nPtBins; i++) {
-        ptBin[i] = CalculateVn(hPtBin[i]->GetMean(), hQnAQnB[1][iDet]->GetMean(), hSqrtSumWeightsPtBins[i]->GetMean());
-        ptBinError[i] = CalculateVnError(hPtBin[i]->GetMean(), hQnAQnB[1][iDet]->GetMean(), hPtBin[i]->GetMeanError(), hQnAQnB[1][iDet]->GetMeanError(), hSqrtSumWeightsPtBins[i]->GetMean(), hSqrtSumWeightsPtBins[i]->GetMeanError());
+        ptBin[i] = CalculateVn(hQnQnAPtBin[i]->GetMean(), hQnAQnB[1][iDet]->GetMean(), hSqrtSumWeightsPtBins[i]->GetMean());
+        ptBinError[i] = CalculateVnError(hQnQnAPtBin[i]->GetMean(), hQnAQnB[1][iDet]->GetMean(), hQnQnAPtBin[i]->GetMeanError(), hQnAQnB[1][iDet]->GetMeanError(), hSqrtSumWeightsPtBins[i]->GetMean(), hSqrtSumWeightsPtBins[i]->GetMeanError());
     }
 
     // Make graphs
@@ -237,4 +255,9 @@ double CalculateVn(double QnQnA, double QnAQnB, double w) {
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr) {
     double vn = CalculateVn(QnQnA, QnAQnB, w);
     return vn*(QnQnAerr/QnQnA + 0.5*QnAQnBerr/QnAQnB + wErr/w);
+}
+
+void checkUnderOverFlow( TH1 *h ){
+        if(h->GetBinContent(0)>0) cout << h->GetName() << " underflow bin not empty: " << h->GetBinContent(0) << endl;
+        if(h->GetBinContent(h->GetXaxis()->GetNbins()+1)>0) cout << h->GetName() << " overflow bin not empty: " << h->GetBinContent(h->GetXaxis()->GetNbins()+1) << endl;
 }

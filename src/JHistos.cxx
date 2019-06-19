@@ -31,9 +31,9 @@ JHistos::JHistos(){
 
 
     for (i=0; i<DET_N; i++){
-        hSqrtSumWeights[i]= new TH1D(Form("hSqrtSumWeightsD%02i",i),"sqrt of sum of weights squares", 240, 0.0, 60.0);
+        hSqrtSumWeights[i]= new TH1D(Form("hSqrtSumWeightsD%02i",i),"sqrt of sum of weights squares", 480, 0.0, 120.0);
         hSqrtSumWeights[i]->Sumw2();
-        hSqrtSumWeightsNonuni[i] = new TH1D(Form("hSqrtSumWeightsNonuniD%02i",i),"sqrt of sum of weights squares - nonuni", 240, 0.0, 60.0);
+        hSqrtSumWeightsNonuni[i] = new TH1D(Form("hSqrtSumWeightsNonuniD%02i",i),"sqrt of sum of weights squares - nonuni", 480, 0.0, 120.0);
         hSqrtSumWeightsNonuni[i]->Sumw2();
     }
 
@@ -67,8 +67,8 @@ JHistos::JHistos(){
     }
 
     for (i=0; i<PTBINS_N; i++) {
-        hPtBin[i] = new TH1D(Form("hPtBinH%02i", i+1), Form("hPtBin%02i", i+1), 401, -10.0, 10.0);
-        hPtBin[i]->Sumw2();
+        hQnQnAPtBin[i] = new TH1D(Form("hQnQnAPtBin%02i", i+1), Form("hQnQnAPtBin%02i", i+1), 482, -11.0, 11.0);
+        hQnQnAPtBin[i]->Sumw2();
         hSqrtSumWeightsPtBins[i] = new TH1D(Form("hSqrtSumWeightsPtBinsH%02i", i+1),Form("sqrt of sum of weights squares for pT bin %02i", i+1), 240, 0.0, 60.0);
         hSqrtSumWeightsPtBins[i]->Sumw2();
     }

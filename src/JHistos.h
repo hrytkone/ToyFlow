@@ -44,7 +44,7 @@ public:
     TH1D *hQnAQnBcorrected[nCoef][DET_N];
 
     // pT bins for v2
-    TH1D *hPtBin[PTBINS_N];
+    TH1D *hQnQnAPtBin[PTBINS_N];
     TH1D *hSqrtSumWeightsPtBins[PTBINS_N];
 
     //FOR TESTING

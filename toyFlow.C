@@ -479,7 +479,7 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
                 histos->hV2ComplexPart->Fill(Qvec[0].Im()*Qvec[1].Im());
                 QnQnA = Qvec[0]*TComplex::Conjugate(Qvec[1]);
                 QnQnA /= TComplex::Abs(Qvec[1]);
-                histos->hPtBin[j]->Fill(QnQnA);
+                histos->hQnQnAPtBin[j]->Fill(QnQnA);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
                 pTBinsQ[j].clear();
             }
