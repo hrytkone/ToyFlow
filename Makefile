@@ -39,10 +39,8 @@ $(PROGRAM):     $(OBJS) $(PROGRAM).C
 	$(COMPILE.cc) $(OUTPUT_OPTION) $(FFTWINC) $<
 
 
-
-
 clean:
-	rm -f $(PROGRAM) *.o nanoDict* *_h* *_C* *_c*
+	rm -f $(PROGRAM) *.o nanoDict*
 
 nanoDict.cc: $(HDRSDICT)
 		@echo "Generating dictionary ..."

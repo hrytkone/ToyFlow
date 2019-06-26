@@ -95,12 +95,14 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         vnEP[i] = hVnObs[i][iDet]->GetMean();
         vnEPtrue[i] = hVnObs[i][iDet]->GetMean();
 
-        Rinit = hRsub[i][iDet]->GetMean();
+        Rinit = TMath::Sqrt(hRsub[i][iDet]->GetMean());
         khi = RIter(khi0, Rinit, err);
-        R[i] = R1(TMath::Sqrt(2)*khi);
+        R[i] = R1(TMath::Sqrt(2)*khi); //Because khi sim sqrt(Multi) and full event has twice multiplicity compared to A or B.
         errorR[i] = CalculateRerror(khi, err);
 
-        cout << "R=" << R[i] << "  err=" << errorR[i] << "\n";
+        cout << "R=    " << R[i] <<                       "  err=" << errorR[i] << "\n";
+        cout << "Rtrue=" << hRtrue[i][iDet]->GetMean() << "  err=" << hRtrue[i][iDet]->GetMeanError() << "\n";
+        cout << "R/Rtrue=" << R[i]/hRtrue[i][iDet]->GetMean() << endl;
 
         vnEP[i] /= R[i];
         errorVnEP[i] = GetVnError(hVnObs[i][iDet]->GetMean(), hVnObs[i][iDet]->GetMeanError(), R[i], errorR[i]);
@@ -254,7 +256,7 @@ double CalculateVn(double QnQnA, double QnAQnB, double w) {
 
 double CalculateVnError(double QnQnA, double QnAQnB, double QnQnAerr, double QnAQnBerr, double w, double wErr) {
     double vn = CalculateVn(QnQnA, QnAQnB, w);
-    return vn*(QnQnAerr/QnQnA + 0.5*QnAQnBerr/QnAQnB + wErr/w);
+    return vn*TMath::Sqrt(QnQnAerr*QnQnAerr/QnQnA/QnQnA + 0.5*0.5*QnAQnBerr*QnAQnBerr/QnAQnB/QnAQnB + wErr*wErr/w/w);
 }
 
 void checkUnderOverFlow( TH1 *h ){
