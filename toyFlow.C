@@ -53,6 +53,10 @@ double BelongsToA(double phi);
 int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
+    if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran seedNum" << endl;
+        return 0;
+    };
     int nEvents = argc > 2 ? atol(argv[2]):1000;
     bool bUsePtDependence = argc > 3 ? atol(argv[3]):0;
     bool bUseGranularity = argc > 4 ? atol(argv[4]):0;
@@ -292,6 +296,7 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
     int detMult[DET_N] = {0};
     int detMultA[DET_N] = {0};
     int detMultB[DET_N] = {0};
+    //double detCenter = 0.0;
 
     int i, j;
     for (i=0; i<nMult; i++) {
@@ -306,7 +311,8 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
                 detMult[j]++;
 
                 phi = tempTrack->GetPhi();
-                if(i%2==0 /*BelongsToA(phi)*/) { //Later use the function.
+                //detCenter = (cov[j][0]+cov[j][1])/2.0;
+                if(/*eta<detCenter*/ i%2==0 /*BelongsToA(phi)*/) { //Later use the function.
                     trackA = *tempTrack;
                     new((*lists->GetList(j,bDoCorrections,"A"))[detMultA[j]]) JToyMCTrack(trackA);
                     detMultA[j]++;
@@ -382,9 +388,13 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
             }
 
             for (j=0; j<jMax; j++) {
+            //for (j=0; j<nMult[1]; j++) {
+                //track = (JToyMCTrack*)lists->GetList(1,bDoCorrections)->At(j);
                 track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections,"A")->At(j);
                 CalculateQvector(track, unitVec, QvecA[iDet], normA[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
-
+            //}
+            //for (j=0; j<nMult[2]; j++) {
+                //track = (JToyMCTrack*)lists->GetList(2,bDoCorrections)->At(j);
                 track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections,"B")->At(j);
                 CalculateQvector(track, unitVec, QvecB[iDet], normB[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
             }
