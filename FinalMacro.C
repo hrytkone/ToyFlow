@@ -1,10 +1,17 @@
+#include <TSystem.h>
+
 void FinalMacro(TString sIn="toyFlow.root") {
     gROOT->ProcessLine(".I /home/heimarry/alice/sw/slc7_x86-64/boost/v1.59.0-1/include/");
     gROOT->ProcessLine(".I src/ResIter.h");
 
-    cout << "Run MakeGraphs.C: " << Form(".x MakeGraphs.C(\"%s\")",sIn.Data()) << endl;
+    if (gSystem->AccessPathName(sIn)) {
+        cout << "File \"" << sIn << "\" not found!\n";
+        return 0;
+    }
+
+    cout << "Run MakeGraphs.C: " << Form(".x MakeGraphs.C(\"%s\")",sIn.Data()) << "\n";
     gROOT->ProcessLine(Form(".x MakeGraphs.C(\"%s\")",sIn.Data()));
-    cout << "Run PlotVn.C" << endl;
+    cout << "Run PlotVn.C\n";
     gROOT->ProcessLine(".x PlotVn.C");
     //gROOT->ProcessLine(".x TestIter.C");
 }
