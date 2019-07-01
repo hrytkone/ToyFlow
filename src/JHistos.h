@@ -27,21 +27,28 @@ public:
     TH1D *hSqrtSumWeights[DET_N];
     TH1D *hSqrtSumWeightsNonuni[DET_N];
 
-    // Historgrams for calculating vn values
+    // Historgrams for resolutions and vobs
     TH1D *hRtrue[nCoef][DET_N];
     TH1D *hRsub[nCoef][DET_N];
     TH1D *hVnObs[nCoef][DET_N];
 
-    TH1D *hRtrueCorrected[nCoef][DET_N];
-    TH1D *hRsubCorrected[nCoef][DET_N];
-    TH1D *hVnObsCorrected[nCoef][DET_N];
+    TH1D *hRtrueNonuni[nCoef][DET_N];
+    TH1D *hRsubNonuni[nCoef][DET_N];
+    TH1D *hVnObsNonuni[nCoef][DET_N];
 
-    // Histograms for the alternative event plane method
-    TH1D *hQnQnA[nCoef][DET_N];
-    TH1D *hQnAQnB[nCoef][DET_N];
+    // Histograms for EP-method
+    TH1D *hQnQnAEP[nCoef][DET_N];
+    TH1D *hQnAQnBEP[nCoef][DET_N];
 
-    TH1D *hQnQnAcorrected[nCoef][DET_N];
-    TH1D *hQnAQnBcorrected[nCoef][DET_N];
+    TH1D *hQnQnAEPnonuni[nCoef][DET_N];
+    TH1D *hQnAQnBEPnonuni[nCoef][DET_N];
+
+    // Histograms for SP-method
+    TH1D *hQnQnASP[nCoef][DET_N];
+    TH1D *hQnAQnBSP[nCoef][DET_N];
+
+    TH1D *hQnQnASPnonuni[nCoef][DET_N];
+    TH1D *hQnAQnBSPnonuni[nCoef][DET_N];
 
     // pT bins for v2
     TH1D *hQnQnAPtBin[PTBINS_N];

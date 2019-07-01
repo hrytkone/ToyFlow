@@ -424,7 +424,7 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
             EventPlaneB = GetEventPlane(QvecB[iDet], n);
             Rsub = TMath::Cos(n*(EventPlaneA - EventPlaneB));
 
-            // ALTERNATIVE EVENT PLANE METHOD
+            // EP-method and SP-method
             norm[iDet] = TMath::Sqrt(norm[iDet]);
             normA[iDet] = TMath::Sqrt(normA[iDet]);
             normB[iDet] = TMath::Sqrt(normB[iDet]);
@@ -432,24 +432,28 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
             Qvec[iDet] /= norm[iDet]; QvecA[iDet] /= normA[iDet]; QvecB[iDet] /= normB[iDet];
 
             QnQnA = Qvec[iDet]*TComplex::Conjugate(QvecA[iDet]);
-            QnQnA /= TComplex::Abs(QvecA[iDet]);
+            //QnQnA /= TComplex::Abs(QvecA[iDet]);
 
             QnAQnB = QvecA[iDet]*TComplex::Conjugate(QvecB[iDet]);
-            QnAQnB /= TComplex::Abs(QvecA[iDet]);
-            QnAQnB /= TComplex::Abs(QvecB[iDet]);
+            //QnAQnB /= TComplex::Abs(QvecA[iDet]);
+            //QnAQnB /= TComplex::Abs(QvecB[iDet]);
 
             if (bDoCorrections) {
-                histos->hVnObsCorrected[i][iDet]->Fill(vobs);
-                histos->hRtrueCorrected[i][iDet]->Fill(Rtrue);
-                histos->hRsubCorrected[i][iDet]->Fill(Rsub);
-                histos->hQnQnAcorrected[i][iDet]->Fill(QnQnA);
-                histos->hQnAQnBcorrected[i][iDet]->Fill(QnAQnB);
+                histos->hVnObsNonuni[i][iDet]->Fill(vobs);
+                histos->hRtrueNonuni[i][iDet]->Fill(Rtrue);
+                histos->hRsubNonuni[i][iDet]->Fill(Rsub);
+                histos->hQnQnAEPnonuni[i][iDet]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
+                histos->hQnAQnBEPnonuni[i][iDet]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
+                histos->hQnQnASPnonuni[i][iDet]->Fill(QnQnA);
+                histos->hQnAQnBSPnonuni[i][iDet]->Fill(QnAQnB);
             } else {
                 histos->hVnObs[i][iDet]->Fill(vobs);
                 histos->hRtrue[i][iDet]->Fill(Rtrue);
                 histos->hRsub[i][iDet]->Fill(Rsub);
-                histos->hQnQnA[i][iDet]->Fill(QnQnA);
-                histos->hQnAQnB[i][iDet]->Fill(QnAQnB);
+                histos->hQnQnAEP[i][iDet]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
+                histos->hQnAQnBEP[i][iDet]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
+                histos->hQnQnASP[i][iDet]->Fill(QnQnA);
+                histos->hQnAQnBSP[i][iDet]->Fill(QnAQnB);
             }
         }
 
