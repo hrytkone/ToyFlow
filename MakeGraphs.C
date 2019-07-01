@@ -117,7 +117,7 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         vnNonuni[i] = hVnObsNonuni[i][iDet]->GetMean();
         vnTrueNonuni[i] = hVnObsNonuni[i][iDet]->GetMean();
 
-        Rinit = hRsubNonuni[i][iDet]->GetMean();
+        Rinit = TMath::Sqrt(hRsubNonuni[i][iDet]->GetMean());
         khi = RIter(khi0, Rinit, err);
         Rnonuni[i] = R1(TMath::Sqrt(2)*khi);
         errorRnonuni[i] = CalculateRerror(khi, err);
@@ -220,8 +220,8 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     for(i = 0; i < nCoef; i++){
         gVnTrue->SetPoint(i, double(i+1)-0.3, vnTrue[i]);
         gVnTrue->SetPointError(i, 0.0, errorVnTrue[i]);
-        gVn->SetPoint(i, double(i+1)-0.1, vnEP[i]);
-        gVn->SetPointError(i, 0.0, errorVnEP[i]);
+        gVn->SetPoint(i, double(i+1)-0.1, vn[i]);
+        gVn->SetPointError(i, 0.0, errorVn[i]);
         gVnEP->SetPoint(i, double(i+1)+0.1, vnEP[i]);
         gVnEP->SetPointError(i, 0.0, errorVnEP[i]);
         gVnSP->SetPoint(i, double(i+1)+0.3, vnSP[i]);

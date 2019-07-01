@@ -123,7 +123,7 @@ void PlotVn() {
 
     gStyle->SetOptStat(0);
 
-    TCanvas *c1 = new TCanvas("c1", "vn values with different methods");
+    TCanvas *c1 = new TCanvas("c1", "vn values with different methods - uniform phi");
     c1->cd();
 
     TLegend *leg1 = new TLegend(0.50,0.6,0.85,0.85,"","brNDC");
