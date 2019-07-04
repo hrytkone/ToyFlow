@@ -48,3 +48,8 @@ double JInputs::GetEta(int centrality) {
     return eta;
 }
 
+int JInputs::GetCentBin(double centrality) {
+    for (int i=0; i<CENTBINS_N-1; i++)
+        if (centrality>centBins[i] && centrality<centBins[i+1]) return i;
+    return -1;
+}

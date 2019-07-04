@@ -24,31 +24,31 @@ public:
     TH1D *hMultiplicity;
     TH1D *hMultiplicityNonuni;
 
-    TH1D *hSqrtSumWeights[DET_N];
-    TH1D *hSqrtSumWeightsNonuni[DET_N];
+    TH1D *hSqrtSumWeights[DET_N][CENTBINS_N];
+    TH1D *hSqrtSumWeightsNonuni[DET_N][CENTBINS_N];
 
     // Historgrams for resolutions and vobs
-    TH1D *hRtrue[nCoef][DET_N];
-    TH1D *hRsub[nCoef][DET_N];
-    TH1D *hVnObs[nCoef][DET_N];
+    TH1D *hRtrue[nCoef][DET_N][CENTBINS_N];
+    TH1D *hRsub[nCoef][DET_N][CENTBINS_N];
+    TH1D *hVnObs[nCoef][DET_N][CENTBINS_N];
 
-    TH1D *hRtrueNonuni[nCoef][DET_N];
-    TH1D *hRsubNonuni[nCoef][DET_N];
-    TH1D *hVnObsNonuni[nCoef][DET_N];
+    TH1D *hRtrueNonuni[nCoef][DET_N][CENTBINS_N];
+    TH1D *hRsubNonuni[nCoef][DET_N][CENTBINS_N];
+    TH1D *hVnObsNonuni[nCoef][DET_N][CENTBINS_N];
 
     // Histograms for EP-method
-    TH1D *hQnQnAEP[nCoef][DET_N];
-    TH1D *hQnAQnBEP[nCoef][DET_N];
+    TH1D *hQnQnAEP[nCoef][DET_N][CENTBINS_N];
+    TH1D *hQnAQnBEP[nCoef][DET_N][CENTBINS_N];
 
-    TH1D *hQnQnAEPnonuni[nCoef][DET_N];
-    TH1D *hQnAQnBEPnonuni[nCoef][DET_N];
+    TH1D *hQnQnAEPnonuni[nCoef][DET_N][CENTBINS_N];
+    TH1D *hQnAQnBEPnonuni[nCoef][DET_N][CENTBINS_N];
 
     // Histograms for SP-method
-    TH1D *hQnQnASP[nCoef][DET_N];
-    TH1D *hQnAQnBSP[nCoef][DET_N];
+    TH1D *hQnQnASP[nCoef][DET_N][CENTBINS_N];
+    TH1D *hQnAQnBSP[nCoef][DET_N][CENTBINS_N];
 
-    TH1D *hQnQnASPnonuni[nCoef][DET_N];
-    TH1D *hQnAQnBSPnonuni[nCoef][DET_N];
+    TH1D *hQnQnASPnonuni[nCoef][DET_N][CENTBINS_N];
+    TH1D *hQnAQnBSPnonuni[nCoef][DET_N][CENTBINS_N];
 
     // pT bins for v2
     TH1D *hQnQnAPtBin[PTBINS_N];

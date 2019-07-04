@@ -69,6 +69,7 @@ public:
     void Load();
     int GetMultiplicity(int centrality);
     double GetEta(int centrality);
+    int GetCentBin(double centrality);
 
 private:
     bool CheckCentBin(int centBin);

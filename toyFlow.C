@@ -27,9 +27,9 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality);
 void GetParticleLists(JEventLists *lists, bool bDoCorrections);
-void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections);
+void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections, double centrality);
 
 double AcceptanceFunc(double *x, double *p);
 double AcceptanceFuncTimesSin(double *x, double *p);
@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
     JInputs *inputs = new JInputs();
     inputs->Load();
 
+    double centrality;
     double Psi[nCoef] = {0};
 
     double Teff = Tdec * TMath::Sqrt((1.+vr)/(1.-vr));
@@ -179,17 +180,19 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI);
+        centrality = rand->Uniform(0.0, 90.0);
+
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI, centrality);
 
         // Analysis of uniform distribution
         bDoCorrections = false;
         GetParticleLists(lists, bDoCorrections);
-        AnalyzeEvent(lists, histos, Psi, bUseWeight, bDoCorrections, corrections);
+        AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bDoCorrections, corrections, centrality);
 
         // Analysis of non-uniform distribution
         bDoCorrections = true;
         GetParticleLists(lists, bDoCorrections);
-        AnalyzeEvent(lists, histos, Psi, bUseWeight, bDoCorrections, corrections);
+        AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bDoCorrections, corrections, centrality);
 
     }
 
@@ -200,10 +203,10 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle) {
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality) {
     double pT, phi, eta, Energy;
     double px, py, pz;
-    double centrality, randNum;
+    double randNum;
     double vnTemp[nCoef];
 
     double nMult, nMultNonuni;
@@ -212,7 +215,6 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     JToyMCTrack track;
     TLorentzVector lVec;
 
-    centrality = rand->Uniform(0.0, 5.0);
     int centBin = 0;
 
     nMult = 0;
@@ -326,7 +328,7 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
     }
 }
 
-void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections) {
+void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections, double centrality) {
 
     int nMult[DET_N], nMultA[DET_N], nMultB[DET_N];
 
@@ -349,6 +351,8 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
     double norm[DET_N], normA[DET_N], normB[DET_N];
 
     double QnQnA, QnAQnB;
+
+    int centBin = inputs->GetCentBin(centrality);
 
     vector<vector<TComplex>> pTBinsQ;
     pTBinsQ.resize(PTBINS_N);
@@ -439,21 +443,21 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
             //QnAQnB /= TComplex::Abs(QvecB[iDet]);
 
             if (bDoCorrections) {
-                histos->hVnObsNonuni[i][iDet]->Fill(vobs);
-                histos->hRtrueNonuni[i][iDet]->Fill(Rtrue);
-                histos->hRsubNonuni[i][iDet]->Fill(Rsub);
-                histos->hQnQnAEPnonuni[i][iDet]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
-                histos->hQnAQnBEPnonuni[i][iDet]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
-                histos->hQnQnASPnonuni[i][iDet]->Fill(QnQnA);
-                histos->hQnAQnBSPnonuni[i][iDet]->Fill(QnAQnB);
+                histos->hVnObsNonuni[i][iDet][centBin]->Fill(vobs);
+                histos->hRtrueNonuni[i][iDet][centBin]->Fill(Rtrue);
+                histos->hRsubNonuni[i][iDet][centBin]->Fill(Rsub);
+                histos->hQnQnAEPnonuni[i][iDet][centBin]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
+                histos->hQnAQnBEPnonuni[i][iDet][centBin]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
+                histos->hQnQnASPnonuni[i][iDet][centBin]->Fill(QnQnA);
+                histos->hQnAQnBSPnonuni[i][iDet][centBin]->Fill(QnAQnB);
             } else {
-                histos->hVnObs[i][iDet]->Fill(vobs);
-                histos->hRtrue[i][iDet]->Fill(Rtrue);
-                histos->hRsub[i][iDet]->Fill(Rsub);
-                histos->hQnQnAEP[i][iDet]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
-                histos->hQnAQnBEP[i][iDet]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
-                histos->hQnQnASP[i][iDet]->Fill(QnQnA);
-                histos->hQnAQnBSP[i][iDet]->Fill(QnAQnB);
+                histos->hVnObs[i][iDet][centBin]->Fill(vobs);
+                histos->hRtrue[i][iDet][centBin]->Fill(Rtrue);
+                histos->hRsub[i][iDet][centBin]->Fill(Rsub);
+                histos->hQnQnAEP[i][iDet][centBin]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
+                histos->hQnAQnBEP[i][iDet][centBin]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
+                histos->hQnQnASP[i][iDet][centBin]->Fill(QnQnA);
+                histos->hQnAQnBSP[i][iDet][centBin]->Fill(QnAQnB);
             }
         }
 
@@ -502,9 +506,9 @@ void AnalyzeEvent(JEventLists *lists, JHistos *histos, double *Psi, bool bUseWei
     }
     for(int iDet=0; iDet<DET_N; iDet++) {
         if (bDoCorrections) {
-            histos->hSqrtSumWeightsNonuni[iDet]->Fill(norm[iDet]);
+            histos->hSqrtSumWeightsNonuni[iDet][centBin]->Fill(norm[iDet]);
         } else {
-            histos->hSqrtSumWeights[iDet]->Fill(norm[iDet]);
+            histos->hSqrtSumWeights[iDet][centBin]->Fill(norm[iDet]);
         }
     }
 
