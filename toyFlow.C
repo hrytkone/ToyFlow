@@ -64,6 +64,7 @@ int main(int argc, char **argv) {
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
+    bool bUseCentDependence = false;
 
     const double scale = 1.0;
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
@@ -76,6 +77,7 @@ int main(int argc, char **argv) {
          << ", Seed: " << iSeed
          << ", Weight: " << bUseWeight
          << ", Random Psi: " << bRandomPsi
+         << ", Centrality-dep: " << bUseCentDependence
          << endl;
     cout << "Vn inputs: ";
     for(int i=0; i<nCoef; i++) cout << vn[i] << ", ";
@@ -177,10 +179,14 @@ int main(int argc, char **argv) {
             }
         }
 
+        centrality = rand->Uniform(0.0, 60.0);
+
+        if (bUseCentDependence) {
+            for (j=0; j<nCoef; j++) vn[j] = inputs->GetCentDependVn(j+1, centrality);
+        }
+
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
-
-        centrality = rand->Uniform(0.0, 90.0);
 
         GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI, centrality);
 
@@ -241,7 +247,6 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             }
             fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
                 Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
-
         }
 
         phi = fPhi->GetRandom();
@@ -504,6 +509,7 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
 
         }
     }
+
     for(int iDet=0; iDet<DET_N; iDet++) {
         if (bDoCorrections) {
             histos->hSqrtSumWeightsNonuni[iDet][centBin]->Fill(norm[iDet]);

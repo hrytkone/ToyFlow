@@ -53,3 +53,8 @@ int JInputs::GetCentBin(double centrality) {
         if (centrality>centBins[i] && centrality<centBins[i+1]) return i;
     return -1;
 }
+
+double JInputs::GetCentDependVn(int n, double centrality) {
+    int centBin = GetCentBin(centrality);
+    return centvn[n-1][centBin];
+}
