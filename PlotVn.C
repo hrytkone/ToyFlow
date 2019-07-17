@@ -23,7 +23,14 @@ TGraphErrors *gVnTrueNonuni[nsets];
 TGraphErrors *gVnEPnonuni[nsets];
 TGraphErrors *gVnSPnonuni[nsets];
 
+TGraphErrors *gVnRatio[nsets];
+TGraphErrors *gVnTrueRatio[nsets];
+TGraphErrors *gVnEPRatio[nsets];
+TGraphErrors *gVnSPRatio[nsets];
+
 TGraphErrors *gPtBin[nsets];
+
+TF1 *fConst;
 
 int mMarker[nsets] = {24};
 
@@ -42,6 +49,9 @@ void hset(TH1& hid, TString xtit="", TString ytit="",
 void PlotVn() {
 
     TH2F *hfr;
+
+    fConst = new TF1("fConst","1",0.5,5.5);
+    fConst->SetLineColor(kBlack);
 
     int i, j;
     for (i=0; i<nsets; i++) {
@@ -65,6 +75,11 @@ void PlotVn() {
         gVnEPnonuni[i] = (TGraphErrors*) fIn[i]->Get("gVnEPnonuni");
         gVnSPnonuni[i] = (TGraphErrors*) fIn[i]->Get("gVnSPnonuni");
 
+        gVnRatio[i] = (TGraphErrors*) fIn[i]->Get("gVnRatio");
+        gVnTrueRatio[i] = (TGraphErrors*) fIn[i]->Get("gVnTrueRatio");
+        gVnEPRatio[i] = (TGraphErrors*) fIn[i]->Get("gVnEPRatio");
+        gVnSPRatio[i] = (TGraphErrors*) fIn[i]->Get("gVnSPRatio");
+
         gPtBin[i] = (TGraphErrors*) fIn[i]->Get("gPtBin");
 
         gR[i]->SetMarkerStyle(mMarker[i]+1);
@@ -83,21 +98,21 @@ void PlotVn() {
         gRtrueNonuni[i]->SetMarkerColor(i+4);
         gRtrueNonuni[i]->SetMarkerSize(mSize);
 
-        gVn[i]->SetMarkerStyle(mMarker[i]);
-        gVn[i]->SetMarkerColor(i+1);
-        gVn[i]->SetMarkerSize(mSize);
+        gVn[i]->SetMarkerStyle(mMarker[i]); gVnRatio[i]->SetMarkerStyle(mMarker[i]);
+        gVn[i]->SetMarkerColor(i+1); gVnRatio[i]->SetMarkerColor(i+1);
+        gVn[i]->SetMarkerSize(mSize); gVnRatio[i]->SetMarkerSize(mSize);
 
-        gVnTrue[i]->SetMarkerStyle(mMarker[i]);
-        gVnTrue[i]->SetMarkerColor(i+2);
-        gVnTrue[i]->SetMarkerSize(mSize);
+        gVnTrue[i]->SetMarkerStyle(mMarker[i]); gVnTrueRatio[i]->SetMarkerStyle(mMarker[i]);
+        gVnTrue[i]->SetMarkerColor(i+2); gVnTrueRatio[i]->SetMarkerColor(i+2);
+        gVnTrue[i]->SetMarkerSize(mSize); gVnTrueRatio[i]->SetMarkerSize(mSize);
 
-        gVnEP[i]->SetMarkerStyle(mMarker[i]);
-        gVnEP[i]->SetMarkerColor(i+3);
-        gVnEP[i]->SetMarkerSize(mSize);
+        gVnEP[i]->SetMarkerStyle(mMarker[i]); gVnEPRatio[i]->SetMarkerStyle(mMarker[i]);
+        gVnEP[i]->SetMarkerColor(i+3); gVnEPRatio[i]->SetMarkerColor(i+3);
+        gVnEP[i]->SetMarkerSize(mSize); gVnEPRatio[i]->SetMarkerSize(mSize);
 
-        gVnSP[i]->SetMarkerStyle(mMarker[i]);
-        gVnSP[i]->SetMarkerColor(i+4);
-        gVnSP[i]->SetMarkerSize(mSize);
+        gVnSP[i]->SetMarkerStyle(mMarker[i]); gVnSPRatio[i]->SetMarkerStyle(mMarker[i]);
+        gVnSP[i]->SetMarkerColor(i+4); gVnSPRatio[i]->SetMarkerColor(i+4);
+        gVnSP[i]->SetMarkerSize(mSize); gVnSPRatio[i]->SetMarkerSize(mSize);
 
         gVnNonuni[i]->SetMarkerStyle(mMarker[i]);
         gVnNonuni[i]->SetMarkerColor(i+1);
@@ -123,14 +138,19 @@ void PlotVn() {
 
     gStyle->SetOptStat(0);
 
-    TCanvas *c1 = new TCanvas("c1", "vn values with different methods - uniform phi");
-    c1->cd();
+    //TCanvas *c1 = new TCanvas("c1", "vn values with different methods - uniform phi");
+    //c1->cd();
+    Filipad *fpad = new Filipad(0, 1.1, 0.3, 100, 100, 0.8, 5);
+    fpad->Draw();
+    TPad *p = fpad->GetPad(1); //upper pad
+    p->SetTickx(); p->SetLogx(0); p->SetLogy(0); p->cd();
+    double c1Min = 0.5, c1Max = 5.5;
 
-    TLegend *leg1 = new TLegend(0.50,0.6,0.85,0.85,"","brNDC");
+    TLegend *leg1 = new TLegend(0.60,0.55,0.80,0.75,"","brNDC");
     leg1->SetTextSize(0.037);leg1->SetBorderSize(0);
 
-    hfr = new TH2F(Form("hfr1%d",0)," ", 1, 0.5, 5.5, 1, -0.021, 0.18);
-    hset( *hfr, "n", "v_{n}",1.0,1.0, 0.04,0.04, 0.01,0.01, 0.03,0.03, 510,510);
+    hfr = new TH2F(Form("hfr1%d",0)," ", 1, c1Min, c1Max, 1, -0.019, 0.18);
+    hset( *hfr, "n", "v_{n}",1.4,1.1, 0.07,0.06, 0.01,0.001, 0.03,0.03, 5,510);
     hfr->Draw();
 
     for (i=0; i<nsets; i++) {
@@ -154,7 +174,26 @@ void PlotVn() {
     }
 
     leg1->Draw("SAME");
-    c1->SaveAs("figures/vn.pdf");
+    //c1->SaveAs("figures/vn.pdf");
+
+    p = fpad->GetPad(2); //lower pad
+    p->SetTickx(); p->SetGridy(0); p->SetLogy(0);p->SetLogx(0); p->cd();
+
+    hfr = new TH2F(Form("hfr1b%d",0)," ", 1, c1Min, c1Max, 1, 0.85, 1.95);
+    hset( *hfr, "n", "ratio to input",1.0,0.7, 0.11,0.09, 0.01,0.001, 0.07,0.07, 5,510);
+    hfr->Draw();
+
+    fConst->Draw("SAME");
+    for (i=0; i<nsets; i++) {
+        if (i==0) {
+            gVnTrueRatio[i]->Draw("SAME P");
+        }
+
+        gVnRatio[i]->Draw("SAME P");
+        gVnEPRatio[i]->Draw("SAME P");
+        gVnSPRatio[i]->Draw("SAME P");
+    }
+
 
     TCanvas *c2 = new TCanvas("c2", "vn values with different methods - nonuniform phi");
     c2->cd();

@@ -3,6 +3,7 @@
 
 #include "src/ResIter.h"
 #include "src/JConst.h"
+#include "src/Filipad.h"
 
 double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 double CalculateVn(double QnQnA, double QnAQnB, double w);
@@ -81,6 +82,12 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     double vnNonuni[nCoef], errorVnNonuni[nCoef] = {0};
     double vnTrue[nCoef], errorVnTrue[nCoef] = {0};
     double vnTrueNonuni[nCoef], errorVnTrueNonuni[nCoef] = {0};
+
+    double vnRatio[nCoef], errorVnRatio[nCoef] = {0};
+    double vnNonuniRatio[nCoef], errorVnNonuniRatio[nCoef] = {0};
+    double vnTrueRatio[nCoef], errorVnTrueRatio[nCoef] = {0};
+    double vnTrueNonuniRatio[nCoef], errorVnTrueNonuniRatio[nCoef] = {0};
+
     double Rinit;
 
     double khi0 = 0.5;
@@ -109,6 +116,19 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
 
         vnTrue[i] /= hRtrue[i][iDet][centBin]->GetMean();
         errorVnTrue[i] = GetVnError(hVnObs[i][iDet][centBin]->GetMean(), hVnObs[i][iDet][centBin]->GetMeanError(), hRtrue[i][iDet][centBin]->GetMean(), hRtrue[i][iDet][centBin]->GetMeanError());
+
+        if(inputFlow[i]==0) {
+            vnRatio[i] = 0;
+            errorVnRatio[i] = 0;
+            vnTrueRatio[i] = 0;
+            errorVnTrueRatio[i] = 0;
+
+        } else {
+            vnRatio[i] = vn[i]/inputFlow[i];
+            errorVnRatio[i] = errorVn[i]/inputFlow[i];
+            vnTrueRatio[i] = vnTrue[i]/inputFlow[i];
+            errorVnTrueRatio[i] = errorVnTrue[i]/inputFlow[i];
+        }
     }
 
     cout << "\nNon-uniform:\n";
@@ -171,6 +191,11 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     double vnSP[nCoef], errorVnSP[nCoef] = {0};
     double vnEPnonuni[nCoef], errorVnEPnonuni[nCoef] = {0};
     double vnSPnonuni[nCoef], errorVnSPnonuni[nCoef] = {0};
+
+    double vnEPRatio[nCoef], errorVnEPRatio[nCoef] = {0};
+    double vnSPRatio[nCoef], errorVnSPRatio[nCoef] = {0};
+    double vnEPnonuniRatio[nCoef], errorVnEPnonuniRatio[nCoef] = {0};
+    double vnSPnonuniRatio[nCoef], errorVnSPnonuniRatio[nCoef] = {0};
     for (i=0; i<nCoef; i++) {
         vnEP[i] = CalculateVn(hQnQnAEP[i][iDet][centBin]->GetMean(), hQnAQnBEP[i][iDet][centBin]->GetMean(), w);
         errorVnEP[i] = CalculateVnError(hQnQnAEP[i][iDet][centBin]->GetMean(), hQnAQnBEP[i][iDet][centBin]->GetMean(), hQnQnAEP[i][iDet][centBin]->GetMeanError(), hQnAQnBEP[i][iDet][centBin]->GetMeanError(),  w, wError);
@@ -181,6 +206,19 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         errorVnEPnonuni[i] = CalculateVnError(hQnQnAEPnonuni[i][iDet][centBin]->GetMean(), hQnAQnBEPnonuni[i][iDet][centBin]->GetMean(), hQnQnAEPnonuni[i][iDet][centBin]->GetMeanError(), hQnAQnBEPnonuni[i][iDet][centBin]->GetMeanError(), wNonuni, wNonuniError);
         vnSPnonuni[i] = CalculateVn(hQnQnASPnonuni[i][iDet][centBin]->GetMean(), hQnAQnBSPnonuni[i][iDet][centBin]->GetMean(), wNonuni);
         errorVnSPnonuni[i] = CalculateVnError(hQnQnASPnonuni[i][iDet][centBin]->GetMean(), hQnAQnBSPnonuni[i][iDet][centBin]->GetMean(), hQnQnASPnonuni[i][iDet][centBin]->GetMeanError(), hQnAQnBSPnonuni[i][iDet][centBin]->GetMeanError(), wNonuni, wNonuniError);
+
+        if(inputFlow[i]==0) {
+            vnEPRatio[i] = 0;
+            errorVnEPRatio[i] = 0;
+            vnSPRatio[i] = 0;
+            errorVnSPRatio[i] = 0;
+
+        } else {
+            vnEPRatio[i] = vnEP[i]/inputFlow[i];
+            errorVnEPRatio[i] = errorVnEP[i]/inputFlow[i];
+            vnSPRatio[i] = vnSP[i]/inputFlow[i];
+            errorVnSPRatio[i] = errorVnSP[i]/inputFlow[i];
+        }
     }
 
     // pT bins
@@ -215,6 +253,16 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     TGraphErrors *gRtrueNonuni = new TGraphErrors(nCoef);
     TGraphErrors *gRnonuni = new TGraphErrors(nCoef);
 
+    TGraphErrors *gVnTrueRatio = new TGraphErrors(nCoef);
+    TGraphErrors *gVnRatio = new TGraphErrors(nCoef);
+    TGraphErrors *gVnEPRatio = new TGraphErrors(nCoef);
+    TGraphErrors *gVnSPRatio = new TGraphErrors(nCoef);
+
+    TGraphErrors *gVnTrueNonuniRatio = new TGraphErrors(nCoef);
+    TGraphErrors *gVnNonuniRatio = new TGraphErrors(nCoef);
+    TGraphErrors *gVnEPnonuniRatio = new TGraphErrors(nCoef);
+    TGraphErrors *gVnSPnonuniRatio = new TGraphErrors(nCoef);
+
     TGraphErrors *gPtBin = new TGraphErrors(6);
 
     for(i = 0; i < nCoef; i++){
@@ -243,6 +291,15 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
         gRtrueNonuni->SetPointError(i, 0.0, hRtrueNonuni[i][iDet][centBin]->GetMeanError());
         gRnonuni->SetPoint(i, double(i+1)+0.15, Rnonuni[i]);
         gRnonuni->SetPointError(i, 0.0, errorRnonuni[i]);
+
+        gVnTrueRatio->SetPoint(i, double(i+1)-0.3, vnTrueRatio[i]);
+        gVnTrueRatio->SetPointError(i, 0.0, errorVnTrueRatio[i]);
+        gVnRatio->SetPoint(i, double(i+1)-0.1, vnRatio[i]);
+        gVnRatio->SetPointError(i, 0.0, errorVnRatio[i]);
+        gVnEPRatio->SetPoint(i, double(i+1)+0.1, vnEPRatio[i]);
+        gVnEPRatio->SetPointError(i, 0.0, errorVnEPRatio[i]);
+        gVnSPRatio->SetPoint(i, double(i+1)+0.3, vnSPRatio[i]);
+        gVnSPRatio->SetPointError(i, 0.0, errorVnSPRatio[i]);
     }
 
     double point = 0.0;
@@ -272,6 +329,11 @@ void MakeGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyF
     gRtrueNonuni->Write("gRtrueNonuni");
     gVnEPnonuni->Write("gVnEPnonuni");
     gVnSPnonuni->Write("gVnSPnonuni");
+
+    gVnRatio->Write("gVnRatio");
+    gVnTrueRatio->Write("gVnTrueRatio");
+    gVnEPRatio->Write("gVnEPRatio");
+    gVnSPRatio->Write("gVnSPRatio");
 
     fOut->Close();
 
