@@ -21,21 +21,13 @@ JHistos::JHistos(){
     hCentrality->Sumw2();
     hEta = new TH1D("hEta", "pseudorapidity", 401, -3.8, 5.2);
 
-    hPhiNonuni = new TH1D("hPhiNonuni", "phi - nonuniform", 129, -pi, pi);
-    hPhiNonuni->Sumw2();
-
     hMultiplicity = new TH1D("hMultiplicity", "Multiplicity - uniform", 300, 0.0, 30000.);
     hMultiplicity->Sumw2();
-    hMultiplicityNonuni = new TH1D("hMultiplicityNonuni", "Multiplicity - non-uniform", 300, 0.0, 30000);
-    hMultiplicityNonuni->Sumw2();
-
 
     for (i=0; i<DET_N; i++) {
         for (j=0; j<CENTBINS_N; j++){
             hSqrtSumWeights[i][j]= new TH1D(Form("hSqrtSumWeightsD%02iCENT%02i",i,j),"sqrt of sum of weights squares", 480, 0.0, 120.0);
             hSqrtSumWeights[i][j]->Sumw2();
-            hSqrtSumWeightsNonuni[i][j] = new TH1D(Form("hSqrtSumWeightsNonuniD%02iCENT%02i",i,j),"sqrt of sum of weights squares - nonuni", 480, 0.0, 120.0);
-            hSqrtSumWeightsNonuni[i][j]->Sumw2();
         }
     }
 
@@ -49,32 +41,15 @@ JHistos::JHistos(){
                 hVnObs[i][j][k] = new TH1D(Form("hVnObsH%02iD%02iCENT%02i",i+1,j,k),Form("hVnObsH%02iD%02iCENT%02i",i+1,j,k),401,-1.5,1.5);
                 hVnObs[i][j][k]->Sumw2();
 
-                hRtrueNonuni[i][j][k] = new TH1D(Form("hRtrueNonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hRtrueNonuniH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
-                hRtrueNonuni[i][j][k]->Sumw2();
-                hRsubNonuni[i][j][k] = new TH1D(Form("hRsubNonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hRsubNonuniH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
-                hRsubNonuni[i][j][k]->Sumw2();
-                hVnObsNonuni[i][j][k] = new TH1D(Form("hVnObsNonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hVnObsNonuniH%02iD%02iCENT%02i",i+1,j,k),401,-1.5,1.5);
-                hVnObsNonuni[i][j][k]->Sumw2();
-
                 hQnQnAEP[i][j][k] = new TH1D(Form("hQnQnAEPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnQnAEPH%02iD%02iCENT%02i",i+1,j,k),401,-50.0,50.0);
                 hQnQnAEP[i][j][k]->Sumw2();
                 hQnAQnBEP[i][j][k] = new TH1D(Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
                 hQnAQnBEP[i][j][k]->Sumw2();
 
-                hQnQnAEPnonuni[i][j][k] = new TH1D(Form("hQnQnAEPnonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hQnQnAEPnonuniH%02iD%02iCENT%02i",i+1,j,k),401,-50.0,50.0);
-                hQnQnAEPnonuni[i][j][k]->Sumw2();
-                hQnAQnBEPnonuni[i][j][k] = new TH1D(Form("hQnAQnBEPnonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBEPnonuniH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
-                hQnAQnBEPnonuni[i][j][k]->Sumw2();
-
                 hQnQnASP[i][j][k] = new TH1D(Form("hQnQnASPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnQnASPH%02iD%02iCENT%02i",i+1,j,k),401,-10.0,110.0);
                 hQnQnASP[i][j][k]->Sumw2();
                 hQnAQnBSP[i][j][k] = new TH1D(Form("hQnAQnBSPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBSPH%02iD%02iCENT%02i",i+1,j,k),401,-10.0,110.0);
                 hQnAQnBSP[i][j][k]->Sumw2();
-
-                hQnQnASPnonuni[i][j][k] = new TH1D(Form("hQnQnASPnonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hQnQnASPnonuniH%02iD%02iCENT%02i",i+1,j,k),401,-10.0,110.0);
-                hQnQnASPnonuni[i][j][k]->Sumw2();
-                hQnAQnBSPnonuni[i][j][k] = new TH1D(Form("hQnAQnBSPnonuniH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBSPnonuniH%02iD%02iCENT%02i",i+1,j,k),401,-10.0,110.0);
-                hQnAQnBSPnonuni[i][j][k]->Sumw2();
             }
         }
     }

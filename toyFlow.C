@@ -27,9 +27,9 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality);
-void GetParticleLists(JEventLists *lists, bool bDoCorrections);
-void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections, double centrality);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality);
+void GetParticleLists(JEventLists *lists);
+void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 
 double AcceptanceFunc(double *x, double *p);
 double AcceptanceFuncTimesSin(double *x, double *p);
@@ -41,7 +41,7 @@ double TwistCorrection(double x, double y, double lambda1, double lambda2);
 double RescalingCorrection(double x, double a);
 void DoCorrections(TComplex &Qvec, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus);
 
-void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, double &norm, bool bUseWeight, bool bDoCorrections, int n, double w, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus);
+void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, double &norm, bool bUseWeight, bool bNonuniformPhi, int n, double w, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus);
 double GetEventPlane(TComplex Qvec, int n);
 double GetVnObs(TComplex Qvec, double phi, int n);
 
@@ -64,7 +64,8 @@ int main(int argc, char **argv) {
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
-    bool bUseCentDependence = false;
+    bool bUseCentDependence = true;
+    bool bNonuniformPhi = true;
 
     const double scale = 1.0;
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
@@ -78,6 +79,7 @@ int main(int argc, char **argv) {
          << ", Weight: " << bUseWeight
          << ", Random Psi: " << bRandomPsi
          << ", Centrality-dep: " << bUseCentDependence
+         << ", Nonuniform phi: " << bNonuniformPhi
          << endl;
     cout << "Vn inputs: ";
     for(int i=0; i<nCoef; i++) cout << vn[i] << ", ";
@@ -158,8 +160,6 @@ int main(int argc, char **argv) {
     fOut->cd();
     hInputNumbers->Write("hInputNumbers");
 
-    bool bDoCorrections;
-
     int nOutput = nEvents/20;
     if (nOutput<1) nOutput = 1;
     for (i=0; i<nEvents; i++) {
@@ -188,18 +188,9 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bUsePtDependence, bUseGranularity, -PI, centrality);
-
-        // Analysis of uniform distribution
-        bDoCorrections = false;
-        GetParticleLists(lists, bDoCorrections);
-        AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bDoCorrections, corrections, centrality);
-
-        // Analysis of non-uniform distribution
-        bDoCorrections = true;
-        GetParticleLists(lists, bDoCorrections);
-        AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bDoCorrections, corrections, centrality);
-
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, bUseGranularity, -PI, centrality);
+        GetParticleLists(lists);
+        AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
     }
 
     fOut->Write();
@@ -209,24 +200,19 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality) {
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality) {
     double pT, phi, eta, Energy;
     double px, py, pz;
     double randNum;
     double vnTemp[nCoef];
 
-    double nMult, nMultNonuni;
+    double nMult = 0, nTracks = 0;
     double alpha = 2.0, beta = 1.0;
 
     JToyMCTrack track;
     TLorentzVector lVec;
 
-    int centBin = 0;
-
-    nMult = 0;
-    nMultNonuni = 0;
-
-    int i, j;
+    int i, j, centBin = 0;
     for (i=0; i<CENTBINS_N-1; i++) {
         if (centrality>centBins[i] && centrality<centBins[i+1]) {
             centrality = centBins[i+1] - (centBins[i+1]-centBins[i])/2.0;
@@ -255,10 +241,6 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             eta = CheckEta(eta);
         }
 
-        histos->hPt->Fill(pT);
-        histos->hPhi->Fill(phi);
-        histos->hEta->Fill(eta);
-
         px = pT*TMath::Cos(phi);
         py = pT*TMath::Sin(phi);
         pz = pT*TMath::SinH(eta);
@@ -266,37 +248,28 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         lVec.SetPxPyPzE(px, py, pz, Energy);
         track.SetTrack(lVec);
 
-        new((*lists->fullEvent)[i]) JToyMCTrack(track);
+        histos->hPt->Fill(pT);
+        histos->hEta->Fill(eta);
 
         if (phi < phiMin || phi > phiMax) {
-
-            histos->hPhiNonuni->Fill(phi);
-
-            new((*lists->fullEventNonuni)[nMultNonuni]) JToyMCTrack(track);
-            nMultNonuni++;
-
+            histos->hPhi->Fill(phi);
+            new((*lists->fullEvent)[nTracks]) JToyMCTrack(track);
+            nTracks++;
         } else {
-            randNum = rand->Rndm();
+            randNum = bNonuniformPhi ? rand->Rndm():1.1;
             if ( randNum > percentage ) {
-
-                histos->hPhiNonuni->Fill(phi);
-
-                new((*lists->fullEventNonuni)[nMultNonuni]) JToyMCTrack(track);
-                nMultNonuni++;
-
+                histos->hPhi->Fill(phi);
+                new((*lists->fullEvent)[nTracks]) JToyMCTrack(track);
+                nTracks++;
             }
         }
-
     }
 
     histos->hMultiplicity->Fill(nMult);
-    histos->hMultiplicityNonuni->Fill(nMultNonuni);
-
 }
 
-void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
-    int nMult = bDoCorrections ? lists->fullEventNonuni->GetEntriesFast()
-                                : lists->fullEvent->GetEntriesFast();
+void GetParticleLists(JEventLists *lists) {
+    int nMult = lists->fullEvent->GetEntriesFast();
 
     JToyMCTrack *tempTrack, track, trackA, trackB;
     double eta, phi;
@@ -307,25 +280,24 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
 
     int i, j;
     for (i=0; i<nMult; i++) {
-        tempTrack = bDoCorrections ? (JToyMCTrack*)lists->fullEventNonuni->At(i)
-                                    : (JToyMCTrack*)lists->fullEvent->At(i);
+        tempTrack = (JToyMCTrack*)lists->fullEvent->At(i);
         eta = tempTrack->GetEta();
 
         for (j=0; j<DET_N; j++) {
             if (cov[j][0]<eta && eta<cov[j][1]) {
                 track = *tempTrack;
-                new((*lists->GetList(j,bDoCorrections))[detMult[j]]) JToyMCTrack(track);
+                new((*lists->GetList(j))[detMult[j]]) JToyMCTrack(track);
                 detMult[j]++;
 
                 phi = tempTrack->GetPhi();
                 //detCenter = (cov[j][0]+cov[j][1])/2.0;
                 if(/*eta<detCenter*/ i%2==0 /*BelongsToA(phi)*/) { //Later use the function.
                     trackA = *tempTrack;
-                    new((*lists->GetList(j,bDoCorrections,"A"))[detMultA[j]]) JToyMCTrack(trackA);
+                    new((*lists->GetList(j,"A"))[detMultA[j]]) JToyMCTrack(trackA);
                     detMultA[j]++;
                 } else {
                     trackB = *tempTrack;
-                    new((*lists->GetList(j,bDoCorrections,"B"))[detMultB[j]]) JToyMCTrack(trackB);
+                    new((*lists->GetList(j,"B"))[detMultB[j]]) JToyMCTrack(trackB);
                     detMultB[j]++;
                 }
             }
@@ -333,14 +305,14 @@ void GetParticleLists(JEventLists *lists, bool bDoCorrections) {
     }
 }
 
-void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bDoCorrections, double **corrections, double centrality) {
+void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality) {
 
     int nMult[DET_N], nMultA[DET_N], nMultB[DET_N];
 
     for(int iDet=0; iDet<DET_N; iDet++) {
-        nMult[iDet] = lists->GetList(iDet,bDoCorrections)->GetEntriesFast();
-        nMultA[iDet] = lists->GetList(iDet,bDoCorrections,"A")->GetEntriesFast();
-        nMultB[iDet] = lists->GetList(iDet,bDoCorrections,"B")->GetEntriesFast();
+        nMult[iDet] = lists->GetList(iDet)->GetEntriesFast();
+        nMultA[iDet] = lists->GetList(iDet,"A")->GetEntriesFast();
+        nMultB[iDet] = lists->GetList(iDet,"B")->GetEntriesFast();
     }
 
     int i, j, k, n, jMax;
@@ -386,8 +358,8 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
 
             // Construct Q-vectors for the detectors
             for (j=0; j<nMult[iDet]; j++) {
-                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections)->At(j);
-                CalculateQvector(track, unitVec, Qvec[iDet], norm[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+                track = (JToyMCTrack*)lists->GetList(iDet)->At(j);
+                CalculateQvector(track, unitVec, Qvec[iDet], norm[iDet], bUseWeight, bNonuniformPhi, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
             }
 
             if (nMultA[iDet]<nMultB[iDet]) {
@@ -398,20 +370,20 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
 
             for (j=0; j<jMax; j++) {
             //for (j=0; j<nMult[1]; j++) {
-                //track = (JToyMCTrack*)lists->GetList(1,bDoCorrections)->At(j);
-                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections,"A")->At(j);
-                CalculateQvector(track, unitVec, QvecA[iDet], normA[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+                //track = (JToyMCTrack*)lists->GetList(1)->At(j);
+                track = (JToyMCTrack*)lists->GetList(iDet,"A")->At(j);
+                CalculateQvector(track, unitVec, QvecA[iDet], normA[iDet], bUseWeight, bNonuniformPhi, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
             //}
             //for (j=0; j<nMult[2]; j++) {
-                //track = (JToyMCTrack*)lists->GetList(2,bDoCorrections)->At(j);
-                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections,"B")->At(j);
-                CalculateQvector(track, unitVec, QvecB[iDet], normB[iDet], bUseWeight, bDoCorrections, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+                //track = (JToyMCTrack*)lists->GetList(2)->At(j);
+                track = (JToyMCTrack*)lists->GetList(iDet,"B")->At(j);
+                CalculateQvector(track, unitVec, QvecB[iDet], normB[iDet], bUseWeight, bNonuniformPhi, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
             }
 
             // Calculate vobs from TPC events
             for (j=0; j<nMult[iDet]; j++) {
 
-                track = (JToyMCTrack*)lists->GetList(iDet,bDoCorrections)->At(j);
+                track = (JToyMCTrack*)lists->GetList(iDet)->At(j);
                 phi = track->GetPhi();
                 pt = track->GetPt();
 
@@ -441,33 +413,19 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
             Qvec[iDet] /= norm[iDet]; QvecA[iDet] /= normA[iDet]; QvecB[iDet] /= normB[iDet];
 
             QnQnA = Qvec[iDet]*TComplex::Conjugate(QvecA[iDet]);
-            //QnQnA /= TComplex::Abs(QvecA[iDet]);
-
             QnAQnB = QvecA[iDet]*TComplex::Conjugate(QvecB[iDet]);
-            //QnAQnB /= TComplex::Abs(QvecA[iDet]);
-            //QnAQnB /= TComplex::Abs(QvecB[iDet]);
 
-            if (bDoCorrections) {
-                histos->hVnObsNonuni[i][iDet][centBin]->Fill(vobs);
-                histos->hRtrueNonuni[i][iDet][centBin]->Fill(Rtrue);
-                histos->hRsubNonuni[i][iDet][centBin]->Fill(Rsub);
-                histos->hQnQnAEPnonuni[i][iDet][centBin]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
-                histos->hQnAQnBEPnonuni[i][iDet][centBin]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
-                histos->hQnQnASPnonuni[i][iDet][centBin]->Fill(QnQnA);
-                histos->hQnAQnBSPnonuni[i][iDet][centBin]->Fill(QnAQnB);
-            } else {
-                histos->hVnObs[i][iDet][centBin]->Fill(vobs);
-                histos->hRtrue[i][iDet][centBin]->Fill(Rtrue);
-                histos->hRsub[i][iDet][centBin]->Fill(Rsub);
-                histos->hQnQnAEP[i][iDet][centBin]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
-                histos->hQnAQnBEP[i][iDet][centBin]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
-                histos->hQnQnASP[i][iDet][centBin]->Fill(QnQnA);
-                histos->hQnAQnBSP[i][iDet][centBin]->Fill(QnAQnB);
-            }
+            histos->hVnObs[i][iDet][centBin]->Fill(vobs);
+            histos->hRtrue[i][iDet][centBin]->Fill(Rtrue);
+            histos->hRsub[i][iDet][centBin]->Fill(Rsub);
+            histos->hQnQnAEP[i][iDet][centBin]->Fill(QnQnA/TComplex::Abs(QvecA[iDet]));
+            histos->hQnAQnBEP[i][iDet][centBin]->Fill(QnAQnB/(TComplex::Abs(QvecA[iDet])*TComplex::Abs(QvecB[iDet])));
+            histos->hQnQnASP[i][iDet][centBin]->Fill(QnQnA);
+            histos->hQnAQnBSP[i][iDet][centBin]->Fill(QnAQnB);
         }
 
         // Divide into pT-bins
-        if (n==2 && !bDoCorrections) {
+        if (n==2) {
             double weight = 0.0;
             double norms[PTBINS_N];
             for (j=0; j<PTBINS_N; j++) norms[j] = 0;
@@ -510,15 +468,8 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
         }
     }
 
-    for(int iDet=0; iDet<DET_N; iDet++) {
-        if (bDoCorrections) {
-            histos->hSqrtSumWeightsNonuni[iDet][centBin]->Fill(norm[iDet]);
-        } else {
-            histos->hSqrtSumWeights[iDet][centBin]->Fill(norm[iDet]);
-        }
-    }
-
-
+    for(int iDet=0; iDet<DET_N; iDet++)
+        histos->hSqrtSumWeights[iDet][centBin]->Fill(norm[iDet]);
 }
 
 double PtDist(double *x, double *p) {
@@ -628,7 +579,7 @@ void DoCorrections(TComplex &Qvec, double cm, double sm, double lambdaMinus, dou
     Qvec = TComplex(RescalingCorrection(Qvec.Re(), aPlus), RescalingCorrection(Qvec.Im(), aMinus));
 }
 
-void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, double &norm, bool bUseWeight, bool bDoCorrections, int n, double w, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
+void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, double &norm, bool bUseWeight, bool bNonuniformPhi, int n, double w, double cm, double sm, double lambdaMinus, double lambdaPlus, double aMinus, double aPlus) {
 
     double phi = track->GetPhi();
     double pt = track->GetPt();
@@ -637,7 +588,7 @@ void CalculateQvector(JToyMCTrack *track, TComplex unitVec, TComplex &Qvec, doub
     norm += w*w;
 
     unitVec = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
-    if (bDoCorrections) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
+    if (bNonuniformPhi) DoCorrections(unitVec, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
     Qvec += unitVec;
 }
 
