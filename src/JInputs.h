@@ -62,6 +62,7 @@ const double etanch[CENTBINS_N-1][ETADST_N] = {
 };**/
 
 // Constant vn in each centrality bin
+// Check that combined correctly
 const double centvn[nCoef][CENTDST_N] = {
     {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
     {0.0277401, 0.04488324, 0.06521883, 0.08433443, 0.09597485, 0.10087206, 0.09925828},

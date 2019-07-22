@@ -194,6 +194,7 @@ void PlotVn() {
         gVnSPRatio[i]->Draw("SAME P");
     }
 
+    fpad->C->SaveAs("figures/vn-with-ratio.pdf");
 
     TCanvas *c2 = new TCanvas("c2", "vn values with different methods - nonuniform phi");
     c2->cd();

@@ -7,7 +7,7 @@
 double GetVnError(double vnObs, double vnObsErr, double Rn, double RnErr);
 void checkUnderOverFlow( TH1 *h );
 
-void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowCentralityGraphs.root", const int iDet=2) {
+void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputName = "toyFlowCentralityGraphs.root", const int iDet=3) {
 
     TFile *fIn = TFile::Open(sInputName, "read");
     TFile *fOut = TFile::Open(sOutputName, "recreate");
@@ -16,24 +16,27 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
 
     int i, j, n;
     double pi = TMath::Pi();
-    double inputFlow[nCoef] = {0.0};
 
-    TH1D *hInputNumbers = (TH1D*)fIn->Get("hInputNumbers");
-    checkUnderOverFlow(hInputNumbers);
-    double nEvents = hInputNumbers->GetBinContent(1);
-    double nOfFiles = hInputNumbers->GetBinContent(14);
-    for(int i = 0; i < nCoef; i++) {
-        inputFlow[i] = hInputNumbers->GetBinContent(2+i);
-        inputFlow[i] /= nOfFiles;
+    double inputFlow[nCoef][CENTBINS_N-4] = {
+        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+        {0.0277401, 0.04488324, 0.06521883, 0.08433443, 0.09597485, 0.10087206, 0.09925828},
+        {0.02039728, 0.02369955, 0.02670301, 0.02950095, 0.03118808, 0.03120636, 0.02918556},
+        {0.01013229, 0.01171893, 0.0131265, 0.01479335, 0.0159713, 0.01644628, 0.01535014},
+        {0.00415816, 0.00467961, 0.00528238, 0.006501, 0.0068885, 0.00690379, 0.00575251}
+    };
+
+    TH1D *hInputFlow[nCoef];
+    for (i=0; i<nCoef; i++) {
+        hInputFlow[i] = new TH1D("hInputFlow", "hInputFlow", CENTBINS_N-4, centBins);
+        hInputFlow[i]->SetLineStyle(1);
+        hInputFlow[i]->SetLineColor(1);
+        hInputFlow[i]->SetLineWidth(1);
     }
-
-    TH1D *hInputFlow = new TH1D("hInputFlow", "hInputFlow", nCoef, 0.5, double(nCoef)+0.5);
-    hInputFlow->SetLineStyle(1);
-    hInputFlow->SetLineColor(1);
-    hInputFlow->SetLineWidth(1);
-    for(int i = 0; i < nCoef; i++)
-        hInputFlow->Fill(double(i+1), inputFlow[i]);
-    hInputFlow->Fill(double(nCoef+1), 0.0);
+    for(i=0; i<nCoef; i++) {
+        for (j=0; j<CENTBINS_N-4; j++) {
+            hInputFlow[i]->Fill(centBins[j], inputFlow[i][j]);
+        }
+    }
 
     //=====vn=====
     // Observed vn
@@ -177,6 +180,8 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
 
     fOut->cd();
     for (i=0; i<nCoef; i++) {
+        hInputFlow[i]->Write(Form("hInputFlow%02i", i+1));
+
         gVnTrue[i]->Write(Form("gVnTrueH%02i", i+1));
         gVn[i]->Write(Form("gVnH%02i", i+1));
         gRtrue[i]->Write(Form("gRtrueH%02i", i+1));

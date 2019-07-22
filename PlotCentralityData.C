@@ -7,6 +7,8 @@ void ErrorExit(TString error, int errnum=1 ){cout<<"ERROR: "<<error<<endl;gSyste
 
 TString fileName = "toyFlowCentralityGraphs.root";
 
+TH1D *hInputFlow[nCoef];
+
 TGraphErrors *gR[nCoef];
 TGraphErrors *gRtrue[nCoef];
 TGraphErrors *gVn[nCoef];
@@ -29,6 +31,8 @@ void PlotCentralityData() {
     int i, j;
     for (i=0; i<nCoef; i++) {
         if(fIn==0) ErrorExit(Form("Cannot open file: %s",fileName.Data()));
+
+        hInputFlow[i] = (TH1D*) fIn->Get(Form("hInputFlow%02i", i+1));
 
         gR[i] = (TGraphErrors*) fIn->Get(Form("gRH%02i", i+1));
         gRtrue[i] = (TGraphErrors*) fIn->Get(Form("gRtrueH%02i", i+1));
@@ -92,6 +96,7 @@ void PlotCentralityData() {
         gVnTrue[i]->Draw("SAME P");
         gVnNonuni[i]->Draw("SAME P");
         gVnTrueNonuni[i]->Draw("SAME P");
+        hInputFlow[i]->Draw("SAME HIST");
         c1->Update();
     }
 
