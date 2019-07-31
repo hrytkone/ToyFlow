@@ -265,7 +265,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         }
     }
 
-    histos->hMultiplicity->Fill(nMult);
+    histos->hMultiplicity->Fill(nTracks);
 }
 
 void GetParticleLists(JEventLists *lists) {
