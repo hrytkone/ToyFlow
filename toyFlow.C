@@ -280,16 +280,17 @@ void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
 
         for (j=0; j<DET_N; j++) {
             if (cov[j][0]<eta && eta<cov[j][1]) {
-                track = *tempTrack;
-                new((*lists->GetList(j))[detMult[j]]) JToyMCTrack(track);
-                detMult[j]++;
-
                 phi = tempTrack->GetPhi();
                 if (bUseGranularity && j==3) {
                     phi = CheckPhi(phi, -PI);
                     tempTrack->SetPhi(phi);
                     eta = CheckEta(eta); // need to add SetEta to JToyMCTrack.h
                 }
+
+                track = *tempTrack;
+                new((*lists->GetList(j))[detMult[j]]) JToyMCTrack(track);
+                detMult[j]++;
+
                 //detCenter = (cov[j][0]+cov[j][1])/2.0;
                 if(/*eta<detCenter*/ i%2==0 /*BelongsToA(phi)*/) { //Later use the function.
                     trackA = *tempTrack;
