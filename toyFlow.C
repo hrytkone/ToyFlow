@@ -27,8 +27,8 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality);
-void GetParticleLists(JEventLists *lists);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality);
+void GetParticleLists(JEventLists *lists, bool bUseGranularity);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 
 double AcceptanceFunc(double *x, double *p);
@@ -188,8 +188,8 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, bUseGranularity, -PI, centrality);
-        GetParticleLists(lists);
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality);
+        GetParticleLists(lists, bUseGranularity);
         AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
     }
 
@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, bool bUseGranularity, double startAngle, double centrality) {
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality) {
     double pT, phi, eta, Energy;
     double px, py, pz;
     double randNum;
@@ -236,11 +236,6 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         }
 
         phi = fPhi->GetRandom();
-        if (bUseGranularity) {
-            phi = CheckPhi(phi, startAngle);
-            eta = CheckEta(eta);
-        }
-
         px = pT*TMath::Cos(phi);
         py = pT*TMath::Sin(phi);
         pz = pT*TMath::SinH(eta);
@@ -268,7 +263,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     histos->hMultiplicity->Fill(nTracks);
 }
 
-void GetParticleLists(JEventLists *lists) {
+void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
     int nMult = lists->fullEvent->GetEntriesFast();
 
     JToyMCTrack *tempTrack, track, trackA, trackB;
@@ -290,6 +285,11 @@ void GetParticleLists(JEventLists *lists) {
                 detMult[j]++;
 
                 phi = tempTrack->GetPhi();
+                if (bUseGranularity && j==3) {
+                    phi = CheckPhi(phi, -PI);
+                    tempTrack->SetPhi(phi);
+                    eta = CheckEta(eta); // need to add SetEta to JToyMCTrack.h
+                }
                 //detCenter = (cov[j][0]+cov[j][1])/2.0;
                 if(/*eta<detCenter*/ i%2==0 /*BelongsToA(phi)*/) { //Later use the function.
                     trackA = *tempTrack;
