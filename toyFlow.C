@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     bool bUseWeight = false;
     bool bRandomPsi = true;
     bool bUseCentDependence = true;
-    bool bNonuniformPhi = true;
+    bool bNonuniformPhi = false;
 
     const double scale = 1.0;
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};

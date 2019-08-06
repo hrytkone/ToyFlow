@@ -34,16 +34,16 @@ JHistos::JHistos(){
     for (i=0; i<nCoef; i++){
         for (j=0; j<DET_N; j++){
             for (k=0; k<CENTBINS_N; k++){
-                hRtrue[i][j][k] = new TH1D(Form("hRtrueH%02iD%02iCENT%02i",i+1,j,k),Form("hRtrueH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
+                hRtrue[i][j][k] = new TH1D(Form("hRtrueH%02iD%02iCENT%02i",i+1,j,k),Form("hRtrueH%02iD%02iCENT%02i",i+1,j,k),404,-1.01,1.01);
                 hRtrue[i][j][k]->Sumw2();
-                hRsub[i][j][k] = new TH1D(Form("hRsubH%02iD%02iCENT%02i",i+1,j,k),Form("hRsubH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
+                hRsub[i][j][k] = new TH1D(Form("hRsubH%02iD%02iCENT%02i",i+1,j,k),Form("hRsubH%02iD%02iCENT%02i",i+1,j,k),404,-1.01,1.01);
                 hRsub[i][j][k]->Sumw2();
                 hVnObs[i][j][k] = new TH1D(Form("hVnObsH%02iD%02iCENT%02i",i+1,j,k),Form("hVnObsH%02iD%02iCENT%02i",i+1,j,k),401,-1.5,1.5);
                 hVnObs[i][j][k]->Sumw2();
 
                 hQnQnAEP[i][j][k] = new TH1D(Form("hQnQnAEPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnQnAEPH%02iD%02iCENT%02i",i+1,j,k),401,-50.0,50.0);
                 hQnQnAEP[i][j][k]->Sumw2();
-                hQnAQnBEP[i][j][k] = new TH1D(Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,j,k),401,-1.0,1.0);
+                hQnAQnBEP[i][j][k] = new TH1D(Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,j,k),404,-1.01,1.01);
                 hQnAQnBEP[i][j][k]->Sumw2();
 
                 hQnQnASP[i][j][k] = new TH1D(Form("hQnQnASPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnQnASPH%02iD%02iCENT%02i",i+1,j,k),401,-10.0,110.0);
