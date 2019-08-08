@@ -29,7 +29,7 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
 
     TH1D *hInputFlow[nCoef];
     for (i=0; i<nCoef; i++) {
-        hInputFlow[i] = new TH1D("hInputFlow", "hInputFlow", CENTBINS_N-4, centBins);
+        hInputFlow[i] = new TH1D(Form("hInputFlow%02i",i+1), Form("hInputFlow%02i",i+1), CENTBINS_N-4, centBins);
         hInputFlow[i]->SetLineStyle(1);
         hInputFlow[i]->SetLineColor(1);
         hInputFlow[i]->SetLineWidth(1);
