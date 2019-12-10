@@ -17,6 +17,7 @@
 #include "TClonesArray.h"
 #include "TComplex.h"
 #include "TCanvas.h"
+#include "TTree.h"
 
 // OTHER
 #include "TStopwatch.h"
@@ -27,7 +28,7 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TClonesArray *particleList, vector<int> *particleCharge, vector<int> *particlePID, vector<int> *particleIsHadron);
 void GetParticleLists(JEventLists *lists, bool bUseGranularity);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 
@@ -54,13 +55,14 @@ int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
-        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran seedNum" << endl;
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran seedNum bSaveAsTrees" << endl;
         return 0;
     };
-    int nEvents = argc > 2 ? atol(argv[2]):1000;
-    bool bUsePtDependence = argc > 3 ? atol(argv[3]):0;
-    bool bUseGranularity = argc > 4 ? atol(argv[4]):0;
-    int iSeed = argc > 5 ? atol(argv[5]):0;
+    int nEvents = argc > 2 ? atol(argv[2]) : 1000;
+    bool bUsePtDependence = argc > 3 ? atol(argv[3]) : 0;
+    bool bUseGranularity = argc > 4 ? atol(argv[4]) : 0;
+    int iSeed = argc > 5 ? atol(argv[5]) : 0;
+    bool bSaveAsTrees = argc > 6 ? atol(argv[6]) : 0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
@@ -97,7 +99,32 @@ int main(int argc, char **argv) {
     TRandom3 *rand = new TRandom3(iSeed);
     //rand->SetSeed(0);
 
-    JHistos *histos = new JHistos();
+    JHistos *histos = 0;
+    TTree *tree;
+    TClonesArray *particleList = 0;
+    vector<int> *particleCharge = 0;
+    vector<int> *particlePID = 0;
+    vector<int> *particleIsHadron = 0;
+    //TClonesArray *particleCharge = 0;
+    //TClonesArray *particlePID = 0;
+    //TClonesArray *particleIsHadron = 0;
+    if(bSaveAsTrees) {
+        Int_t split = 0;
+        Int_t bsize = 64000;
+        particleList = new TClonesArray("TLorentzVector", 20000);
+        particleCharge = new vector<int>();
+        particlePID = new vector<int>();
+        particleIsHadron = new vector<int>();
+
+        tree = new TTree("tracks","Tree for track information");
+        tree->Branch("particleList", "TClonesArray", &particleList, bsize, split);
+        tree->Branch("particleCharge", "vector<int>", &particleCharge, bsize, split);
+        tree->Branch("particlePID", "vector<int>", &particlePID, bsize, split);
+        tree->Branch("particleIsHadron", "vector<int>", &particleIsHadron, bsize, split);
+    } else {
+        // Do not produce histos if saving as trees.
+        histos = new JHistos();
+    }
     JEventLists *lists = new JEventLists();
     JInputs *inputs = new JInputs();
     inputs->Load();
@@ -167,6 +194,12 @@ int main(int argc, char **argv) {
             cout << 100*i/nEvents << " % finished" << endl;
 
         lists->ClearLists();
+        if(bSaveAsTrees) {
+            particleList->Clear("C");
+            particleCharge->clear();
+            particlePID->clear();
+            particleIsHadron->clear();
+        }
 
         if (bRandomPsi) {
             for (j=0; j<5; j++) {
@@ -188,9 +221,13 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality);
-        GetParticleLists(lists, bUseGranularity);
-        AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality, particleList, particleCharge, particlePID, particleIsHadron);
+        if(bSaveAsTrees) {
+            tree->Fill(); // record all objects connected to tree in this event
+        } else { //When saving tracks as trees, we don't need to analyze event.
+            GetParticleLists(lists, bUseGranularity);
+            AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
+        }
     }
 
     fOut->Write();
@@ -200,11 +237,14 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality) {
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TClonesArray *particleList, vector<int> *particleCharge, vector<int> *particlePID, vector<int> *particleIsHadron) {
     double pT, phi, eta, Energy;
     double px, py, pz;
     double randNum;
     double vnTemp[nCoef];
+    int lPID;
+    int lCharge;
+    int lIsHadron;
 
     double nMult = 0, nTracks = 0;
     double alpha = 2.0, beta = 1.0;
@@ -217,7 +257,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         if (centrality>centBins[i] && centrality<centBins[i+1]) {
             centrality = centBins[i+1] - (centBins[i+1]-centBins[i])/2.0;
             centBin = i;
-            histos->hCentrality->Fill(centrality);
+            if(histos!=0) histos->hCentrality->Fill(centrality);
             nMult = inputs->GetMultiplicity(centBin);
         }
     }
@@ -243,24 +283,64 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         lVec.SetPxPyPzE(px, py, pz, Energy);
         track.SetTrack(lVec);
 
-        histos->hPt->Fill(pT);
-        histos->hEta->Fill(eta);
+        // Selecting particle species.
+        //http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf PID
+        randNum = rand->Rndm();
+        if(randNum<0.1) {
+            lPID = 111; lCharge = 0; lIsHadron = 1; //pi0
+        } else if(randNum<0.2) {
+            lPID = -111; lCharge = 0; lIsHadron = 1; //anti-pi0
+        } else if(randNum<0.3) {
+            lPID = 211; lCharge = 1; lIsHadron = 1; //pi+
+        } else if(randNum<0.4) {
+            lPID = -211; lCharge = -1; lIsHadron = 1; //pi-
+        } else if(randNum<0.5) {
+            lPID = 311; lCharge = 0; lIsHadron = 1; //K0
+        } else if(randNum<0.6) {
+            lPID = -311; lCharge = 0; lIsHadron = 1; //anti-K0
+        } else if(randNum<0.7) {
+            lPID = 321; lCharge = 1; lIsHadron = 1; //K+
+        } else if(randNum<0.8) {
+            lPID = -321; lCharge = -1; lIsHadron = 1; //K-
+        } else if(randNum<0.85) {
+            lPID = 2212; lCharge = 1; lIsHadron = 1; //p
+        } else if(randNum<0.90) {
+            lPID = -2212; lCharge = -1; lIsHadron = 1; //anti-p
+        } else if(randNum<0.95) {
+            lPID = 2112; lCharge = 0; lIsHadron = 1; //n
+        } else if(randNum<1.0) {
+            lPID = -2112; lCharge = 0; lIsHadron = 1; //anti-p
+        }
+
+        if(particleList!=0) {
+            // track, charge, pid, ishadron
+            //new ( (*particleList)[nTracks] ) JToyMCTrack( lVec , lCharge, lPID, lIsHadron);
+            new ( (*particleList)[nTracks] ) TLorentzVector( lVec );
+            particleCharge->push_back(lCharge);
+            particlePID->push_back(lPID);
+            particleIsHadron->push_back(lIsHadron);
+        }
+
+        if(histos!=0) histos->hPt->Fill(pT);
+        if(histos!=0) histos->hEta->Fill(eta);
 
         if (phi < phiMin || phi > phiMax) {
-            histos->hPhi->Fill(phi);
-            new((*lists->fullEvent)[nTracks]) JToyMCTrack(track);
+            if(histos!=0) histos->hPhi->Fill(phi);
+            // track, charge, pid, ishadron
+            new((*lists->fullEvent)[nTracks]) JToyMCTrack(lVec, lCharge, lPID, lIsHadron);
             nTracks++;
         } else {
             randNum = bNonuniformPhi ? rand->Rndm():1.1;
             if ( randNum > percentage ) {
-                histos->hPhi->Fill(phi);
-                new((*lists->fullEvent)[nTracks]) JToyMCTrack(track);
+                if(histos!=0) histos->hPhi->Fill(phi);
+                // track, charge, pid, ishadron
+                new((*lists->fullEvent)[nTracks]) JToyMCTrack(lVec, lCharge, lPID, lIsHadron);
                 nTracks++;
             }
         }
     }
 
-    histos->hMultiplicity->Fill(nTracks);
+    if(histos!=0) histos->hMultiplicity->Fill(nTracks);
 }
 
 void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
