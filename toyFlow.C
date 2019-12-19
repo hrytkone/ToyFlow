@@ -248,6 +248,19 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
 
     double nMult = 0, nTracks = 0;
     double alpha = 2.0, beta = 1.0;
+    //http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf PID
+    //Thermal model AN:
+    //https://alice-notes.web.cern.ch/system/files/notes/analysis/308/2014-May-13-analysis_note-ThermalFitsAnalysisNote.pdf
+    //check also source [5]: https://inspirehep.net/record/1222333
+    // Ratios from 10-20 % centrality class.
+    // pi+    pi-    K+   K-   p        anti-p
+    // 455±31 453±31 68±5 68±6 21.0±1.7 21.1±1.8
+    double probPiPlus  = 455.0/(455+455+68+68+21+21);
+    double probPiMinus = 455.0/(455+455+68+68+21+21);
+    double probKPlus   = 68.0/(455+455+68+68+21+21);
+    double probKMinus  = 68.0/(455+455+68+68+21+21);
+    double probP       = 21.0/(455+455+68+68+21+21);
+    double probAntiP   = 21.0/(455+455+68+68+21+21);
 
     JToyMCTrack track;
     TLorentzVector lVec;
@@ -284,32 +297,19 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         track.SetTrack(lVec);
 
         // Selecting particle species.
-        //http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf PID
         randNum = rand->Rndm();
-        if(randNum<0.1) {
-            lPID = 111; lCharge = 0; lIsHadron = 1; //pi0
-        } else if(randNum<0.2) {
-            lPID = -111; lCharge = 0; lIsHadron = 1; //anti-pi0
-        } else if(randNum<0.3) {
+        if(randNum<probPiPlus) {
             lPID = 211; lCharge = 1; lIsHadron = 1; //pi+
-        } else if(randNum<0.4) {
+        } else if(randNum<probPiPlus+probPiMinus) {
             lPID = -211; lCharge = -1; lIsHadron = 1; //pi-
-        } else if(randNum<0.5) {
-            lPID = 311; lCharge = 0; lIsHadron = 1; //K0
-        } else if(randNum<0.6) {
-            lPID = -311; lCharge = 0; lIsHadron = 1; //anti-K0
-        } else if(randNum<0.7) {
+        } else if(randNum<probPiPlus+probPiMinus+probKPlus) {
             lPID = 321; lCharge = 1; lIsHadron = 1; //K+
-        } else if(randNum<0.8) {
+        } else if(randNum<probPiPlus+probPiMinus+probKPlus+probKMinus) {
             lPID = -321; lCharge = -1; lIsHadron = 1; //K-
-        } else if(randNum<0.85) {
+        } else if(randNum<probPiPlus+probPiMinus+probKPlus+probKMinus+probP) {
             lPID = 2212; lCharge = 1; lIsHadron = 1; //p
-        } else if(randNum<0.90) {
+        } else if(randNum<probPiPlus+probPiMinus+probKPlus+probKMinus+probP+probAntiP) {
             lPID = -2212; lCharge = -1; lIsHadron = 1; //anti-p
-        } else if(randNum<0.95) {
-            lPID = 2112; lCharge = 0; lIsHadron = 1; //n
-        } else if(randNum<1.0) {
-            lPID = -2112; lCharge = 0; lIsHadron = 1; //anti-p
         }
 
         if(particleList!=0) {
