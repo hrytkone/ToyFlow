@@ -56,21 +56,21 @@ int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
-        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran seedNum bSaveAsTrees" << endl;
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale seedNum bSaveAsTrees" << endl;
         return 0;
     };
     int nEvents = argc > 2 ? atol(argv[2]) : 1000;
     bool bUsePtDependence = argc > 3 ? atol(argv[3]) : 0;
     bool bUseGranularity = argc > 4 ? atol(argv[4]) : 0;
-    int iSeed = argc > 5 ? atol(argv[5]) : 0;
-    bool bSaveAsTrees = argc > 6 ? atol(argv[6]) : 0;
+    double scale = argc > 5 ? atof(argv[5]) : 1.0;
+    int iSeed = argc > 6 ? atol(argv[6]) : 0;
+    bool bSaveAsTrees = argc > 7 ? atol(argv[7]) : 0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
     bool bUseCentDependence = true;
     bool bNonuniformPhi = false;
 
-    const double scale = 1.0;
     double vn[nCoef] = {scale*0.0, scale*0.15, scale*0.08, scale*0.03, scale*0.01};
 
     cout << "=========================================== Settings ===========================================" << endl;
@@ -189,10 +189,10 @@ int main(int argc, char **argv) {
             }
         }
 
-        centrality = rand->Uniform(0.0, 60.0);
+        centrality = rand->Uniform(0.0, 70.0);
 
         if (bUseCentDependence) {
-            for (j=0; j<nCoef; j++) vn[j] = inputs->GetCentDependVn(j+1, centrality);
+            for (j=0; j<nCoef; j++) vn[j] = scale * inputs->GetCentDependVn(j+1, centrality);
         }
 
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],

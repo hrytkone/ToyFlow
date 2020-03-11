@@ -5,9 +5,9 @@
 # Usage and arguments
 ###############################################
 PROG=`basename $0`
-if [ $# -ne 4 ]
+if [ $# -ne 5 ]
 then
-    echo "Usage: ${PROG} comment events ptDep granularity"
+    echo "Usage: ${PROG} comment events ptDep granularity scale"
     exit;
 fi
 
@@ -18,17 +18,18 @@ export comment=$1
 export noEvents=$2
 export ptDep=$3
 export gran=$4
+export scale=$5
 
 ###############################################
 # Run settings
 ###############################################
-export noFileToRun=10
+export noFileToRun=1
 
 ###############################################
 # Program name
 ###############################################
 export DoWhat=toyFlow
-export oname=${DoWhat}_${comment}_PtDep${ptDep}_Gran${gran}
+export oname=${DoWhat}_${comment}_PtDep${ptDep}_Gran${gran}_Scale${scale}
 
 ###############################################
 # Output file locations
@@ -54,7 +55,7 @@ export iseg=\${SLURM_ARRAY_TASK_ID}
 sedN=\`expr \${sedN} + \${iseg}\`
 export outfile=${Out_DIR}/${oname}_\${sedN}.root
 export Log=${LOG_DIR}/${DoWhat}-\${sedN}.log
-./\${what} \${outfile} ${noEvents} ${ptDep} ${gran} \${sedN} >& \${Log}
+./\${what} \${outfile} ${noEvents} ${ptDep} ${gran} ${scale} \${sedN} >& \${Log}
 cd ${Main_DIR}
 EOF
 ###############################################
