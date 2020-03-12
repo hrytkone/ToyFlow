@@ -20,6 +20,9 @@ enum DETECTOR {
     D_T0P_A,
     D_T0P_C,
     D_VOP,
+    D_TPC_A,
+    D_TPC_C,
+    D_V0_C,
     DET_N
 };
 
@@ -27,7 +30,10 @@ const double cov[DET_N][2] = {
     {-0.9, 0.9},
     {3.8, 5.4},
     {-3.3, -2.2},
-    {2.2, 5.06}
+    {2.2, 5.06},
+    {0.1, 0.9},
+    {-0.9, -0.1},
+    {-3.7, -1.7}
 };
 
 #define PTBINS_N 9

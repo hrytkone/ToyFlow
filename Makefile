@@ -2,7 +2,7 @@ PROGRAM       = toyFlow
 
 version       = toka
 CXX           = g++
-CXXFLAGS      = -Ofast -Wall -g -D$(version) -std=c++14
+CXXFLAGS      = -Ofast -Wall -g -D$(version)
 
 LD            = g++
 LDFLAGS       = -Ofast

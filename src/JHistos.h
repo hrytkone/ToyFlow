@@ -39,6 +39,11 @@ public:
     TH1D *hQnQnAPtBin[PTBINS_N];
     TH1D *hSqrtSumWeightsPtBins[PTBINS_N];
 
+    // 3-sub event
+    TH1D *hRsubAB[nCoef][CENTBINS_N];
+    TH1D *hRsubAC[nCoef][CENTBINS_N];
+    TH1D *hRsubBA[nCoef][CENTBINS_N];
+
     //FOR TESTING
     TH1D *hV2ComplexPart;
 

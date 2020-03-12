@@ -54,6 +54,14 @@ JHistos::JHistos(){
         }
     }
 
+    for (int i=0; i<nCoef; i++) {
+        for (int j=0; j<CENTBINS_N; j++) {
+            hRsubAB[i][j] = new TH1D(Form("hRsubAB%dCENT%02d", i+1, j), Form("hRsubAB%dCENT%02d", i+1, j), 100, -1.0, 1.0);
+            hRsubAC[i][j] = new TH1D(Form("hRsubAC%dCENT%02d", i+1, j), Form("hRsubAC%dCENT%02d", i+1, j), 100, -1.0, 1.0);
+            hRsubBA[i][j] = new TH1D(Form("hRsubBA%dCENT%02d", i+1, j), Form("hRsubBA%dCENT%02d", i+1, j), 100, -1.0, 1.0);
+        }
+    }
+
     for (i=0; i<PTBINS_N; i++) {
         hQnQnAPtBin[i] = new TH1D(Form("hQnQnAPtBin%02i", i+1), Form("hQnQnAPtBin%02i", i+1), 482, -11.0, 11.0);
         hQnQnAPtBin[i]->Sumw2();

@@ -32,6 +32,7 @@ double VnDist(double *x, double *p);
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt);
 void GetParticleLists(JEventLists *lists, bool bUseGranularity);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
+void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality);
 
 double AcceptanceFunc(double *x, double *p);
 double AcceptanceFuncTimesSin(double *x, double *p);
@@ -204,6 +205,7 @@ int main(int argc, char **argv) {
         } else { //When saving tracks as trees, we don't need to analyze event.
             GetParticleLists(lists, bUseGranularity);
             AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
+            AnalyzeUsing3sub(histos, lists, inputs, centrality);
         }
     }
 
@@ -524,6 +526,62 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
 
     for(int iDet=0; iDet<DET_N; iDet++)
         histos->hSqrtSumWeights[iDet][centBin]->Fill(norm[iDet]);
+}
+
+void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality) {
+
+    TComplex Qvec, QvecA, QvecB, QvecC;
+    TComplex unitVec = TComplex(0, 0);
+
+    double norm, normA, normB, normC;
+
+    JToyMCTrack *track;
+
+    vector<double> phiList;
+
+    int nmult = lists->fullEvent->GetEntriesFast();
+
+    for (Int_t j=0; j<nCoef; j++) {
+
+        int n = j+1;
+
+        Qvec = TComplex(0, 0);
+        QvecA = TComplex(0, 0);
+        QvecB = TComplex(0, 0);
+        QvecC = TComplex(0, 0);
+
+        norm = 0.0; normA = 0.0; normB = 0.0; normC = 0.0;
+
+        for (Int_t i=0; i<nmult; i++) {
+            track = (JToyMCTrack*)lists->fullEvent->At(i);
+            double eta = track->GetEta();
+            double phi = track->GetPhi();
+
+            // Sub A
+            if ((eta > cov[5][0]) && (eta < cov[5][1])) {
+                CalculateQvector(track, unitVec, QvecA, normA, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
+            }
+
+            // Sub B
+            if ((eta > cov[3][0]) && (eta < cov[3][1])) {
+                CalculateQvector(track, unitVec, QvecB, normB, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
+            }
+
+            // Sub C
+            if ((eta > cov[4][0]) && (eta < cov[4][1])) {
+                CalculateQvector(track, unitVec, QvecC, normC, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
+            }
+        }
+
+        int ibin = inputs->GetCentBin(centrality);
+
+        double epA = GetEventPlane(QvecA, n);
+        double epB = GetEventPlane(QvecB, n);
+        double epC = GetEventPlane(QvecC, n);
+        histos->hRsubAB[j][ibin]->Fill(TMath::Cos((n)*(epA - epB)));
+        histos->hRsubAC[j][ibin]->Fill(TMath::Cos((n)*(epA - epC)));
+        histos->hRsubBA[j][ibin]->Fill(TMath::Cos((n)*(epB - epA)));
+    }
 }
 
 double PtDist(double *x, double *p) {
