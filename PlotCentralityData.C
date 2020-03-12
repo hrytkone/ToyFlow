@@ -8,14 +8,13 @@ void ErrorExit(TString error, int errnum=1 ){cout<<"ERROR: "<<error<<endl;gSyste
 const int nFiles = 3;
 const int nRef = 0;
 TString fileName[nFiles] = {
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-v0c/toyFlow_20200312_PtDep0_Gran0_Scale1.0/data/analysis.root",
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-v0c/toyFlow_20200312_PtDep0_Gran0_Scale0.8/data/analysis.root",
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-v0c/toyFlow_20200312_PtDep0_Gran0_Scale0.65/data/analysis.root"
+    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale1.0/data/graphs.root",
+    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.8/data/graphs.root",
+    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.65/data/graphs.root"
 };
 TString sSame[nFiles] = {"AP", "SAME P", "SAME P"};
 int gColor[nFiles] = {1,2,4};
 bool drawToSameFig = false;
-
 
 // You can choose how many harmonics are drawn
 // by changing this number. Max=4

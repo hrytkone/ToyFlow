@@ -17,6 +17,9 @@ public:
     TClonesArray *T0PAlist;
     TClonesArray *T0PClist;
     TClonesArray *V0Plist;
+    TClonesArray *TPCAlist;
+    TClonesArray *TPCClist;
+    TClonesArray *V0Clist;
 
     TClonesArray *TPClistA;
     TClonesArray *TPClistB;
@@ -26,6 +29,12 @@ public:
     TClonesArray *T0PClistB;
     TClonesArray *V0PlistA;
     TClonesArray *V0PlistB;
+    TClonesArray *TPCAlistA;
+    TClonesArray *TPCAlistB;
+    TClonesArray *TPCClistA;
+    TClonesArray *TPCClistB;
+    TClonesArray *V0ClistA;
+    TClonesArray *V0ClistB;
 };
 
 #endif

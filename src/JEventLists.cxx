@@ -10,6 +10,9 @@ JEventLists::JEventLists() {
     T0PAlist = new TClonesArray("JToyMCTrack", size);
     T0PClist = new TClonesArray("JToyMCTrack", size);
     V0Plist = new TClonesArray("JToyMCTrack", size);
+    TPCAlist = new TClonesArray("JToyMCTrack", size);
+    TPCClist = new TClonesArray("JToyMCTrack", size);
+    V0Clist = new TClonesArray("JToyMCTrack", size);
 
     TPClistA = new TClonesArray("JToyMCTrack",size);
     TPClistB = new TClonesArray("JToyMCTrack",size);
@@ -19,6 +22,12 @@ JEventLists::JEventLists() {
     T0PClistB = new TClonesArray("JToyMCTrack",size);
     V0PlistA = new TClonesArray("JToyMCTrack",size);
     V0PlistB = new TClonesArray("JToyMCTrack",size);
+    TPCAlistA = new TClonesArray("JToyMCTrack", size);
+    TPCAlistB = new TClonesArray("JToyMCTrack", size);
+    TPCClistA = new TClonesArray("JToyMCTrack", size);
+    TPCClistB = new TClonesArray("JToyMCTrack", size);
+    V0ClistA = new TClonesArray("JToyMCTrack", size);
+    V0ClistB = new TClonesArray("JToyMCTrack", size);
 }
 
 void JEventLists::ClearLists() {
@@ -27,6 +36,9 @@ void JEventLists::ClearLists() {
     T0PAlist->Clear("C");
     T0PClist->Clear("C");
     V0Plist->Clear("C");
+    TPCAlist->Clear("C");
+    TPCClist->Clear("C");
+    V0Clist->Clear("C");
     TPClistA->Clear("C");
     TPClistB->Clear("C");
     T0PAlistA->Clear("C");
@@ -35,6 +47,12 @@ void JEventLists::ClearLists() {
     T0PClistB->Clear("C");
     V0PlistA->Clear("C");
     V0PlistB->Clear("C");
+    TPCAlistA->Clear("C");
+    TPCAlistB->Clear("C");
+    TPCClistA->Clear("C");
+    TPCClistB->Clear("C");
+    V0ClistA->Clear("C");
+    V0ClistB->Clear("C");
 }
 
 TClonesArray *JEventLists::GetList(int det_i, TString sAorB) {
@@ -44,6 +62,9 @@ TClonesArray *JEventLists::GetList(int det_i, TString sAorB) {
             case 1 : return T0PAlistA;
             case 2 : return T0PClistA;
             case 3 : return V0PlistA;
+            case 4 : return TPCAlistA;
+            case 5 : return TPCClistA;
+            case 6 : return V0ClistA;
         }
     } else if (sAorB.EqualTo("B")) {
         switch (det_i) {
@@ -51,6 +72,9 @@ TClonesArray *JEventLists::GetList(int det_i, TString sAorB) {
             case 1 : return T0PAlistB;
             case 2 : return T0PClistB;
             case 3 : return V0PlistB;
+            case 4 : return TPCAlistB;
+            case 5 : return TPCClistB;
+            case 6 : return V0ClistB;
         }
     } else {
         switch (det_i) {
@@ -58,6 +82,9 @@ TClonesArray *JEventLists::GetList(int det_i, TString sAorB) {
             case 1 : return T0PAlist;
             case 2 : return T0PClist;
             case 3 : return V0Plist;
+            case 4 : return TPCAlist;
+            case 5 : return TPCClist;
+            case 6 : return V0Clist;
         }
     }
     return TPClist;
