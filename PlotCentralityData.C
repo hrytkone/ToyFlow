@@ -8,10 +8,10 @@ void ErrorExit(TString error, int errnum=1 ){cout<<"ERROR: "<<error<<endl;gSyste
 const int nFiles = 3;
 const int nRef = 0;
 TString fileName[nFiles] = {
-                            "toyFlowCentralityGraphs.root"
-                           ,"toyFlowCentralityGraphsDoubleGran.root"
-                           ,"toyFlowCentralityGraphsGran.root"
-                           };
+    "/home/heimarry/Desktop/toyflow-vntests/outputs-v0c/toyFlow_20200312_PtDep0_Gran0_Scale1.0/data/analysis.root",
+    "/home/heimarry/Desktop/toyflow-vntests/outputs-v0c/toyFlow_20200312_PtDep0_Gran0_Scale0.8/data/analysis.root",
+    "/home/heimarry/Desktop/toyflow-vntests/outputs-v0c/toyFlow_20200312_PtDep0_Gran0_Scale0.65/data/analysis.root"
+};
 TString sSame[nFiles] = {"AP", "SAME P", "SAME P"};
 int gColor[nFiles] = {1,2,4};
 bool drawToSameFig = false;
@@ -19,7 +19,7 @@ bool drawToSameFig = false;
 
 // You can choose how many harmonics are drawn
 // by changing this number. Max=4
-const int nHarmonics = 4;
+const int nHarmonics = 2;
 int nXH[5] = {0, 1, 2, 2, 2};
 int nYH[5] = {0, 1, 1, 2, 2};
 int nXP[5] = {0, 500, 1000, 1000, 1000};
@@ -121,10 +121,14 @@ void PlotCentralityData(int readNFiles = 1) {
 
     TLegend *legVn[nHarmonics+1];
     if(drawToSameFig) {
-        double xl[nHarmonics+1] = {0, 0.301205, 0.423695, 0.483936, 0.485944};
-        double yl[nHarmonics+1] = {0, 0.67019,  0.350951, 0.230444, 0.150106};
-        double xh[nHarmonics+1] = {0, 0.341365, 0.463855, 0.524096, 0.534137};
-        double yh[nHarmonics+1] = {0, 0.725159, 0.40592,  0.285412, 0.205074};
+        //double xl[nHarmonics+1] = {0, 0.301205, 0.423695, 0.483936, 0.485944};
+        //double yl[nHarmonics+1] = {0, 0.67019,  0.350951, 0.230444, 0.150106};
+        //double xh[nHarmonics+1] = {0, 0.341365, 0.463855, 0.524096, 0.534137};
+        //double yh[nHarmonics+1] = {0, 0.725159, 0.40592,  0.285412, 0.205074};
+        double xl[nHarmonics+1] = {0, 0.301205, 0.423695};
+        double yl[nHarmonics+1] = {0, 0.67019,  0.350951};
+        double xh[nHarmonics+1] = {0, 0.341365, 0.463855};
+        double yh[nHarmonics+1] = {0, 0.725159, 0.40592};
         for(i=1; i<nHarmonics+1; i++) {
             legVn[i] = new TLegend(xl[i],yl[i],xh[i],yh[i],"","brNDC");
             legVn[i]->SetTextSize(0.040);legVn[i]->SetBorderSize(0);
@@ -145,9 +149,9 @@ void PlotCentralityData(int readNFiles = 1) {
     leg1->AddEntry(gVn[0][nRef], "v_{n}, trad. EP", "p");
     leg1->AddEntry(gVnEP[0][nRef], "v_{n}{EP}", "p");
     leg1->AddEntry(gVnSP[0][nRef], "v_{n}{SP}", "p");
-    if(readNFiles>1) leg1->AddEntry(gR[0][0], "Ideal detector", "f");
-    if(readNFiles>1) leg1->AddEntry(gR[0][1], "16 sec granular detector", "f");
-    if(readNFiles>2) leg1->AddEntry(gR[0][2], "8 sec granular detector", "f");
+    if(readNFiles>1) leg1->AddEntry(gR[0][0], "vn scale=1.0", "f");
+    if(readNFiles>1) leg1->AddEntry(gR[0][1], "vn scale=0.8", "f");
+    if(readNFiles>2) leg1->AddEntry(gR[0][2], "vn scale=0.65", "f");
     leg1->Draw("SAME");
     c1->Draw();
 
@@ -172,9 +176,9 @@ void PlotCentralityData(int readNFiles = 1) {
 
     leg2->AddEntry(gRtrue[0][nRef], "R true", "p");
     leg2->AddEntry(gR[0][nRef], "R sub event method", "p");
-    if(readNFiles>1) leg2->AddEntry(gR[0][0], "Ideal detector", "f");
-    if(readNFiles>1) leg2->AddEntry(gR[0][1], "16 sec granular detector", "f");
-    if(readNFiles>2) leg2->AddEntry(gR[0][2], "8 sec granular detector", "f");
+    if(readNFiles>1) leg2->AddEntry(gR[0][0], "vn scale=1.0", "f");
+    if(readNFiles>1) leg2->AddEntry(gR[0][1], "vn scale=0.8", "f");
+    if(readNFiles>2) leg2->AddEntry(gR[0][2], "vn scale=0.65", "f");
     leg2->Draw("SAME");
     c2->Draw();
 

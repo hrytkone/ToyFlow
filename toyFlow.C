@@ -32,7 +32,7 @@ double VnDist(double *x, double *p);
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt);
 void GetParticleLists(JEventLists *lists, bool bUseGranularity);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
-void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality);
+void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity);
 
 double AcceptanceFunc(double *x, double *p);
 double AcceptanceFuncTimesSin(double *x, double *p);
@@ -205,7 +205,7 @@ int main(int argc, char **argv) {
         } else { //When saving tracks as trees, we don't need to analyze event.
             GetParticleLists(lists, bUseGranularity);
             AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
-            AnalyzeUsing3sub(histos, lists, inputs, centrality);
+            AnalyzeUsing3sub(histos, lists, inputs, centrality, bUseGranularity);
         }
     }
 
@@ -340,6 +340,12 @@ void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
                     phi = CheckPhi(phi, -PI);
                     tempTrack->SetPhi(phi);
                     eta = CheckEta(eta); // need to add SetEta to JToyMCTrack.h
+                }
+
+                // Phi granularity for V0C
+                if (bUseGranularity && j==6) {
+                    phi = CheckPhi(phi, -PI);
+                    tempTrack->SetPhi(phi);
                 }
 
                 track = *tempTrack;
@@ -528,7 +534,7 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
         histos->hSqrtSumWeights[iDet][centBin]->Fill(norm[iDet]);
 }
 
-void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality) {
+void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity) {
 
     TComplex Qvec, QvecA, QvecB, QvecC;
     TComplex unitVec = TComplex(0, 0);
@@ -559,6 +565,7 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
 
             // Sub A
             if ((eta > cov[5][0]) && (eta < cov[5][1])) {
+                if (bUseGranularity) phi = CheckPhi(phi, -PI);
                 CalculateQvector(track, unitVec, QvecA, normA, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
 
