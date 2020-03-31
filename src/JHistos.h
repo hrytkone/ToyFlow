@@ -42,7 +42,7 @@ public:
     // 3-sub event
     TH1D *hRsubAB[nCoef][CENTBINS_N];
     TH1D *hRsubAC[nCoef][CENTBINS_N];
-    TH1D *hRsubBA[nCoef][CENTBINS_N];
+    TH1D *hRsubBC[nCoef][CENTBINS_N];
 
     //FOR TESTING
     TH1D *hV2ComplexPart;

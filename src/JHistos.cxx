@@ -58,7 +58,7 @@ JHistos::JHistos(){
         for (int j=0; j<CENTBINS_N; j++) {
             hRsubAB[i][j] = new TH1D(Form("hRsubAB%dCENT%02d", i+1, j), Form("hRsubAB%dCENT%02d", i+1, j), 100, -1.0, 1.0);
             hRsubAC[i][j] = new TH1D(Form("hRsubAC%dCENT%02d", i+1, j), Form("hRsubAC%dCENT%02d", i+1, j), 100, -1.0, 1.0);
-            hRsubBA[i][j] = new TH1D(Form("hRsubBA%dCENT%02d", i+1, j), Form("hRsubBA%dCENT%02d", i+1, j), 100, -1.0, 1.0);
+            hRsubBC[i][j] = new TH1D(Form("hRsubBC%dCENT%02d", i+1, j), Form("hRsubBC%dCENT%02d", i+1, j), 100, -1.0, 1.0);
         }
     }
 

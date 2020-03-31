@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
     int nEvents = argc > 2 ? atol(argv[2]) : 1000;
     bool bUsePtDependence = argc > 3 ? atol(argv[3]) : 0;
     bool bUseGranularity = argc > 4 ? atol(argv[4]) : 0;
-    double scale = argc > 5 ? atof(argv[5]) : 1.0;
+    double scale = argc > 5 ? atof(argv[5]) : 0.8;
     int iSeed = argc > 6 ? atol(argv[6]) : 0;
     bool bSaveAsTrees = argc > 7 ? atol(argv[7]) : 0;
 
@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        centrality = rand->Uniform(0.0, 70.0);
+        centrality = rand->Uniform(0.0, 50.0);
 
         if (bUseCentDependence) {
             for (j=0; j<nCoef; j++) vn[j] = scale * inputs->GetCentDependVn(j+1, centrality);
@@ -267,6 +267,11 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             fPhi->SetParameters(vnTemp[0], vnTemp[1], vnTemp[2], vnTemp[3], vnTemp[4],
                 Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
         }
+
+	if ((eta>cov[0][0]) && (eta<cov[0][1])) {
+	    if (pT<0.2) continue;
+            if (rand->Uniform()>0.8) continue;
+	}
 
         phi = fPhi->GetRandom();
         px = pT*TMath::Cos(phi);
@@ -564,18 +569,21 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
             double phi = track->GetPhi();
 
             // Sub A
-            if ((eta > cov[5][0]) && (eta < cov[5][1])) {
-                if (bUseGranularity) phi = CheckPhi(phi, -PI);
+            if ((eta > cov[6][0]) && (eta < cov[6][1])) {
+                if (bUseGranularity) {
+		    phi = CheckPhi(phi, -PI);
+                    track->SetPhi(phi);
+		}
                 CalculateQvector(track, unitVec, QvecA, normA, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
 
             // Sub B
-            if ((eta > cov[3][0]) && (eta < cov[3][1])) {
+            if ((eta > cov[4][0]) && (eta < cov[4][1])) {
                 CalculateQvector(track, unitVec, QvecB, normB, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
 
             // Sub C
-            if ((eta > cov[4][0]) && (eta < cov[4][1])) {
+            if ((eta > cov[5][0]) && (eta < cov[5][1])) {
                 CalculateQvector(track, unitVec, QvecC, normC, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
         }
@@ -587,7 +595,7 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
         double epC = GetEventPlane(QvecC, n);
         histos->hRsubAB[j][ibin]->Fill(TMath::Cos((n)*(epA - epB)));
         histos->hRsubAC[j][ibin]->Fill(TMath::Cos((n)*(epA - epC)));
-        histos->hRsubBA[j][ibin]->Fill(TMath::Cos((n)*(epB - epA)));
+        histos->hRsubBC[j][ibin]->Fill(TMath::Cos((n)*(epB - epA)));
     }
 }
 

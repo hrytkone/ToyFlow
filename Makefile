@@ -40,7 +40,7 @@ $(PROGRAM):     $(OBJS) $(PROGRAM).C
 
 
 clean:
-	rm -f $(PROGRAM) *.o nanoDict*
+	rm -f $(PROGRAM) *.o nanoDict* src/*.o
 
 nanoDict.cc: $(HDRSDICT)
 		@echo "Generating dictionary ..."
