@@ -5,15 +5,19 @@
 
 #include <TF1.h>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 #include <TH1D.h>
 #include <TRandom3.h>
 #include <TMath.h>
+#include <TFile.h>
 
 using namespace std;
 
 #define ETADST_N 36
 //#define CENTDST_N 30
 #define CENTDST_N 7
+#define PTDST_N 61
+//#define PTDST_N 50
 
 const double etadst[ETADST_N] = {
 	-3.8, //underflow
@@ -71,6 +75,9 @@ const double centvn[nCoef][CENTDST_N] = {
     {0.00415816, 0.00467961, 0.00528238, 0.006501, 0.0068885, 0.00690379, 0.00575251}
 };
 
+const double ptdst[PTDST_N] = {0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 30, 34, 40};
+//const double ptdst[PTDST_N] = {0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 9, 10, 11, 12, 13};
+
 class JInputs {
 
 public:
@@ -79,15 +86,20 @@ public:
 
     void Load();
     int GetMultiplicity(int centrality);
-    double GetEta(int centrality);
+    double GetEta(double centrality);
     int GetCentBin(double centrality);
     double GetCentDependVn(int n, double centrality);
+    double GetPt(double centrality);
 
 private:
     bool CheckCentBin(int centBin);
 
     TH1F *hEtaDist[CENTBINS_N-1] = {NULL};
     int dMulti[CENTBINS_N-1] = {0};
+
+    TFile *mInputFile;
+    TH1F *hPtDist[CENTBINS_N-1] = {NULL};
+    TGraph *gPtDist;
 };
 
 #endif

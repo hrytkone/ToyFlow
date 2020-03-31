@@ -95,6 +95,10 @@ int main(int argc, char **argv) {
     TStopwatch timer;
     timer.Start();
 
+    JEventLists *lists = new JEventLists();
+    JInputs *inputs = new JInputs();
+    inputs->Load();
+
     TFile *fOut = TFile::Open(outFileName, "RECREATE");
 
     gRandom->SetSeed(iSeed);
@@ -109,9 +113,6 @@ int main(int argc, char **argv) {
         // Do not produce histos if saving as trees.
         histos = new JHistos();
     }
-    JEventLists *lists = new JEventLists();
-    JInputs *inputs = new JInputs();
-    inputs->Load();
 
     double centrality;
     double Psi[nCoef] = {0};
@@ -254,10 +255,16 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             nMult = inputs->GetMultiplicity(centBin);
         }
     }
+    cout << "\nCentrality : " << centrality << endl;
 
     for (i=0; i<nMult; i++) {
-        eta = inputs->GetEta(centBin);
-        pT = fPt->GetRandom();
+
+        eta = inputs->GetEta(centrality);
+        //pT = fPt->GetRandom(); // from v2(pT) distribution
+        pT = inputs->GetPt(centrality); // from pT distribution
+
+        if (pT<0.2)
+            cout << pT << endl;
 
         if (bUsePtDependence) {
             for (j=0; j<nCoef; j++) {
