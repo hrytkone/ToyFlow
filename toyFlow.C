@@ -255,16 +255,12 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             nMult = inputs->GetMultiplicity(centBin);
         }
     }
-    cout << "\nCentrality : " << centrality << endl;
 
     for (i=0; i<nMult; i++) {
 
         eta = inputs->GetEta(centrality);
         //pT = fPt->GetRandom(); // from v2(pT) distribution
         pT = inputs->GetPt(centrality); // from pT distribution
-
-        if (pT<0.2)
-            cout << pT << endl;
 
         if (bUsePtDependence) {
             for (j=0; j<nCoef; j++) {
