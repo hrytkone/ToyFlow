@@ -13,7 +13,9 @@ JInputs::~JInputs() {
 // and the total multiplicities for each centrality
 // bin.
 //
-// Initializes also pt distributions for each centrality bin (0-80%)
+// Initializes also pt distributions for each centrality bin (0-80%),
+// not really necessary since distributions pretty much the same in 
+// each centrality bin
 void JInputs::Load() {
 
     int i, j;

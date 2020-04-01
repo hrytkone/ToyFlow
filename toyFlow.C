@@ -259,8 +259,8 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     for (i=0; i<nMult; i++) {
 
         eta = inputs->GetEta(centrality);
-        //pT = fPt->GetRandom(); // from v2(pT) distribution
-        pT = inputs->GetPt(centrality); // from pT distribution
+        pT = fPt->GetRandom(); // from the analytic function
+        //pT = inputs->GetPt(centrality); // from pT centrality dependent distribution
 
         if (bUsePtDependence) {
             for (j=0; j<nCoef; j++) {
@@ -598,7 +598,7 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
         double epC = GetEventPlane(QvecC, n);
         histos->hRsubAB[j][ibin]->Fill(TMath::Cos((n)*(epA - epB)));
         histos->hRsubAC[j][ibin]->Fill(TMath::Cos((n)*(epA - epC)));
-        histos->hRsubBC[j][ibin]->Fill(TMath::Cos((n)*(epB - epA)));
+        histos->hRsubBC[j][ibin]->Fill(TMath::Cos((n)*(epB - epC)));
     }
 }
 
