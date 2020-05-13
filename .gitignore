@@ -37,6 +37,9 @@
 # Exec-files
 exec_*
 
+# pdf-files
+*.pdf
+
 #Additional files:
 .*.swp
 .*.swo

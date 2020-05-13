@@ -1,11 +1,12 @@
 #include <TMath.h>
 #include <TFile.h>
+#include "src/Filipad.h"
 
 const int nsets = 1;
 
 void ErrorExit(TString error, int errnum=1 ){cout<<"ERROR: "<<error<<endl;gSystem->Exit(errnum);}
 
-TString fileNames[nsets] = {"toyFlowGraphs.root"};
+TString fileNames[nsets] = {"output/toyFlow_20200429_PtDep0_Gran0_Scale1.00/toyFlow_20200429_PtDep0_Gran0_Scale1.00-plot-output-normal.root"};
 
 TH1D *hInputFlow[nsets];
 

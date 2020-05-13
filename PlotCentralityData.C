@@ -8,9 +8,12 @@ void ErrorExit(TString error, int errnum=1 ){cout<<"ERROR: "<<error<<endl;gSyste
 const int nFiles = 3;
 const int nRef = 0;
 TString fileName[nFiles] = {
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale1.0/data/graphs.root",
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.8/data/graphs.root",
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.65/data/graphs.root"
+    //"/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale1.0/data/graphs.root",
+    //"/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.8/data/graphs.root",
+    //"/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.65/data/graphs.root"
+    "output/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale1.00/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale1.00-plot-output-centrality.root",
+    "output/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.80/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.80-plot-output-centrality.root",
+    "output/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.65/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.65-plot-output-centrality.root"
 };
 TString sSame[nFiles] = {"AP", "SAME P", "SAME P"};
 int gColor[nFiles] = {1,2,4};
@@ -18,11 +21,16 @@ bool drawToSameFig = false;
 
 // You can choose how many harmonics are drawn
 // by changing this number. Max=4
-const int nHarmonics = 2;
+const int nHarmonics = 1;
+// Here we have max(nHarmonics + 1) = 5
 int nXH[5] = {0, 1, 2, 2, 2};
 int nYH[5] = {0, 1, 1, 2, 2};
 int nXP[5] = {0, 500, 1000, 1000, 1000};
 int nYP[5] = {0, 500, 500, 1000, 1000};
+double xl[5] = {0, 0.301205, 0.423695, 0.483936, 0.485944};
+double yl[5] = {0, 0.67019,  0.350951, 0.230444, 0.150106};
+double xh[5] = {0, 0.341365, 0.463855, 0.524096, 0.534137};
+double yh[5] = {0, 0.725159, 0.40592,  0.285412, 0.205074};
 
 TH1D *hInputFlow[nCoef][nFiles];
 
@@ -120,16 +128,8 @@ void PlotCentralityData(int readNFiles = 1) {
 
     TLegend *legVn[nHarmonics+1];
     if(drawToSameFig) {
-        //double xl[nHarmonics+1] = {0, 0.301205, 0.423695, 0.483936, 0.485944};
-        //double yl[nHarmonics+1] = {0, 0.67019,  0.350951, 0.230444, 0.150106};
-        //double xh[nHarmonics+1] = {0, 0.341365, 0.463855, 0.524096, 0.534137};
-        //double yh[nHarmonics+1] = {0, 0.725159, 0.40592,  0.285412, 0.205074};
-        double xl[nHarmonics+1] = {0, 0.301205, 0.423695};
-        double yl[nHarmonics+1] = {0, 0.67019,  0.350951};
-        double xh[nHarmonics+1] = {0, 0.341365, 0.463855};
-        double yh[nHarmonics+1] = {0, 0.725159, 0.40592};
         for(i=1; i<nHarmonics+1; i++) {
-            legVn[i] = new TLegend(xl[i],yl[i],xh[i],yh[i],"","brNDC");
+            legVn[i] = new TLegend(xl[nHarmonics],yl[nHarmonics],xh[nHarmonics],yh[nHarmonics],"","brNDC");
             legVn[i]->SetTextSize(0.040);legVn[i]->SetBorderSize(0);
             legVn[i]->AddEntry((TH1D*)NULL, Form("v_{%d}",i+1), "");
             legVn[i]->Draw("same");
@@ -137,7 +137,7 @@ void PlotCentralityData(int readNFiles = 1) {
     }
 
     TLegend *leg1;
-    if(!drawToSameFig) {
+    if(!drawToSameFig) {
         leg1 = new TLegend(0.30,0.5,0.55,0.85,"","brNDC");
     } else {
         leg1 = new TLegend(0.48996,0.348837,0.626506,0.693446,"","brNDC");
@@ -170,7 +170,7 @@ void PlotCentralityData(int readNFiles = 1) {
         }
     }
 
-    TLegend *leg2 = new TLegend(0.30,0.7,0.55,0.85,"","brNDC");
+    TLegend *leg2 = new TLegend(0.30,0.2,0.55,0.45,"","brNDC");
     leg2->SetTextSize(0.037);leg2->SetBorderSize(0);
 
     leg2->AddEntry(gRtrue[0][nRef], "R true", "p");

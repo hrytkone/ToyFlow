@@ -13,9 +13,15 @@ const int nFiles = 3;
 const int nFilesRead = 3;
 const int nRef = 0;
 TString fileName[nFiles] = {
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale1.0/data/toyFlow_20200312_PtDep0_Gran1_Scale1.0.root",
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.8/data/toyFlow_20200312_PtDep0_Gran1_Scale0.8.root",
-    "/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.65/data/toyFlow_20200312_PtDep0_Gran1_Scale0.65.root"
+    //"/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale1.0/data/toyFlow_20200312_PtDep0_Gran1_Scale1.0.root",
+    //"/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.8/data/toyFlow_20200312_PtDep0_Gran1_Scale0.8.root",
+    //"/home/heimarry/Desktop/toyflow-vntests/outputs-gran-on/toyFlow_20200312_PtDep0_Gran1_Scale0.65/data/toyFlow_20200312_PtDep0_Gran1_Scale0.65.root"
+    //"output/toyFlow_20200429_PtDep0_Gran0_Scale1.00/toyFlow_20200429_PtDep0_Gran0_Scale1.00.root",
+    //"output/toyFlow_20200429_PtDep0_Gran0_Scale0.80/toyFlow_20200429_PtDep0_Gran0_Scale0.80.root",
+    //"output/toyFlow_20200429_PtDep0_Gran0_Scale0.65/toyFlow_20200429_PtDep0_Gran0_Scale0.65.root"
+    "output/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale1.00/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale1.00.root",
+    "output/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.80/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.80.root",
+    "output/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.65/toyFlow_20200430_70perMulti_PtDep0_Gran0_Scale0.65.root",
 };
 TString sSame[nFiles] = {"AP", "SAME P", "SAME P"};
 int gColor[nFiles] = {1,2,4};
@@ -53,7 +59,7 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
     TH1D *hVnObs[CENTBINS_N];
     TH1D *hRsubAB[CENTBINS_N];
     TH1D *hRsubAC[CENTBINS_N];
-    TH1D *hRsubBA[CENTBINS_N];
+    TH1D *hRsubBC[CENTBINS_N];
 
     for(int iFil=0; iFil<nFilesRead; iFil++) {
 
@@ -68,8 +74,8 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
             checkUnderOverFlow(hRsubAB[i]);
             hRsubAC[i] = (TH1D*)fIn[iFil]->Get(Form("hRsubAC%dCENT%02d", n, i));
             checkUnderOverFlow(hRsubAC[i]);
-            hRsubBA[i] = (TH1D*)fIn[iFil]->Get(Form("hRsubBA%dCENT%02d", n, i));
-            checkUnderOverFlow(hRsubBA[i]);
+            hRsubBC[i] = (TH1D*)fIn[iFil]->Get(Form("hRsubBC%dCENT%02d", n, i));
+            checkUnderOverFlow(hRsubBC[i]);
         }
 
         double r[CENTBINS_N], rerr[CENTBINS_N];
@@ -78,7 +84,7 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
         for (int i=0; i<CENTBINS_N; i++) {
             cout << "\nCENTRALITY BIN " << i << " : \n";
 
-            double res = GetRes(hRsubAB[i]->GetMean(), hRsubAC[i]->GetMean(), hRsubBA[i]->GetMean());
+            double res = GetRes(hRsubAB[i]->GetMean(), hRsubAC[i]->GetMean(), hRsubBC[i]->GetMean());
             if (isnan(res)) res = 0.0;
 
             r[i] = res;
@@ -91,7 +97,7 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
 
             rerr[i] = GetResError(hRsubAB[i]->GetMean(), hRsubAB[i]->GetMeanError(),
                                   hRsubAC[i]->GetMean(), hRsubAC[i]->GetMeanError(),
-                                  hRsubBA[i]->GetMean(), hRsubBA[i]->GetMeanError());
+                                  hRsubBC[i]->GetMean(), hRsubBC[i]->GetMeanError());
             vobserr[i] = hVnObs[i]->GetMeanError();
             verr[i] = GetVnError(vobs[i], vobserr[i], r[i], rerr[i]);
 
@@ -102,7 +108,7 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
 
         for(int i=0; i<CENTDST_N; i++) {
             if (i==0 || i==1) {
-                gR[iFil]->SetPoint(i, double(i+1)*5.0-2.5, r[i]);
+                gR[iFil]->SetPoint(i, double(i+1)*5.0-2.5+iFil, r[i]);
                 gR[iFil]->SetPointError(i, 0.0, rerr[i]);
 
                 gVobs[iFil]->SetPoint(i, double(i+1)*5.0-2.5, vobs[i]);
@@ -111,7 +117,7 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
                 gV[iFil]->SetPoint(i, double(i+1)*5.0-2.5, v[i]);
                 gV[iFil]->SetPointError(i, 0.0, verr[i]);
             } else {
-                gR[iFil]->SetPoint(i, double(i)*10.0-5.0, r[i]);
+                gR[iFil]->SetPoint(i, double(i)*10.0-5.0+iFil, r[i]);
                 gR[iFil]->SetPointError(i, 0.0, rerr[i]);
 
                 gVobs[iFil]->SetPoint(i, double(i)*10.0-5.0, vobs[i]);

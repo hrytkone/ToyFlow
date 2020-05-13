@@ -29,7 +29,7 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale);
 void GetParticleLists(JEventLists *lists, bool bUseGranularity);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity);
@@ -57,15 +57,16 @@ int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
-        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale seedNum bSaveAsTrees" << endl;
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale seedNum bSaveAsTrees" << endl;
         return 0;
     };
     int nEvents = argc > 2 ? atol(argv[2]) : 1000;
     bool bUsePtDependence = argc > 3 ? atol(argv[3]) : 0;
     bool bUseGranularity = argc > 4 ? atol(argv[4]) : 0;
     double scale = argc > 5 ? atof(argv[5]) : 0.8;
-    int iSeed = argc > 6 ? atol(argv[6]) : 0;
-    bool bSaveAsTrees = argc > 7 ? atol(argv[7]) : 0;
+    double multiScale = argc > 6 ? atof(argv[6]) : 1.0;
+    int iSeed = argc > 7 ? atol(argv[7]) : 0;
+    bool bSaveAsTrees = argc > 8 ? atol(argv[8]) : 0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
@@ -79,6 +80,8 @@ int main(int argc, char **argv) {
          << ", Events: " << nEvents
          << ", Pt-dep: " << bUsePtDependence
          << ", Granularity: " << bUseGranularity
+         << ", vn scale: " << scale
+         << ", multiplicity scale: " << multiScale
          << ", Seed: " << iSeed
          << ", Weight: " << bUseWeight
          << ", Random Psi: " << bRandomPsi
@@ -200,7 +203,7 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality, ntuple, i);
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality, ntuple, i, multiScale);
         if(bSaveAsTrees) {
             //
         } else { //When saving tracks as trees, we don't need to analyze event.
@@ -218,7 +221,7 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt) {
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale) {
     double pT, phi, eta, Energy;
     double px, py, pz;
     double randNum;
@@ -252,7 +255,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             centrality = centBins[i+1] - (centBins[i+1]-centBins[i])/2.0;
             centBin = i;
             if(histos!=0) histos->hCentrality->Fill(centrality);
-            nMult = inputs->GetMultiplicity(centBin);
+            nMult = multiScale*inputs->GetMultiplicity(centBin);
         }
     }
 
@@ -271,10 +274,12 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
                 Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
         }
 
-	if ((eta>cov[0][0]) && (eta<cov[0][1])) {
-	    if (pT<0.2) continue;
-            if (rand->Uniform()>0.8) continue;
-	}
+        /* // 
+        if ((eta>cov[0][0]) && (eta<cov[0][1])) {
+             if (pT<0.2) continue;
+             if (rand->Uniform()>0.8) continue;
+        }
+        */
 
         phi = fPhi->GetRandom();
         px = pT*TMath::Cos(phi);
@@ -572,21 +577,21 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
             double phi = track->GetPhi();
 
             // Sub A
-            if ((eta > cov[6][0]) && (eta < cov[6][1])) {
+            if ((eta > cov[6][0]) && (eta < cov[6][1])) { // 6 is TPC_C
                 if (bUseGranularity) {
-		    phi = CheckPhi(phi, -PI);
+                    phi = CheckPhi(phi, -PI);
                     track->SetPhi(phi);
-		}
+                }
                 CalculateQvector(track, unitVec, QvecA, normA, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
 
             // Sub B
-            if ((eta > cov[4][0]) && (eta < cov[4][1])) {
+            if ((eta > cov[4][0]) && (eta < cov[4][1])) { // 4 is V_zero-plus
                 CalculateQvector(track, unitVec, QvecB, normB, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
 
             // Sub C
-            if ((eta > cov[5][0]) && (eta < cov[5][1])) {
+            if ((eta > cov[5][0]) && (eta < cov[5][1])) { // 5 is TPC_A
                 CalculateQvector(track, unitVec, QvecC, normC, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
             }
         }
