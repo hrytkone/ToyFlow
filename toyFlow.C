@@ -237,7 +237,8 @@ int main(int argc, char **argv) {
 
 //======END OF MAIN PROGRAM======
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale, double extraConvPart, double decays) {
-    double pT, phi, eta, Energy;
+    double pT, mT, phi, eta, Energy;
+    double pionMass = 0.135;
     double px, py, pz;
     double randNum;
     double vnTemp[nCoef];
@@ -305,10 +306,12 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         } else {
             phi = fPhi->GetRandom();
         }
+        mT = TMath::Sqrt(pT*pT + pionMass*pionMass);
         px = pT*TMath::Cos(phi);
         py = pT*TMath::Sin(phi);
-        pz = pT*TMath::SinH(eta);
-        Energy = TMath::Sqrt(pT*pT + pz*pz);
+        // Note: Here y=eta assumed.
+        pz = mT*TMath::SinH(eta);
+        Energy = mT*TMath::CosH(eta);//TMath::Sqrt(pT*pT + pz*pz + pionMass*pionMass);
         lVec.SetPxPyPzE(px, py, pz, Energy);
         track.SetTrack(lVec);
 
@@ -336,7 +339,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         randNum = rand->Rndm();
         if(randNum < decays) { // This needs to be checked randomly.
             // Calculate lorentz vectors for decay particles in CMS frame
-            double decayEnergy = 1.0001/2.0; // Pion mass halved -> assume pion mass for decaying particle.
+            double decayEnergy = pionMass/2.0; // Pion mass halved -> assume pion mass for decaying particle.
             double phiDecay = rand->Uniform(0.0, 2*PI);
             double thetaDecay = rand->Uniform(0.0, PI);
             double pxDec = decayEnergy*TMath::Cos(phiDecay)*TMath::Sin(thetaDecay);
