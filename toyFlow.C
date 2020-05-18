@@ -29,7 +29,8 @@ double PtDist(double *x, double *p);
 double PhiDist(double *x, double *p);
 double VnDist(double *x, double *p);
 
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale);
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale, double extraConvPart, double decays);
+int AddParticle(JHistos *histos, JEventLists *lists, TRandom3 *rand, bool bNonuniformPhi, double phi, double phiMin, double phiMax, int listID, TLorentzVector lVec, int lCharge, int lPID, int lIsHadron, double percentage);
 void GetParticleLists(JEventLists *lists, bool bUseGranularity);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity);
@@ -53,11 +54,21 @@ double CheckPhi(double phi, double startAngle);
 double CheckEta(double eta);
 double BelongsToA(double phi);
 
+// Arguments:
+// filename.root filename of the output
+// nEvents       number of events
+// bUsePtDep     toggle flow pt dependency (currently not under development)
+// scale         scale v_n signal strength
+// multiScale    scale the multiplicity
+// extraConvPart add a % of conversion particles (no flow)
+// decays        decay a % of particles into two new particles (currently under construction)
+// seedNum       seed number for the random number generator
+// bSaveAsTrees  toggle between saving particles as trees with no histograms, or only histograms.
 int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
-        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale seedNum bSaveAsTrees" << endl;
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale extraConvPart decays seedNum bSaveAsTrees" << endl;
         return 0;
     };
     int nEvents = argc > 2 ? atol(argv[2]) : 1000;
@@ -65,8 +76,10 @@ int main(int argc, char **argv) {
     bool bUseGranularity = argc > 4 ? atol(argv[4]) : 0;
     double scale = argc > 5 ? atof(argv[5]) : 0.8;
     double multiScale = argc > 6 ? atof(argv[6]) : 1.0;
-    int iSeed = argc > 7 ? atol(argv[7]) : 0;
-    bool bSaveAsTrees = argc > 8 ? atol(argv[8]) : 0;
+    double extraConvPart = argc > 7 ? atof(argv[7]) : 0.0;
+    double decays = argc > 8 ? atof(argv[8]) : 0.0;
+    int iSeed = argc > 9 ? atol(argv[9]) : 0;
+    bool bSaveAsTrees = argc > 10 ? atol(argv[10]) : 0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
@@ -82,6 +95,8 @@ int main(int argc, char **argv) {
          << ", Granularity: " << bUseGranularity
          << ", vn scale: " << scale
          << ", multiplicity scale: " << multiScale
+         << ", extra conversion particles: " << extraConvPart
+         << ", decay perc of the particles: " << decays
          << ", Seed: " << iSeed
          << ", Weight: " << bUseWeight
          << ", Random Psi: " << bRandomPsi
@@ -203,7 +218,7 @@ int main(int argc, char **argv) {
         fPhiDist->SetParameters(vn[0], vn[1], vn[2], vn[3], vn[4],
             Psi[0], Psi[1], Psi[2], Psi[3], Psi[4]);
 
-        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality, ntuple, i, multiScale);
+        GetEvent(histos, lists, inputs, rand, fPtDist, fPhiDist, fVnDist, vn, Psi, percentage, phiMin, phiMax, bNonuniformPhi, bUsePtDependence, centrality, ntuple, i, multiScale, extraConvPart, decays);
         if(bSaveAsTrees) {
             //
         } else { //When saving tracks as trees, we don't need to analyze event.
@@ -221,7 +236,7 @@ int main(int argc, char **argv) {
 }
 
 //======END OF MAIN PROGRAM======
-void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale) {
+void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale, double extraConvPart, double decays) {
     double pT, phi, eta, Energy;
     double px, py, pz;
     double randNum;
@@ -230,7 +245,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     int lCharge;
     int lIsHadron;
 
-    double nMult = 0, nTracks = 0;
+    int nMult = 0, nTracks = 0;
     double alpha = 2.0, beta = 1.0;
     //http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf PID
     //Thermal model AN:
@@ -247,7 +262,8 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     double probAntiP   = 21.0/(455+455+68+68+21+21);
 
     JToyMCTrack track;
-    TLorentzVector lVec;
+    TLorentzVector lVec, lVecDecay1, lVecDecay2;
+    TVector3 lBoost3Vec;
 
     int i, j, centBin = 0;
     for (i=0; i<CENTBINS_N-1; i++) {
@@ -255,10 +271,12 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             centrality = centBins[i+1] - (centBins[i+1]-centBins[i])/2.0;
             centBin = i;
             if(histos!=0) histos->hCentrality->Fill(centrality);
-            nMult = multiScale*inputs->GetMultiplicity(centBin);
+            // Extra multiplicity scaling * extra conversion particles (no flow) * Multiplicity 
+            nMult = multiScale*(1.0+extraConvPart)*inputs->GetMultiplicity(centBin);
         }
     }
 
+    // Note that this i is incremented also in the decay if the particle happens to decay.
     for (i=0; i<nMult; i++) {
 
         eta = inputs->GetEta(centrality);
@@ -281,7 +299,12 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         }
         */
 
-        phi = fPhi->GetRandom();
+        // The last extraConvPart % of particles are conversion particles with no flow.
+        if(i > nMult*(1.0-extraConvPart)) {
+            phi = rand->Uniform(-PI,PI);
+        } else {
+            phi = fPhi->GetRandom();
+        }
         px = pT*TMath::Cos(phi);
         py = pT*TMath::Sin(phi);
         pz = pT*TMath::SinH(eta);
@@ -303,32 +326,84 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             lPID = 2212; lCharge = 1; lIsHadron = 1; //p
         } else if(randNum<probPiPlus+probPiMinus+probKPlus+probKMinus+probP+probAntiP) {
             lPID = -2212; lCharge = -1; lIsHadron = 1; //anti-p
-        }
-
-        if(ntuple!=0) {
-            ntuple->Fill(iEvt, lPID, px, py, pz, 0, 0, 0, lIsHadron);
-        }
-
-        if(histos!=0) histos->hPt->Fill(pT);
-        if(histos!=0) histos->hEta->Fill(eta);
-
-        if (phi < phiMin || phi > phiMax) {
-            if(histos!=0) histos->hPhi->Fill(phi);
-            // track, charge, pid, ishadron
-            new((*lists->fullEvent)[nTracks]) JToyMCTrack(lVec, lCharge, lPID, lIsHadron);
-            nTracks++;
         } else {
-            randNum = bNonuniformPhi ? rand->Rndm():1.1;
-            if ( randNum > percentage ) {
-                if(histos!=0) histos->hPhi->Fill(phi);
-                // track, charge, pid, ishadron
-                new((*lists->fullEvent)[nTracks]) JToyMCTrack(lVec, lCharge, lPID, lIsHadron);
-                nTracks++;
+            lPID = 0; lCharge = -9; lIsHadron = -1;
+        }
+
+        // When decays is over 0, that perc of the particles are decayed,
+        // but the multiplicity is kept the same. This is for studying
+        // the effects of strongly correlated decay particles in flow.
+        randNum = rand->Rndm();
+        if(randNum < decays) { // This needs to be checked randomly.
+            // Calculate lorentz vectors for decay particles in CMS frame
+            double decayEnergy = 1.0001/2.0; // Pion mass halved -> assume pion mass for decaying particle.
+            double phiDecay = rand->Uniform(0.0, 2*PI);
+            double thetaDecay = rand->Uniform(0.0, PI);
+            double pxDec = decayEnergy*TMath::Cos(phiDecay)*TMath::Sin(thetaDecay);
+            double pyDec = decayEnergy*TMath::Sin(phiDecay)*TMath::Sin(thetaDecay);
+            double pzDec = decayEnergy*TMath::Cos(thetaDecay);
+
+            // decay products back to back in CMS frame
+            lVecDecay1.SetPxPyPzE(pxDec, pyDec, pzDec, decayEnergy);
+            lVecDecay2.SetPxPyPzE(-pxDec, -pyDec, -pzDec, decayEnergy);
+
+            // Boost decay products to LAB frame
+            lBoost3Vec = lVec.BoostVector();
+            lVecDecay1.Boost(lBoost3Vec);
+            lVecDecay2.Boost(lBoost3Vec);
+
+            // Note that this decay is not taking into account any charge conservation or other such details.
+            nTracks += AddParticle(histos, lists, rand, bNonuniformPhi, lVecDecay1.Phi(), phiMin, phiMax, nTracks, lVecDecay1, lCharge, lPID, lIsHadron, percentage);
+            nTracks += AddParticle(histos, lists, rand, bNonuniformPhi, lVecDecay2.Phi(), phiMin, phiMax, nTracks, lVecDecay2, lCharge, lPID, lIsHadron, percentage);
+
+            if(histos!=0) {
+                histos->hPt->Fill(lVecDecay1.Pt());
+                histos->hPt->Fill(lVecDecay2.Pt());
+                histos->hEta->Fill(lVecDecay1.Eta());
+                histos->hEta->Fill(lVecDecay2.Eta());
+            }
+
+            if(ntuple!=0) {
+                ntuple->Fill(iEvt, lPID, lVecDecay1.Px(), lVecDecay1.Py(), lVecDecay1.Pz(), 0, 0, 0, lIsHadron);
+                ntuple->Fill(iEvt, lPID, lVecDecay2.Px(), lVecDecay2.Py(), lVecDecay2.Pz(), 0, 0, 0, lIsHadron);
+            }
+
+            // One extra i++ is needed here as the decay results in two particles instead of the normal one particle.
+            i++;
+        } else {
+            nTracks += AddParticle(histos, lists, rand, bNonuniformPhi, phi, phiMin, phiMax, nTracks, lVec, lCharge, lPID, lIsHadron, percentage);
+
+            if(histos!=0) histos->hPt->Fill(pT);
+            if(histos!=0) histos->hEta->Fill(eta);
+
+            if(ntuple!=0) {
+                ntuple->Fill(iEvt, lPID, px, py, pz, 0, 0, 0, lIsHadron);
             }
         }
     }
 
     if(histos!=0) histos->hMultiplicity->Fill(nTracks);
+}
+
+// Returns 1 or 0 depending on if a particle was added to the list or not.
+int AddParticle(JHistos *histos, JEventLists *lists, TRandom3 *rand, bool bNonuniformPhi, double phi, double phiMin, double phiMax, int listID, TLorentzVector lVec, int lCharge, int lPID, int lIsHadron, double percentage) {
+    double randNum;
+    int particleAdded = 0;
+    if (phi < phiMin || phi > phiMax) {
+        if(histos!=0) histos->hPhi->Fill(phi);
+        // track, charge, pid, ishadron
+        new((*lists->fullEvent)[listID]) JToyMCTrack(lVec, lCharge, lPID, lIsHadron);
+        particleAdded = 1;
+    } else {
+        randNum = bNonuniformPhi ? rand->Rndm():1.1;
+        if ( randNum > percentage ) {
+            if(histos!=0) histos->hPhi->Fill(phi);
+            // track, charge, pid, ishadron
+            new((*lists->fullEvent)[listID]) JToyMCTrack(lVec, lCharge, lPID, lIsHadron);
+            particleAdded = 1;
+        }
+    }
+    return particleAdded;
 }
 
 void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
@@ -552,7 +627,7 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
     TComplex Qvec, QvecA, QvecB, QvecC;
     TComplex unitVec = TComplex(0, 0);
 
-    double norm, normA, normB, normC;
+    double normA, normB, normC;
 
     JToyMCTrack *track;
 
@@ -569,7 +644,7 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
         QvecB = TComplex(0, 0);
         QvecC = TComplex(0, 0);
 
-        norm = 0.0; normA = 0.0; normB = 0.0; normC = 0.0;
+        normA = 0.0; normB = 0.0; normC = 0.0;
 
         for (Int_t i=0; i<nmult; i++) {
             track = (JToyMCTrack*)lists->fullEvent->At(i);
