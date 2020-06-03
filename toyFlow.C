@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     bool bSaveAsTrees = argc > 10 ? atol(argv[10]) : 0;
 
     bool bUseWeight = false;
-    bool bRandomPsi = true;
+    bool bRandomPsi = false;
     bool bUseCentDependence = true;
     bool bNonuniformPhi = false;
 
@@ -686,7 +686,7 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
 }
 
 double PtDist(double *x, double *p) {
-    return TMath::Exp(-p[0]*x[0]);
+    return x[0]*TMath::Exp(-p[0]*x[0]);
 }
 
 double PhiDist(double *x, double *p) {

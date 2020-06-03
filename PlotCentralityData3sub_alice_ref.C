@@ -30,7 +30,7 @@ TGraphErrors *gV[nFiles];
 TFile *fIn[nFiles];
 TFile *fIn2sub[nFiles];
 
-void PlotCentralityData3sub_alice_ref(TString sOutputPath = "./", int n = 2, int iVnDet = 6, double multiScale=1.0, double vnScale=1.0) {
+void PlotCentralityData3sub_alice_ref(TString sFile1 = "testgran0", TString sFile2 = "testgran1", int n = 2, int iVnDet = 6, double multiScale=1.0, double vnScale=1.0) {
     //const double multiScale = 0.8; //0.3, 0.5, 0.8, 1.0
     //const double vnScale = 1.0; //0.65, 0.80, 1.00
 
@@ -38,16 +38,16 @@ void PlotCentralityData3sub_alice_ref(TString sOutputPath = "./", int n = 2, int
     TString fileName[nFilesRead] = {
         //"toyFlow_eta-gap-full-eff-cut_PtDep0_Gran0_Scale0.8/toyFlow_eta-gap-full-eff-cut_PtDep0_Gran0_Scale0.8.root",
         //"toyFlow_eta-gap-full-eff-cut_PtDep0_Gran1_Scale0.8/toyFlow_eta-gap-full-eff-cut_PtDep0_Gran1_Scale0.8.root"
-        Form("output/toyFlow_20200430_%.1fMulti_PtDep0_Gran0_Scale%.2f/toyFlow_20200430_%.1fMulti_PtDep0_Gran0_Scale%.2f.root",multiScale,vnScale,multiScale,vnScale),
-        Form("output/toyFlow_20200430_%.1fMulti_PtDep0_Gran1_Scale%.2f/toyFlow_20200430_%.1fMulti_PtDep0_Gran1_Scale%.2f.root",multiScale,vnScale,multiScale,vnScale)
+        Form("output/%s/%s.root",sFile1.Data(),sFile1.Data()),
+        Form("output/%s/%s.root",sFile2.Data(),sFile2.Data())
     };
 
     // Nämä luotu MakeCentralityGraphs.C makrolla ja niistä otetaan 2-subevent metodiin asiat
     TString fileName2sub[nFilesRead] = {
         //"toyFlow_eta-gap-full-eff-cut_PtDep0_Gran0_Scale0.8/graphs.root",
         //"toyFlow_eta-gap-full-eff-cut_PtDep0_Gran1_Scale0.8/graphs.root"
-        Form("output/toyFlow_20200430_%.1fMulti_PtDep0_Gran0_Scale%.2f/toyFlow_20200430_%.1fMulti_PtDep0_Gran0_Scale%.2f-plot-output-alice_comp.root",multiScale,vnScale,multiScale,vnScale),
-        Form("output/toyFlow_20200430_%.1fMulti_PtDep0_Gran1_Scale%.2f/toyFlow_20200430_%.1fMulti_PtDep0_Gran1_Scale%.2f-plot-output-alice_comp.root",multiScale,vnScale,multiScale,vnScale)
+        Form("output/%s/%s-plot-output-alice_comp.root",sFile1.Data(),sFile1.Data()),
+        Form("output/%s/%s-plot-output-alice_comp.root",sFile2.Data(),sFile2.Data())
     };
 
 
@@ -288,8 +288,10 @@ void PlotCentralityData3sub_alice_ref(TString sOutputPath = "./", int n = 2, int
     leg2->Draw("SAME");
     c2->Update();
 
-    c1->SaveAs(Form("%sreso.pdf",sOutputPath.Data()));
-    c2->SaveAs(Form("%sv2.pdf",sOutputPath.Data()));
+    c1->SaveAs(Form("output/%s/%s-reso.pdf",sFile1.Data(),sFile1.Data()));
+    c2->SaveAs(Form("output/%s/%s-v2.pdf",sFile1.Data(),sFile1.Data()));
+    c1->SaveAs(Form("output/%s/%s-reso.pdf",sFile2.Data(),sFile2.Data()));
+    c2->SaveAs(Form("output/%s/%s-v2.pdf",sFile2.Data(),sFile2.Data()));
 }
 
 //______________________________________________________________________________
