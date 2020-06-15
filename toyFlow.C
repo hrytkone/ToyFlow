@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
 
 //======END OF MAIN PROGRAM======
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale, double extraConvPart, double decays) {
-    double pT, mT, phi, eta, Energy;
+    double pT, phi, eta, Energy;
     double pionMass = 0.135;
     double px, py, pz;
     double randNum;
@@ -306,12 +306,10 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         } else {
             phi = fPhi->GetRandom();
         }
-        mT = TMath::Sqrt(pT*pT + pionMass*pionMass);
         px = pT*TMath::Cos(phi);
         py = pT*TMath::Sin(phi);
-        // Note: Here y=eta assumed.
-        pz = mT*TMath::SinH(eta);
-        Energy = mT*TMath::CosH(eta);//TMath::Sqrt(pT*pT + pz*pz + pionMass*pionMass);
+        pz = pT*TMath::SinH(eta);
+        Energy = TMath::Sqrt(pT*pT + pz*pz + pionMass*pionMass);
         lVec.SetPxPyPzE(px, py, pz, Energy);
         track.SetTrack(lVec);
 
@@ -385,7 +383,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         }
     }
 
-    if(histos!=0) histos->hMultiplicity->Fill(nTracks);
+    if(histos!=0) histos->hMultiplicity[centBin]->Fill(nTracks);
 }
 
 // Returns 1 or 0 depending on if a particle was added to the list or not.
@@ -483,6 +481,10 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
     double QnQnA, QnAQnB;
 
     int centBin = inputs->GetCentBin(centrality);
+
+    for(int iDet=0; iDet<DET_N; iDet++) {
+        histos->hMultiPerDet[iDet][centBin]->Fill(nMult[iDet]);
+    }
 
     vector<vector<TComplex>> pTBinsQ;
     pTBinsQ.resize(PTBINS_N);

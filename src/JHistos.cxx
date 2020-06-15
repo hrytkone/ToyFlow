@@ -21,11 +21,13 @@ JHistos::JHistos(){
     hCentrality->Sumw2();
     hEta = new TH1D("hEta", "pseudorapidity", 401, -3.8, 5.2);
 
-    hMultiplicity = new TH1D("hMultiplicity", "Multiplicity - uniform", 300, 0.0, 30000.);
-    hMultiplicity->Sumw2();
 
-    for (i=0; i<DET_N; i++) {
-        for (j=0; j<CENTBINS_N; j++){
+    for (j=0; j<CENTBINS_N; j++){
+        hMultiplicity[j] = new TH1D(Form("hMultiplicityCENT%02i",j), "Total multiplicity", 300, 0.0, 30000.);
+        hMultiplicity[j]->Sumw2();
+        for (i=0; i<DET_N; i++) {
+            hMultiPerDet[i][j] = new TH1D(Form("hMultiPerDetD%02iCENT%02i",i,j), "Detector multiplicity", 300, 0.0, 30000.);
+            hMultiPerDet[i][j]->Sumw2();
             hSqrtSumWeights[i][j]= new TH1D(Form("hSqrtSumWeightsD%02iCENT%02i",i,j),"sqrt of sum of weights squares", 480, 0.0, 120.0);
             hSqrtSumWeights[i][j]->Sumw2();
         }

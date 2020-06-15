@@ -18,7 +18,8 @@ public:
     TH1D *hPhi;
     TH1D *hCentrality;
     TH1D *hEta;
-    TH1D *hMultiplicity;
+    TH1D *hMultiplicity[CENTBINS_N];
+    TH1D *hMultiPerDet[DET_N][CENTBINS_N];
 
     TH1D *hSqrtSumWeights[DET_N][CENTBINS_N];
 
