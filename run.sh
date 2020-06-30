@@ -13,7 +13,7 @@ export vnScale=$3
 export multiScale=$4
 export extraConvPart=$5
 export bDecay=$6
-export today=20200602
+export today=20200624
 
 export fileg0=toyFlow_${today}_${multiScale}Multi_${extraConvPart}extraConvPart_${bDecay}bDecay_PtDep${ptdep}_Gran0_Scale${vnScale}
 export fileg1=toyFlow_${today}_${multiScale}Multi_${extraConvPart}extraConvPart_${bDecay}bDecay_PtDep${ptdep}_Gran1_Scale${vnScale}

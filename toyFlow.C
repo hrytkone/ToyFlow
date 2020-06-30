@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     bool bSaveAsTrees = argc > 10 ? atol(argv[10]) : 0;
 
     bool bUseWeight = false;
-    bool bRandomPsi = false;
+    bool bRandomPsi = true;
     bool bUseCentDependence = true;
     bool bNonuniformPhi = false;
 
@@ -273,7 +273,8 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
             centBin = i;
             if(histos!=0) histos->hCentrality->Fill(centrality);
             // Extra multiplicity scaling * extra conversion particles (no flow) * Multiplicity 
-            nMult = multiScale*(1.0+extraConvPart)*inputs->GetMultiplicity(centBin);
+            nMultOrig = multiScale*inputs->GetMultiplicity(centBin);
+            nMult = (1.0+extraConvPart)*nMultOrig;
         }
     }
 
@@ -301,7 +302,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         */
 
         // The last extraConvPart % of particles are conversion particles with no flow.
-        if(i > nMult*(1.0-extraConvPart)) {
+        if(i > nMultOrig) {
             phi = rand->Uniform(-PI,PI);
         } else {
             phi = fPhi->GetRandom();
