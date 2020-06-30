@@ -246,7 +246,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
     int lCharge;
     int lIsHadron;
 
-    int nMult = 0, nTracks = 0;
+    int nMult = 0, nMultOrig =0, nTracks = 0;
     double alpha = 2.0, beta = 1.0;
     //http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf PID
     //Thermal model AN:
@@ -629,6 +629,16 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
 }
 
 void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity) {
+    // 0: D_TPC   -0.8,  0.8
+    // 1: D_T0_A   4.5,  5.0
+    // 2: D_T0_C  -3.3, -2.9
+    // 3: D_V0_A   2.8,  5.1
+    // 4: D_TPC_A  0.1,  0.8
+    // 5: D_TPC_C -0.8, -0.1
+    // 6: D_V0_C  -3.7, -1.7
+    const int detA = 6;
+    const int detB = 3;
+    const int detC = 0;
 
     TComplex Qvec, QvecA, QvecB, QvecC;
     TComplex unitVec = TComplex(0, 0);
@@ -639,7 +649,9 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
 
     vector<double> phiList;
 
-    int nmult = lists->fullEvent->GetEntriesFast();
+    int nmultA = lists->GetList(detA)->GetEntriesFast();
+    int nmultB = lists->GetList(detB)->GetEntriesFast();
+    int nmultC = lists->GetList(detC)->GetEntriesFast();
 
     for (Int_t j=0; j<nCoef; j++) {
 
@@ -652,29 +664,17 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
 
         normA = 0.0; normB = 0.0; normC = 0.0;
 
-        for (Int_t i=0; i<nmult; i++) {
-            track = (JToyMCTrack*)lists->fullEvent->At(i);
-            double eta = track->GetEta();
-            double phi = track->GetPhi();
-
-            // Sub A
-            if ((eta > cov[6][0]) && (eta < cov[6][1])) { // 6 is TPC_C
-                if (bUseGranularity) {
-                    phi = CheckPhi(phi, -PI);
-                    track->SetPhi(phi);
-                }
-                CalculateQvector(track, unitVec, QvecA, normA, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
-            }
-
-            // Sub B
-            if ((eta > cov[4][0]) && (eta < cov[4][1])) { // 4 is V_zero-plus
-                CalculateQvector(track, unitVec, QvecB, normB, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
-            }
-
-            // Sub C
-            if ((eta > cov[5][0]) && (eta < cov[5][1])) { // 5 is TPC_A
-                CalculateQvector(track, unitVec, QvecC, normC, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
-            }
+        for (Int_t i=0; i<nmultA; i++) {
+            track = (JToyMCTrack*)lists->GetList(detA)->At(i);
+            CalculateQvector(track, unitVec, QvecA, normA, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
+        }
+        for (Int_t i=0; i<nmultB; i++) {
+            track = (JToyMCTrack*)lists->GetList(detB)->At(i);
+            CalculateQvector(track, unitVec, QvecB, normB, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
+        }
+        for (Int_t i=0; i<nmultC; i++) {
+            track = (JToyMCTrack*)lists->GetList(detC)->At(i);
+            CalculateQvector(track, unitVec, QvecC, normC, 0, 0, n, 1.0, 0, 0, 0, 0, 0, 0);
         }
 
         int ibin = inputs->GetCentBin(centrality);
