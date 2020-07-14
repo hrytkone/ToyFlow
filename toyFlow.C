@@ -31,7 +31,7 @@ double VnDist(double *x, double *p);
 
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale, double extraConvPart, double decays);
 int AddParticle(JHistos *histos, JEventLists *lists, TRandom3 *rand, bool bNonuniformPhi, double phi, double phiMin, double phiMax, int listID, TLorentzVector lVec, int lCharge, int lPID, int lIsHadron, double percentage);
-void GetParticleLists(JEventLists *lists, bool bUseGranularity);
+void GetParticleLists(JEventLists *lists, bool bUseGranularity, bool bptCuts);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity);
 
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
-        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale extraConvPart decays seedNum bSaveAsTrees" << endl;
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale extraConvPart decays seedNum bSaveAsTrees bptCuts" << endl;
         return 0;
     };
     int nEvents = argc > 2 ? atol(argv[2]) : 1000;
@@ -80,6 +80,7 @@ int main(int argc, char **argv) {
     double decays = argc > 8 ? atof(argv[8]) : 0.0;
     int iSeed = argc > 9 ? atol(argv[9]) : 0;
     bool bSaveAsTrees = argc > 10 ? atol(argv[10]) : 0;
+    bool bptCuts = argc > 11 ? atol(argv[11]) : 0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
@@ -222,7 +223,7 @@ int main(int argc, char **argv) {
         if(bSaveAsTrees) {
             //
         } else { //When saving tracks as trees, we don't need to analyze event.
-            GetParticleLists(lists, bUseGranularity);
+            GetParticleLists(lists, bUseGranularity, bptCuts);
             AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
             AnalyzeUsing3sub(histos, lists, inputs, centrality, bUseGranularity);
         }
@@ -295,7 +296,7 @@ void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *ra
         }
 
         /* // 
-        if ((eta>cov[0][0]) && (eta<cov[0][1])) {
+        if ((eta>cov[D_TPC][0]) && (eta<cov[D_TPC][1])) {
              if (pT<0.2) continue;
              if (rand->Uniform()>0.8) continue;
         }
@@ -408,7 +409,7 @@ int AddParticle(JHistos *histos, JEventLists *lists, TRandom3 *rand, bool bNonun
     return particleAdded;
 }
 
-void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
+void GetParticleLists(JEventLists *lists, bool bUseGranularity, bool bptCuts) {
     int nMult = lists->fullEvent->GetEntriesFast();
 
     JToyMCTrack *tempTrack, track, trackA, trackB;
@@ -426,6 +427,8 @@ void GetParticleLists(JEventLists *lists, bool bUseGranularity) {
         for (j=0; j<DET_N; j++) {
             if (cov[j][0]<eta && eta<cov[j][1]) {
                 phi = tempTrack->GetPhi();
+                // Don't include tracks with less than 150 MeV in TPC.
+                if(bptCuts && (j==0 || j==4 || j==5) && tempTrack->GetPt() < 0.15 ) continue; 
                 if (bUseGranularity && j==3) {
                     phi = CheckPhi(phi, -PI);
                     tempTrack->SetPhi(phi);
@@ -536,23 +539,48 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
                 CalculateQvector(track, unitVec, QvecB[iDet], normB[iDet], bUseWeight, bNonuniformPhi, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
             }
 
-            // Calculate vobs from TPC events
-            for (j=0; j<nMult[iDet]; j++) {
+            // Calculate vobs from TPC events! This is always done from TPC for each detector.
+            for (j=0; j<nMult[D_TPC]; j++) {
 
-                track = (JToyMCTrack*)lists->GetList(iDet)->At(j);
+                track = (JToyMCTrack*)lists->GetList(D_TPC)->At(j);
                 phi = track->GetPhi();
                 pt = track->GetPt();
 
                 if (bUseWeight) w = pt;
 
-                autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
+                // No need to remove autocorrelation except for TPC as there the particles
+                // which are used to calculate Qvec are also used to calculate phi.
+                switch (iDet) {
+                    case D_TPC : // Whole TPC needs to remove autocorrelation every time.
+                        autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
+                        break;
+                    case D_TPC_A : // TPC_A needs to remove autocorrelation only if particle
+                             // is inside TPC_A acceptance
+                        if(track->GetEta()>cov[D_TPC_A][0] && track->GetEta()<cov[D_TPC_A][0]) {
+                            autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
+                        } else {
+                            autocorr = TComplex(0,0);
+                        }
+                        break;
+                    case D_TPC_C : // TPC_C needs to remove autocorrelation only if particle
+                             // is inside TPC_C acceptance
+                        if(track->GetEta()>cov[D_TPC_C][0] && track->GetEta()<cov[D_TPC_C][0]) {
+                            autocorr = TComplex(w*TMath::Cos(n*phi), w*TMath::Sin(n*phi));
+                        } else {
+                            autocorr = TComplex(0,0);
+                        }
+                        break;
+                    default : 
+                        autocorr = TComplex(0,0);
+                }
 
                 Qvec[iDet] -= autocorr;
                 vobs += GetVnObs(Qvec[iDet], phi, n);
                 Qvec[iDet] += autocorr;
             }
 
-            vobs /= nMult[iDet];
+            // TPC multi used to scale vobs
+            vobs /= nMult[D_TPC];
 
             // Resolution parameter calculations
             Rtrue = TMath::Cos(n*(GetEventPlane(Qvec[iDet], n) - Psi[i]));
@@ -586,7 +614,7 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
             double norms[PTBINS_N];
             for (j=0; j<PTBINS_N; j++) norms[j] = 0;
 
-            for (j=0; j<nMult[0]; j++) { //Only do this for TPC.
+            for (j=0; j<nMult[D_TPC]; j++) { //Only do this for TPC.
 
                 track = (JToyMCTrack*)lists->TPClist->At(j);
                 phi = track->GetPhi();
@@ -606,15 +634,15 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
 
             double l;
             for (j=0; j<PTBINS_N; j++) {
-                Qvec[0] = TComplex(0, 0);
+                Qvec[D_TPC] = TComplex(0, 0);
                 l = pTBinsQ[j].size();
                 for (k=0; k<l; k++) {
-                    Qvec[0] += pTBinsQ[j][k];
+                    Qvec[D_TPC] += pTBinsQ[j][k];
                 }
                 weight = TMath::Sqrt(norms[j]);
-                if (weight!=0) Qvec[0] /= weight;
-                histos->hV2ComplexPart->Fill(Qvec[0].Im()*Qvec[1].Im());
-                QnQnA = Qvec[0]*TComplex::Conjugate(Qvec[1]);
+                if (weight!=0) Qvec[D_TPC] /= weight;
+                histos->hV2ComplexPart->Fill(Qvec[D_TPC].Im()*Qvec[1].Im());
+                QnQnA = Qvec[D_TPC]*TComplex::Conjugate(Qvec[1]);
                 QnQnA /= TComplex::Abs(Qvec[1]);
                 histos->hQnQnAPtBin[j]->Fill(QnQnA);
                 histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
@@ -637,10 +665,10 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
     // 5: D_TPC_C -0.8, -0.1
     // 6: D_V0_C  -3.7, -1.7
     const int detA = 6;
-    const int detB = 3;
-    const int detC = 0;
+    const int detB = 4;
+    const int detC = 5;
 
-    TComplex Qvec, QvecA, QvecB, QvecC;
+    TComplex QvecA, QvecB, QvecC;
     TComplex unitVec = TComplex(0, 0);
 
     double normA, normB, normC;
@@ -657,7 +685,6 @@ void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, doub
 
         int n = j+1;
 
-        Qvec = TComplex(0, 0);
         QvecA = TComplex(0, 0);
         QvecB = TComplex(0, 0);
         QvecC = TComplex(0, 0);

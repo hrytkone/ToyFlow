@@ -14,21 +14,21 @@ public:
 
     TClonesArray *fullEvent;
     TClonesArray *TPClist;
-    TClonesArray *T0PAlist;
-    TClonesArray *T0PClist;
-    TClonesArray *V0Plist;
+    TClonesArray *T0Alist;
+    TClonesArray *T0Clist;
+    TClonesArray *V0Alist;
     TClonesArray *TPCAlist;
     TClonesArray *TPCClist;
     TClonesArray *V0Clist;
 
     TClonesArray *TPClistA;
     TClonesArray *TPClistB;
-    TClonesArray *T0PAlistA;
-    TClonesArray *T0PAlistB;
-    TClonesArray *T0PClistA;
-    TClonesArray *T0PClistB;
-    TClonesArray *V0PlistA;
-    TClonesArray *V0PlistB;
+    TClonesArray *T0AlistA;
+    TClonesArray *T0AlistB;
+    TClonesArray *T0ClistA;
+    TClonesArray *T0ClistB;
+    TClonesArray *V0AlistA;
+    TClonesArray *V0AlistB;
     TClonesArray *TPCAlistA;
     TClonesArray *TPCAlistB;
     TClonesArray *TPCClistA;

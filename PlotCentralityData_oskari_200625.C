@@ -9,8 +9,8 @@ double GetResError(double rab, double rabErr,
                    double rbc, double rbcErr);
 double GetVnError(double vobs, double vobsErr, double res, double resErr);
 
-const int nFiles = 13;
-const int nFilesRead = 13;
+const int nFiles = 14;
+const int nFilesRead = 14;
 const int nRef = 0;
 int gColor[5] = {1,2,4,8,9};
 //double scale[4] = {1.0, 0.8, 0.65, 1.0};
@@ -36,36 +36,38 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
 
     // Näistä luetaan 3-subevent metodiin jutut
     TString fileName[nFilesRead] = {
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Ideal
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00.root", // Granularity on
-        "output/toyFlow_20200624_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Multi -20 %
-        "output/toyFlow_20200624_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Multi -50 %
-        "output/toyFlow_20200624_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Multi -70 %
-        "output/toyFlow_20200624_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Conversions 10 %
-        "output/toyFlow_20200624_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Conversions 20 %
-        "output/toyFlow_20200624_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Conversions 50 %
-        "output/toyFlow_20200624_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00.root", // Conversions 80 %
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00.root", // Decays 10 %
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00.root", // Decays 20 %
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80.root", // v_n -20 %
-        "output/toyFlow_20200624_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80/toyFlow_20200624_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80.root"  // Best guess
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Ideal
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0.root", // Granularity on
+        "output/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Multi -20 %
+        "output/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Multi -50 %
+        "output/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Multi -70 %
+        "output/toyFlow_20200630_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Conversions 10 %
+        "output/toyFlow_20200630_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Conversions 20 %
+        "output/toyFlow_20200630_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Conversions 50 %
+        "output/toyFlow_20200630_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Conversions 80 %
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Decays 10 %
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Decays 20 %
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0.root", // v_n -20 %
+        "output/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0.root", // Best guess
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1.root"  // Pt cut for TPC
     };
 
     // Nämä luotu MakeCentralityGraphs.C makrolla ja niistä otetaan 2-subevent metodiin asiat
     TString fileName2sub[nFilesRead] = {
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Ideal
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00-plot-output-alice_comp.root", // Granularity on
-        "output/toyFlow_20200624_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Multi -20 %
-        "output/toyFlow_20200624_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Multi -50 %
-        "output/toyFlow_20200624_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Multi -70 %
-        "output/toyFlow_20200624_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Conversions 10 %
-        "output/toyFlow_20200624_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Conversions 20 %
-        "output/toyFlow_20200624_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Conversions 50 %
-        "output/toyFlow_20200624_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Conversions 80 %
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Decays 10 %
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00-plot-output-alice_comp.root", // Decays 20 %
-        "output/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80/toyFlow_20200624_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80-plot-output-alice_comp.root", // v_n -20 %
-        "output/toyFlow_20200624_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80/toyFlow_20200624_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80-plot-output-alice_comp.root"  // Best guess
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Ideal
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0-plot-output-alice_comp.root", // Granularity on
+        "output/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Multi -20 %
+        "output/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Multi -50 %
+        "output/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Multi -70 %
+        "output/toyFlow_20200630_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.1extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Conversions 10 %
+        "output/toyFlow_20200630_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Conversions 20 %
+        "output/toyFlow_20200630_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.5extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Conversions 50 %
+        "output/toyFlow_20200630_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.8extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Conversions 80 %
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.1bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Decays 10 %
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Decays 20 %
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0-plot-output-alice_comp.root", // v_n -20 %
+        "output/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0-plot-output-alice_comp.root", // Best guess
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1-plot-output-alice_comp.root"  // Pt cut for TPC
     };
 
 
@@ -848,6 +850,82 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
     cFinal2->Update();
 
 
+
+
+    TCanvas *cPtCut = new TCanvas("cPtCut", "cPtCut", 600, 500);
+
+    gR2sub[0]->GetXaxis()->CenterTitle(true);
+    gR2sub[0]->GetYaxis()->CenterTitle(true);
+    gR2sub[0]->GetYaxis()->SetRangeUser(0.4,1.0);
+    gR2sub[0]->GetXaxis()->SetRangeUser(0.0,50.0);
+    gR2sub[0]->SetTitle(Form("Resolution of V0C; centrality; R_{%01i}", 2));
+    gR2sub[0]->Draw("AP");
+    gR2sub[0]->SetMarkerColor(gColor[1]);
+    gR2sub[0]->SetFillColor(gColor[1]);
+    gR2sub[0]->SetMarkerStyle(mMarker);
+    gR2sub[0]->SetMarkerSize(mSize);
+    gR2sub[0]->Draw("P SAME");
+    cPtCut->Update();
+
+    gR2sub[13]->Draw("P SAME");
+    gR2sub[13]->SetMarkerColor(gColor[1]);
+    gR2sub[13]->SetMarkerStyle(mMarker+1);
+    gR2sub[13]->SetMarkerSize(mSize);
+    gR2sub[13]->Draw("P SAME");
+    cPtCut->Update();
+
+    hResMeas->Draw("HIST SAME");
+    cPtCut->Update();
+
+    TLegend *legPtCut = new TLegend(0.3,0.15,0.55,0.40,"Ideal","brNDC");
+    legPtCut->SetTextSize(0.037);legPtCut->SetBorderSize(0);
+    legPtCut->SetHeader("Pt cut, 3-subevt, #sqrt{s_{NN}} = 5.02 TeV");
+    legPtCut->AddEntry(gR2sub[0], "Ideal", "p");
+    legPtCut->AddEntry(gR2sub[13], "Pt cut < 150 MeV in TPC", "p");
+    legPtCut->AddEntry(hResMeas, "Measured resolution", "l");
+    legPtCut->Draw("SAME");
+    cPtCut->Update();
+
+
+
+    TCanvas *cPtCut2 = new TCanvas("cPtCut2", "cPtCut2", 600, 500);
+
+    gV2sub[0]->Draw("AP");
+    gV2sub[0]->GetXaxis()->CenterTitle(true);
+    gV2sub[0]->GetYaxis()->CenterTitle(true);
+    gV2sub[0]->GetYaxis()->SetRangeUser(0.0, 0.12);
+    gV2sub[0]->GetXaxis()->SetRangeUser(0.0, 50.0);
+    gV2sub[0]->SetTitle(Form("v_{%01i} from V0C; centrality; v_{%01i}", 2, 2));
+    gV2sub[0]->SetMarkerColor(gColor[1]);
+    gV2sub[0]->SetFillColor(gColor[1]);
+    gV2sub[0]->SetMarkerStyle(mMarker);
+    gV2sub[0]->SetMarkerSize(mSize);
+    gV2sub[0]->Draw("AP");
+    cPtCut2->Update();
+
+    gV2sub[13]->Draw("P SAME");
+    gV2sub[13]->SetMarkerColor(gColor[1]);
+    gV2sub[13]->SetMarkerStyle(mMarker+1);
+    gV2sub[13]->SetMarkerSize(mSize);
+    gV2sub[13]->Draw("P SAME");
+    cPtCut2->Update();
+
+    //hInput[0]->Draw("HIST SAME");
+    hInput[1]->Draw("HIST SAME");
+    //hInput[2]->Draw("HIST SAME");
+    //hInput[3]->Draw("HIST SAME");
+
+    TLegend *legPtCut2 = new TLegend(0.40,0.15,0.65,0.35,"","brNDC");
+    legPtCut2->SetTextSize(0.037);legPtCut2->SetBorderSize(0);
+    legPtCut2->SetHeader("Pt cut, 3-subevt, #sqrt{s_{NN}} = 5.02 TeV");
+    legPtCut2->AddEntry(gV2sub[0], "Ideal", "p");
+    legPtCut2->AddEntry(gV2sub[13], "Pt cut < 150 MeV in TPC", "p");
+    legPtCut2->AddEntry(hInput[0], "Input v_{2}", "l");
+    legPtCut2->Draw("SAME");
+    cPtCut2->Update();
+
+
+
     c1->SaveAs(Form("figures/oskari_200625/Ideal_R2.pdf"));
     c2->SaveAs(Form("figures/oskari_200625/Ideal_v2.pdf"));
     cgran->SaveAs(Form("figures/oskari_200625/Gran_R2.pdf"));
@@ -862,6 +940,8 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
     cVnScale2->SaveAs(Form("figures/oskari_200625/VnScale_v2.pdf"));
     cFinal->SaveAs(Form("figures/oskari_200625/Final-R2.pdf"));
     cFinal2->SaveAs(Form("figures/oskari_200625/Final-v2.pdf"));
+    cPtCut->SaveAs(Form("figures/oskari_200625/PtCut-R2.pdf"));
+    cPtCut2->SaveAs(Form("figures/oskari_200625/PtCut-v2.pdf"));
 }
 
 //______________________________________________________________________________
