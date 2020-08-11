@@ -9,8 +9,8 @@ double GetResError(double rab, double rabErr,
                    double rbc, double rbcErr);
 double GetVnError(double vobs, double vobsErr, double res, double resErr);
 
-const int nFiles = 14;
-const int nFilesRead = 14;
+const int nFiles = 15;
+const int nFilesRead = 15;
 const int nRef = 0;
 int gColor[5] = {1,2,4,8,9};
 //double scale[4] = {1.0, 0.8, 0.65, 1.0};
@@ -36,8 +36,8 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
 
     // Näistä luetaan 3-subevent metodiin jutut
     TString fileName[nFilesRead] = {
-        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Ideal
-        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0.root", // Granularity on
+        "output/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC1.0_def_run/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC1.0_def_run.root", // Ideal
+        "output/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran1_Scale1.00_ptCut0_effTPC1.0_def_run/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran1_Scale1.00_ptCut0_effTPC1.0_def_run.root", // Granularity on
         "output/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Multi -20 %
         "output/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Multi -50 %
         "output/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Multi -70 %
@@ -49,13 +49,14 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
         "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0.root", // Decays 20 %
         "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0.root", // v_n -20 %
         "output/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0.root", // Best guess
-        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1.root"  // Pt cut for TPC
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1.root",  // Pt cut for TPC
+        "output/toyFlow_20200715_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC0.10_eff_run/toyFlow_20200715_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC0.10_eff_run.root"  // TPC efficiency testeed 
     };
 
     // Nämä luotu MakeCentralityGraphs.C makrolla ja niistä otetaan 2-subevent metodiin asiat
     TString fileName2sub[nFilesRead] = {
-        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Ideal
-        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran1_Scale1.00_ptCut0-plot-output-alice_comp.root", // Granularity on
+        "output/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC1.0_def_run/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC1.0_def_run-plot-output-alice_comp.root", // Ideal
+        "output/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran1_Scale1.00_ptCut0_effTPC1.0_def_run/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran1_Scale1.00_ptCut0_effTPC1.0_def_run-plot-output-alice_comp.root", // Granularity on
         "output/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.8Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Multi -20 %
         "output/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.5Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Multi -50 %
         "output/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_0.3Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Multi -70 %
@@ -67,7 +68,8 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
         "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.2bDecay_PtDep0_Gran0_Scale1.00_ptCut0-plot-output-alice_comp.root", // Decays 20 %
         "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale0.80_ptCut0-plot-output-alice_comp.root", // v_n -20 %
         "output/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0/toyFlow_20200630_0.8Multi_0.2extraConvPart_0.0bDecay_PtDep0_Gran1_Scale0.80_ptCut0-plot-output-alice_comp.root", // Best guess
-        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1-plot-output-alice_comp.root"  // Pt cut for TPC
+        "output/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1/toyFlow_20200630_1.0Multi_0.0extraConvPart_0.0bDecay_PtDep0_Gran0_Scale1.00_ptCut1-plot-output-alice_comp.root",  // Pt cut for TPC
+        "output/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC0.81_eff_run/toyFlow_20200714_1.0Multi_0.0extraConvPart_0bDecay_PtDep0_Gran0_Scale1.00_ptCut0_effTPC0.81_eff_run-plot-output-alice_comp.root"  // TPC efficiency testeed 
     };
 
 
@@ -854,24 +856,24 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
 
     TCanvas *cPtCut = new TCanvas("cPtCut", "cPtCut", 600, 500);
 
-    gR2sub[0]->GetXaxis()->CenterTitle(true);
-    gR2sub[0]->GetYaxis()->CenterTitle(true);
-    gR2sub[0]->GetYaxis()->SetRangeUser(0.4,1.0);
-    gR2sub[0]->GetXaxis()->SetRangeUser(0.0,50.0);
-    gR2sub[0]->SetTitle(Form("Resolution of V0C; centrality; R_{%01i}", 2));
-    gR2sub[0]->Draw("AP");
-    gR2sub[0]->SetMarkerColor(gColor[1]);
-    gR2sub[0]->SetFillColor(gColor[1]);
-    gR2sub[0]->SetMarkerStyle(mMarker);
-    gR2sub[0]->SetMarkerSize(mSize);
-    gR2sub[0]->Draw("P SAME");
+    gR[0]->GetXaxis()->CenterTitle(true);
+    gR[0]->GetYaxis()->CenterTitle(true);
+    gR[0]->GetYaxis()->SetRangeUser(0.4,1.0);
+    gR[0]->GetXaxis()->SetRangeUser(0.0,50.0);
+    gR[0]->SetTitle(Form("Resolution of V0C; centrality; R_{%01i}", 2));
+    gR[0]->Draw("AP");
+    gR[0]->SetMarkerColor(gColor[1]);
+    gR[0]->SetFillColor(gColor[1]);
+    gR[0]->SetMarkerStyle(mMarker);
+    gR[0]->SetMarkerSize(mSize);
+    gR[0]->Draw("P SAME");
     cPtCut->Update();
 
-    gR2sub[13]->Draw("P SAME");
-    gR2sub[13]->SetMarkerColor(gColor[1]);
-    gR2sub[13]->SetMarkerStyle(mMarker+1);
-    gR2sub[13]->SetMarkerSize(mSize);
-    gR2sub[13]->Draw("P SAME");
+    gR[13]->Draw("P SAME");
+    gR[13]->SetMarkerColor(gColor[1]);
+    gR[13]->SetMarkerStyle(mMarker+1);
+    gR[13]->SetMarkerSize(mSize);
+    gR[13]->Draw("P SAME");
     cPtCut->Update();
 
     hResMeas->Draw("HIST SAME");
@@ -880,8 +882,8 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
     TLegend *legPtCut = new TLegend(0.3,0.15,0.55,0.40,"Ideal","brNDC");
     legPtCut->SetTextSize(0.037);legPtCut->SetBorderSize(0);
     legPtCut->SetHeader("Pt cut, 3-subevt, #sqrt{s_{NN}} = 5.02 TeV");
-    legPtCut->AddEntry(gR2sub[0], "Ideal", "p");
-    legPtCut->AddEntry(gR2sub[13], "Pt cut < 150 MeV in TPC", "p");
+    legPtCut->AddEntry(gR[0], "Ideal", "p");
+    legPtCut->AddEntry(gR[13], "Pt cut < 150 MeV in TPC", "p");
     legPtCut->AddEntry(hResMeas, "Measured resolution", "l");
     legPtCut->Draw("SAME");
     cPtCut->Update();
@@ -890,24 +892,24 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
 
     TCanvas *cPtCut2 = new TCanvas("cPtCut2", "cPtCut2", 600, 500);
 
-    gV2sub[0]->Draw("AP");
-    gV2sub[0]->GetXaxis()->CenterTitle(true);
-    gV2sub[0]->GetYaxis()->CenterTitle(true);
-    gV2sub[0]->GetYaxis()->SetRangeUser(0.0, 0.12);
-    gV2sub[0]->GetXaxis()->SetRangeUser(0.0, 50.0);
-    gV2sub[0]->SetTitle(Form("v_{%01i} from V0C; centrality; v_{%01i}", 2, 2));
-    gV2sub[0]->SetMarkerColor(gColor[1]);
-    gV2sub[0]->SetFillColor(gColor[1]);
-    gV2sub[0]->SetMarkerStyle(mMarker);
-    gV2sub[0]->SetMarkerSize(mSize);
-    gV2sub[0]->Draw("AP");
+    gV[0]->Draw("AP");
+    gV[0]->GetXaxis()->CenterTitle(true);
+    gV[0]->GetYaxis()->CenterTitle(true);
+    gV[0]->GetYaxis()->SetRangeUser(0.0, 0.12);
+    gV[0]->GetXaxis()->SetRangeUser(0.0, 50.0);
+    gV[0]->SetTitle(Form("v_{%01i} from V0C; centrality; v_{%01i}", 2, 2));
+    gV[0]->SetMarkerColor(gColor[1]);
+    gV[0]->SetFillColor(gColor[1]);
+    gV[0]->SetMarkerStyle(mMarker);
+    gV[0]->SetMarkerSize(mSize);
+    gV[0]->Draw("AP");
     cPtCut2->Update();
 
-    gV2sub[13]->Draw("P SAME");
-    gV2sub[13]->SetMarkerColor(gColor[1]);
-    gV2sub[13]->SetMarkerStyle(mMarker+1);
-    gV2sub[13]->SetMarkerSize(mSize);
-    gV2sub[13]->Draw("P SAME");
+    gV[13]->Draw("P SAME");
+    gV[13]->SetMarkerColor(gColor[1]);
+    gV[13]->SetMarkerStyle(mMarker+1);
+    gV[13]->SetMarkerSize(mSize);
+    gV[13]->Draw("P SAME");
     cPtCut2->Update();
 
     //hInput[0]->Draw("HIST SAME");
@@ -918,11 +920,86 @@ void PlotCentralityData_oskari_200625(int n = 2, int iVnDet = 6, double multiSca
     TLegend *legPtCut2 = new TLegend(0.40,0.15,0.65,0.35,"","brNDC");
     legPtCut2->SetTextSize(0.037);legPtCut2->SetBorderSize(0);
     legPtCut2->SetHeader("Pt cut, 3-subevt, #sqrt{s_{NN}} = 5.02 TeV");
-    legPtCut2->AddEntry(gV2sub[0], "Ideal", "p");
-    legPtCut2->AddEntry(gV2sub[13], "Pt cut < 150 MeV in TPC", "p");
+    legPtCut2->AddEntry(gV[0], "Ideal", "p");
+    legPtCut2->AddEntry(gV[13], "Pt cut < 150 MeV in TPC", "p");
     legPtCut2->AddEntry(hInput[0], "Input v_{2}", "l");
     legPtCut2->Draw("SAME");
     cPtCut2->Update();
+
+
+
+    TCanvas *cTPCeff = new TCanvas("cTPCeff", "cTPCeff", 600, 500);
+
+    gR[0]->GetXaxis()->CenterTitle(true);
+    gR[0]->GetYaxis()->CenterTitle(true);
+    gR[0]->GetYaxis()->SetRangeUser(0.4,1.0);
+    gR[0]->GetXaxis()->SetRangeUser(0.0,50.0);
+    gR[0]->SetTitle(Form("Resolution of V0C; centrality; R_{%01i}", 2));
+    gR[0]->Draw("AP");
+    gR[0]->SetMarkerColor(gColor[1]);
+    gR[0]->SetFillColor(gColor[1]);
+    gR[0]->SetMarkerStyle(mMarker);
+    gR[0]->SetMarkerSize(mSize);
+    gR[0]->Draw("P SAME");
+    cTPCeff->Update();
+
+    gR[14]->Draw("P SAME");
+    gR[14]->SetMarkerColor(gColor[1]);
+    gR[14]->SetMarkerStyle(mMarker+1);
+    gR[14]->SetMarkerSize(mSize);
+    gR[14]->Draw("P SAME");
+    cTPCeff->Update();
+
+    hResMeas->Draw("HIST SAME");
+    cTPCeff->Update();
+
+    TLegend *legTPCeff = new TLegend(0.3,0.15,0.55,0.40,"Ideal","brNDC");
+    legTPCeff->SetTextSize(0.037);legTPCeff->SetBorderSize(0);
+    legTPCeff->SetHeader("Pt cut, 3-subevt, #sqrt{s_{NN}} = 5.02 TeV");
+    legTPCeff->AddEntry(gR[0], "Ideal", "p");
+    legTPCeff->AddEntry(gR[14], "TPC eff 81 %", "p");
+    legTPCeff->AddEntry(hResMeas, "Measured resolution", "l");
+    legTPCeff->Draw("SAME");
+    cTPCeff->Update();
+
+
+
+    TCanvas *cTPCeff2 = new TCanvas("cTPCeff2", "cTPCeff2", 600, 500);
+
+    gV[0]->Draw("AP");
+    gV[0]->GetXaxis()->CenterTitle(true);
+    gV[0]->GetYaxis()->CenterTitle(true);
+    gV[0]->GetYaxis()->SetRangeUser(0.0, 0.12);
+    gV[0]->GetXaxis()->SetRangeUser(0.0, 50.0);
+    gV[0]->SetTitle(Form("v_{%01i} from V0C; centrality; v_{%01i}", 2, 2));
+    gV[0]->SetMarkerColor(gColor[1]);
+    gV[0]->SetFillColor(gColor[1]);
+    gV[0]->SetMarkerStyle(mMarker);
+    gV[0]->SetMarkerSize(mSize);
+    gV[0]->Draw("AP");
+    cTPCeff2->Update();
+
+    gV[14]->Draw("P SAME");
+    gV[14]->SetMarkerColor(gColor[1]);
+    gV[14]->SetMarkerStyle(mMarker+1);
+    gV[14]->SetMarkerSize(mSize);
+    gV[14]->Draw("P SAME");
+    cTPCeff2->Update();
+
+    //hInput[0]->Draw("HIST SAME");
+    hInput[1]->Draw("HIST SAME");
+    //hInput[2]->Draw("HIST SAME");
+    //hInput[3]->Draw("HIST SAME");
+
+    TLegend *leTPCeff2 = new TLegend(0.40,0.15,0.65,0.35,"","brNDC");
+    leTPCeff2->SetTextSize(0.037);leTPCeff2->SetBorderSize(0);
+    leTPCeff2->SetHeader("Pt cut, 3-subevt, #sqrt{s_{NN}} = 5.02 TeV");
+    leTPCeff2->AddEntry(gV[0], "Ideal", "p");
+    leTPCeff2->AddEntry(gV[14], "TPC eff 81 %", "p");
+    leTPCeff2->AddEntry(hInput[0], "Input v_{2}", "l");
+    leTPCeff2->Draw("SAME");
+    cTPCeff2->Update();
+
 
 
 

@@ -31,7 +31,7 @@ double VnDist(double *x, double *p);
 
 void GetEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, TRandom3 *rand, TF1 *fPt, TF1 *fPhi, TF1 *fVnDist, double *vn, double *Psi, double percentage, double phiMin, double phiMax, bool bNonuniformPhi, bool bUsePtDependence, double centrality, TNtuple *ntuple, int iEvt, double multiScale, double extraConvPart, double decays);
 int AddParticle(JHistos *histos, JEventLists *lists, TRandom3 *rand, bool bNonuniformPhi, double phi, double phiMin, double phiMax, int listID, TLorentzVector lVec, int lCharge, int lPID, int lIsHadron, double percentage);
-void GetParticleLists(JEventLists *lists, bool bUseGranularity, bool bptCuts);
+void GetParticleLists(JEventLists *lists, TRandom3* rand, bool bUseGranularity, bool bptCuts, double effTPC);
 void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *Psi, bool bUseWeight, bool bNonuniformPhi, double **corrections, double centrality);
 void AnalyzeUsing3sub(JHistos *histos, JEventLists *lists, JInputs *inputs, double centrality, bool bUseGranularity);
 
@@ -64,11 +64,13 @@ double BelongsToA(double phi);
 // decays        decay a % of particles into two new particles (currently under construction)
 // seedNum       seed number for the random number generator
 // bSaveAsTrees  toggle between saving particles as trees with no histograms, or only histograms.
+// bptCuts       do a pt cut at 150 MeV for TPC
+// effTPC        set an efficiency for TPC so that particles at random are discarded.
 int main(int argc, char **argv) {
 
     TString outFileName = argc > 1 ? argv[1]:"toyFlow.root";
     if(outFileName.EqualTo("help",TString::kIgnoreCase)) {
-        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale extraConvPart decays seedNum bSaveAsTrees bptCuts" << endl;
+        cout << "Usage: " << argv[0] << " filename.root nEvents bUsePtDep bUseGran scale multiScale extraConvPart decays seedNum bSaveAsTrees bptCuts effTPC" << endl;
         return 0;
     };
     int nEvents = argc > 2 ? atol(argv[2]) : 1000;
@@ -81,6 +83,7 @@ int main(int argc, char **argv) {
     int iSeed = argc > 9 ? atol(argv[9]) : 0;
     bool bSaveAsTrees = argc > 10 ? atol(argv[10]) : 0;
     bool bptCuts = argc > 11 ? atol(argv[11]) : 0;
+    double effTPC = argc > 12 ? atof(argv[12]) : 1.0;
 
     bool bUseWeight = false;
     bool bRandomPsi = true;
@@ -223,7 +226,7 @@ int main(int argc, char **argv) {
         if(bSaveAsTrees) {
             //
         } else { //When saving tracks as trees, we don't need to analyze event.
-            GetParticleLists(lists, bUseGranularity, bptCuts);
+            GetParticleLists(lists, rand, bUseGranularity, bptCuts, effTPC);
             AnalyzeEvent(histos, lists, inputs, Psi, bUseWeight, bNonuniformPhi, corrections, centrality);
             AnalyzeUsing3sub(histos, lists, inputs, centrality, bUseGranularity);
         }
@@ -409,11 +412,13 @@ int AddParticle(JHistos *histos, JEventLists *lists, TRandom3 *rand, bool bNonun
     return particleAdded;
 }
 
-void GetParticleLists(JEventLists *lists, bool bUseGranularity, bool bptCuts) {
+void GetParticleLists(JEventLists *lists, TRandom3* rand, bool bUseGranularity, bool bptCuts, double effTPC) {
     int nMult = lists->fullEvent->GetEntriesFast();
 
     JToyMCTrack *tempTrack, track, trackA, trackB;
-    double eta, phi;
+    double eta, phi, drand;
+    bool discardParticleTPC = false;
+    bool isTPC = false;
     int detMult[DET_N] = {0};
     int detMultA[DET_N] = {0};
     int detMultB[DET_N] = {0};
@@ -424,11 +429,21 @@ void GetParticleLists(JEventLists *lists, bool bUseGranularity, bool bptCuts) {
         tempTrack = (JToyMCTrack*)lists->fullEvent->At(i);
         eta = tempTrack->GetEta();
 
+        if(effTPC < 1.0) {
+            drand = rand->Uniform();
+            if(drand > effTPC) discardParticleTPC = true;
+            else discardParticleTPC = false;
+        }
+
         for (j=0; j<DET_N; j++) {
+
+            isTPC = (j==D_TPC || j==D_TPC_A || j==D_TPC_C);
+            if(isTPC && discardParticleTPC) continue;
+
             if (cov[j][0]<eta && eta<cov[j][1]) {
                 phi = tempTrack->GetPhi();
                 // Don't include tracks with less than 150 MeV in TPC.
-                if(bptCuts && (j==0 || j==4 || j==5) && tempTrack->GetPt() < 0.15 ) continue; 
+                if(bptCuts && isTPC && tempTrack->GetPt() < 0.15 ) continue; 
                 if (bUseGranularity && j==3) {
                     phi = CheckPhi(phi, -PI);
                     tempTrack->SetPhi(phi);
