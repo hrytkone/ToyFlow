@@ -52,6 +52,9 @@ JHistos::JHistos(){
                 hQnQnASP[i][j][k]->Sumw2();
                 hQnAQnBSP[i][j][k] = new TH1D(Form("hQnAQnBSPH%02iD%02iCENT%02i",i+1,j,k),Form("hQnAQnBSPH%02iD%02iCENT%02i",i+1,j,k),401,-10.0,110.0);
                 hQnAQnBSP[i][j][k]->Sumw2();
+
+                hQvec[i][j][k] = new TH2D(Form("hQvec%02iD%02iCENT%02i",i+1,j,k),Form("hQvec%02iD%02iCENT%02i",i+1,j,k),101,-100.0,100.0, 101, -100.0, 100.0);
+                hQvec[i][j][k]->Sumw2();
             }
         }
     }

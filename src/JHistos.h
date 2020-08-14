@@ -47,5 +47,6 @@ public:
 
     //FOR TESTING
     TH1D *hV2ComplexPart;
+    TH2D *hQvec[nCoef][DET_N][CENTBINS_N];
 
 };

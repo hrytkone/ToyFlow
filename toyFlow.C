@@ -535,6 +535,7 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
                 track = (JToyMCTrack*)lists->GetList(iDet)->At(j);
                 CalculateQvector(track, unitVec, Qvec[iDet], norm[iDet], bUseWeight, bNonuniformPhi, n, w, cm, sm, lambdaMinus, lambdaPlus, aMinus, aPlus);
             }
+            histos->hQvec[i][iDet][centBin]->Fill(Qvec[iDet].Re(), Qvec[iDet].Im());
 
             if (nMultA[iDet]<nMultB[iDet]) {
                 jMax = nMultA[iDet];
