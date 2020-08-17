@@ -68,13 +68,13 @@ void PlotCentralityData3sub(TString sOutputName = "output.pdf", int n = 2, int i
         gV[iFil] = new TGraphErrors(CENTDST_N);
 
         for (int i=0; i<CENTBINS_N; i++) {
-            hVnObs[i] = (TH1D*)fIn[iFil]->Get(Form("hVnObsH%02iD%02iCENT%02i", n, iVnDet, i));
+            hVnObs[i] = (TH1D*)fIn[iFil]->Get(Form("toyflow/hVnObs/hVnObsH%02iD%02iCENT%02i", n, iVnDet, i));
             checkUnderOverFlow(hVnObs[i]);
-            hRsubAB[i] = (TH1D*)fIn[iFil]->Get(Form("hRsubAB%dCENT%02d", n, i));
+            hRsubAB[i] = (TH1D*)fIn[iFil]->Get(Form("toyflow/hRsubAB/hRsubABH%dCENT%02d", n, i));
             checkUnderOverFlow(hRsubAB[i]);
-            hRsubAC[i] = (TH1D*)fIn[iFil]->Get(Form("hRsubAC%dCENT%02d", n, i));
+            hRsubAC[i] = (TH1D*)fIn[iFil]->Get(Form("toyflow/hRsubAC/hRsubACH%dCENT%02d", n, i));
             checkUnderOverFlow(hRsubAC[i]);
-            hRsubBC[i] = (TH1D*)fIn[iFil]->Get(Form("hRsubBC%dCENT%02d", n, i));
+            hRsubBC[i] = (TH1D*)fIn[iFil]->Get(Form("toyflow/hRsubBC/hRsubBCH%dCENT%02d", n, i));
             checkUnderOverFlow(hRsubBC[i]);
         }
 

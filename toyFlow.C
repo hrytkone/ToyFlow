@@ -168,31 +168,27 @@ int main(int argc, char **argv) {
     }
 
     // Save correction parameters
-    TH2D *hCorrectionParameters = new TH2D("hCorrectionParameters", "hCorrectionParameters", 5, 0.5, 5.5, 8, 0.5, 8.5);
     for (i=0; i<nCoef; i++) {
         for (j=0; j<nCorrParam; j++) {
-            hCorrectionParameters->Fill(i, j, corrections[i][j]);
+            histos->hCorrectionParameters->Fill(i, j, corrections[i][j]);
         }
     }
 
     // Save input numbers
-    TH1D *hInputNumbers = new TH1D("hInputNumbers","hInputNumbers",14, 0.5, 14.5);
-    hInputNumbers->Fill(1, double(nEvents));
-    hInputNumbers->Fill(2, vn[0]);
-    hInputNumbers->Fill(3, vn[1]);
-    hInputNumbers->Fill(4, vn[2]);
-    hInputNumbers->Fill(5, vn[3]);
-    hInputNumbers->Fill(6, vn[4]);
-    hInputNumbers->Fill(7, Tdec);
-    hInputNumbers->Fill(8, vr);
-    hInputNumbers->Fill(9, Teff);
-    hInputNumbers->Fill(10, 1./Teff);
-    hInputNumbers->Fill(11, phiMin);
-    hInputNumbers->Fill(12, phiMax);
-    hInputNumbers->Fill(13, percentage);
-    hInputNumbers->Fill(14, 1.0); // Counting number of files added with hadd.
-    fOut->cd();
-    hInputNumbers->Write("hInputNumbers");
+    histos->hInputNumbers->Fill(1, double(nEvents));
+    histos->hInputNumbers->Fill(2, vn[0]);
+    histos->hInputNumbers->Fill(3, vn[1]);
+    histos->hInputNumbers->Fill(4, vn[2]);
+    histos->hInputNumbers->Fill(5, vn[3]);
+    histos->hInputNumbers->Fill(6, vn[4]);
+    histos->hInputNumbers->Fill(7, Tdec);
+    histos->hInputNumbers->Fill(8, vr);
+    histos->hInputNumbers->Fill(9, Teff);
+    histos->hInputNumbers->Fill(10, 1./Teff);
+    histos->hInputNumbers->Fill(11, phiMin);
+    histos->hInputNumbers->Fill(12, phiMax);
+    histos->hInputNumbers->Fill(13, percentage);
+    histos->hInputNumbers->Fill(14, 1.0); // Counting number of files added with hadd.
 
     int nOutput = nEvents/20;
     if (nOutput<1) nOutput = 1;
@@ -657,11 +653,11 @@ void AnalyzeEvent(JHistos *histos, JEventLists *lists, JInputs *inputs, double *
                 }
                 weight = TMath::Sqrt(norms[j]);
                 if (weight!=0) Qvec[D_TPC] /= weight;
-                histos->hV2ComplexPart->Fill(Qvec[D_TPC].Im()*Qvec[1].Im());
-                QnQnA = Qvec[D_TPC]*TComplex::Conjugate(Qvec[1]);
-                QnQnA /= TComplex::Abs(Qvec[1]);
-                histos->hQnQnAPtBin[j]->Fill(QnQnA);
-                histos->hSqrtSumWeightsPtBins[j]->Fill(weight);
+                histos->hV2ComplexPart->Fill(Qvec[D_TPC].Im()*Qvec[D_T0_A].Im());
+                QnQnA = Qvec[D_TPC]*TComplex::Conjugate(Qvec[D_T0_A]);
+                QnQnA /= TComplex::Abs(Qvec[D_T0_A]);
+                histos->hQnQnAPtBinned[j]->Fill(QnQnA);
+                histos->hSqrtSumWeightsPtBinned[j]->Fill(weight);
                 pTBinsQ[j].clear();
             }
 

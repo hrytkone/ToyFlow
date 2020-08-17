@@ -45,7 +45,7 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
     TH1D *hVnObs[nCoef][DET_N][CENTBINS_N];
     for (i=0; i<nCoef; i++) {
         for (j=0; j<CENTBINS_N-4; j++) {
-            hVnObs[i][iDet][j] = (TH1D*)fIn->Get(Form("hVnObsH%02iD%02iCENT%02i",i+1,iDet,j));
+            hVnObs[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hVnObs/hVnObsH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hVnObs[i][iDet][j]);
         }
     }
@@ -55,9 +55,9 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
     TH1D *hRtrue[nCoef][DET_N][CENTBINS_N];
     for (i=0; i<nCoef; i++) {
         for (j=0; j<CENTBINS_N-4; j++) {
-            hRsub[i][iDet][j] = (TH1D*)fIn->Get(Form("hRsubH%02iD%02iCENT%02i",i+1,iDet,j));
+            hRsub[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hRsub/hRsubH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hRsub[i][iDet][j]);
-            hRtrue[i][iDet][j] = (TH1D*)fIn->Get(Form("hRtrueH%02iD%02iCENT%02i",i+1,iDet,j));
+            hRtrue[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hRtrue/hRtrueH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hRtrue[i][iDet][j]);
         }
     }
@@ -103,13 +103,13 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
     TH1D *hQnAQnBSP[nCoef][DET_N][CENTBINS_N];
     for (i = 0; i < nCoef; i++) {
         for (j=0; j<CENTBINS_N-4; j++) {
-            hQnQnAEP[i][iDet][j] = (TH1D*)fIn->Get(Form("hQnQnAEPH%02iD%02iCENT%02i",i+1,iDet,j));
+            hQnQnAEP[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hQnQnAEP/hQnQnAEPH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hQnQnAEP[i][iDet][j]);
-            hQnAQnBEP[i][iDet][j] = (TH1D*)fIn->Get(Form("hQnAQnBEPH%02iD%02iCENT%02i",i+1,iDet,j));
+            hQnAQnBEP[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hQnAQnBEP/hQnAQnBEPH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hQnAQnBEP[i][iDet][j]);
-            hQnQnASP[i][iDet][j] = (TH1D*)fIn->Get(Form("hQnQnASPH%02iD%02iCENT%02i",i+1,iDet,j));
+            hQnQnASP[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hQnQnASP/hQnQnASPH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hQnQnASP[i][iDet][j]);
-            hQnAQnBSP[i][iDet][j] = (TH1D*)fIn->Get(Form("hQnAQnBSPH%02iD%02iCENT%02i",i+1,iDet,j));
+            hQnAQnBSP[i][iDet][j] = (TH1D*)fIn->Get(Form("toyflow/hQnAQnBSP/hQnAQnBSPH%02iD%02iCENT%02i",i+1,iDet,j));
             checkUnderOverFlow(hQnAQnBSP[i][iDet][j]);
         }
     }
@@ -117,7 +117,7 @@ void MakeCentralityGraphs(TString sInputName = "toyFlow.root", TString sOutputNa
     TH1D *hSqrtSumWeights[DET_N][CENTBINS_N];
     double w[CENTBINS_N], wError[CENTBINS_N] = {0};
     for (i=0; i<CENTBINS_N-4; i++) {
-        hSqrtSumWeights[iDet][i] = (TH1D*)fIn->Get(Form("hSqrtSumWeightsD%02iCENT%02i",iDet,i));
+        hSqrtSumWeights[iDet][i] = (TH1D*)fIn->Get(Form("toyflow/hSqrtSumWeights/hSqrtSumWeightsD%02iCENT%02i",iDet,i));
         checkUnderOverFlow(hSqrtSumWeights[iDet][i]);
         w[i] = hSqrtSumWeights[iDet][i]->GetMean();
         wError[i] = hSqrtSumWeights[iDet][i]->GetMeanError();

@@ -56,15 +56,15 @@ void PlotCentralityData(int readNFiles = 1) {
         for (i=0; i<nCoef; i++) {
             if(fIn[iFil]==0) ErrorExit(Form("Cannot open file: %s",fileName[iFil].Data()));
 
-            hInputFlow[i][iFil] = (TH1D*) fIn[iFil]->Get(Form("hInputFlow%02i", i+1));
+            hInputFlow[i][iFil] = (TH1D*) fIn[iFil]->Get(Form("toyflow/hInputFlow/hInputFlow%02i", i+1));
 
-            gR[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("gRH%02i", i+1));
-            gRtrue[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("gRtrueH%02i", i+1));
+            gR[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("toyflow/gR/gRH%02i", i+1));
+            gRtrue[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("toyflow/gRtrue/gRtrueH%02i", i+1));
 
-            gVn[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("gVnH%02i", i+1));
-            gVnTrue[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("gVnTrueH%02i", i+1));
-            gVnEP[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("gVnEPH%02i", i+1));
-            gVnSP[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("gVnSPH%02i", i+1));
+            gVn[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("toyflow/gVn/gVnH%02i", i+1));
+            gVnTrue[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("toyflow/gVnTrue/gVnTrueH%02i", i+1));
+            gVnEP[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("toyflow/gVnEP/gVnEPH%02i", i+1));
+            gVnSP[i][iFil] = (TGraphErrors*) fIn[iFil]->Get(Form("toyflow/gVnSP/gVnSPH%02i", i+1));
 
             gR[i][iFil]->SetMarkerStyle(mMarker);
             gR[i][iFil]->SetMarkerColor(gColor[iFil]);
